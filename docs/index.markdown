@@ -33,7 +33,7 @@ permalink: /
   margin-top:2rem;
 }
 .hobby_img {
-  display: inline-block;
+  /* display: inline-block; */
 }
 </style>
 <!-- <h1>Adam Lee</h1> -->
@@ -94,11 +94,15 @@ permalink: /
 {% endfor %}
   <p>Hobbies</p>
   <div class="hobby_img">
-  <img class="profile" src="/assets/img/saxophone.jpeg" style="width:30%;">
-  <video width="320" height="240" controls>
-  <source src="/assets/vid/side3.mov" type="video/mp4">
-Your browser does not support the video tag.
-</video>
+  <img class="profile" src="/assets/img/saxophone.jpeg" style="width:40%;">
+  <video width="400" height="240" controls>
+  <source src="/assets/vid/side3.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+  </video>
+  <video width="400" height="240" controls>
+  <source src="/assets/vid/front3.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+  </video>
   </div>
 </div>
 
