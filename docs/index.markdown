@@ -32,6 +32,9 @@ permalink: /
 .main {
   margin-top:2rem;
 }
+.hobby_img {
+  display: inline-block;
+}
 </style>
 <!-- <h1>Adam Lee</h1> -->
 <div class="container">
@@ -89,6 +92,14 @@ permalink: /
     {% endif %}
   </ul>
 {% endfor %}
+  <p>Hobbies</p>
+  <div class="hobby_img">
+  <img class="profile" src="/assets/img/saxophone.jpeg" style="width:30%;">
+  <video width="320" height="240" controls>
+  <source src="/assets/vid/side3.mov" type="video/mp4">
+Your browser does not support the video tag.
+</video>
+  </div>
 </div>
 
 <!-- Paper Reviews
