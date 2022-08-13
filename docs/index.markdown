@@ -51,7 +51,7 @@ permalink: /
   <br>
   (현재 병특을 구하는 중입니다!)
   <br>
-  <a href="mailto:adamlee3211@gmail.com">Email</a>  /  <a href="https://twitter.com/abecidadam">Twitter</a>  /  <a href="https://www.linkedin.com/in/adam-lee-653aa018b/">LinkedIn</a>  /  <a href="/assets/pdf/AdamLee_CV_2022_8_13.pdf" download>CV</a>
+  <a href="mailto:adamlee3211@gmail.com">Email</a>  /  <a href="https://twitter.com/abecidadam">Twitter</a>  /  <a href="https://www.linkedin.com/in/adam-lee-653aa018b">LinkedIn</a>  /  <a href="/assets/pdf/AdamLee_CV_2022_8_13.pdf" download>CV</a>
   
   </div>
 
