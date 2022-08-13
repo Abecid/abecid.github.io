@@ -13,6 +13,7 @@ permalink: /
   justify-content:space-between; */
   /* border: 3px solid blue; */
   display:flex;
+  width:100%;
 }
 .description {
   height:100%;
