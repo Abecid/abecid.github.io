@@ -3,7 +3,11 @@
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
 layout: home
+title: Home
+permalink: /
 ---
+
+<img src="/assets/img/profile.jpeg">
 
 <ul>
   {% for post in site.posts %}
