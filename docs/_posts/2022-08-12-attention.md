@@ -1,10 +1,15 @@
 ---
 layout: post
-title:  "Attention is all you need (Transformer)"
-date:   2022-08-13 12:02:31 +0900
-category: paper review
-tags: nlp deep_learning
+title:  "Attention is all you need - Transformer"
+date:   2022-08-12 12:02:31 +0900
+category: Paper Review
+tags: [ NLP, Deep Learning]
 ---
+
+{% if post.tags.size > 0 %}
+  {{ post.tags | sort | join: ", " }}
+{% endif %}
+
 You’ll find this post in your `_posts` directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run `jekyll serve`, which launches a web server and auto-regenerates your site when a file is updated.
 
 Jekyll requires blog post files to be named according to the following format:
