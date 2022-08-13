@@ -25,7 +25,7 @@ permalink: /
   align-items: stretch;
 }
 .profile {
-  width:35%;
+  width:70%;
   height:auto;
   text-align: center;
 }
