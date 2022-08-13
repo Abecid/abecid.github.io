@@ -43,12 +43,12 @@ permalink: /
   <div style="display:fex;justify-content:center;">
   <img class="profile" src="/assets/img/profile2.jpeg">
   </div>
-  Hi I'm currently a computer science major at GeorgiaTech. I previously attended Seoul National University (SNU) in 2021 as an Electrical and Computer Engineering major. While at SNU, I co-founded XREAL, the first metaverse club based in Korea. My primary research interests are in transformers, NERF, and 3D Reconstruction. However I also spend time building defi apps on Ethereum. 
+  Hi I'm a 4th year computer science major at GeorgiaTech. I previously attended Seoul National University (SNU) in 2021 as an Electrical and Computer Engineering major. While at SNU, I co-founded XREAL, the first metaverse club based in Korea. My primary research interests are transformers, NERF, and 3D Reconstruction. I also spend time building defi apps on Ethereum. 
   <br>
   <br>
   (현재 병특을 구하는 중입니다!)
   <br>
-  <a href="mailto:adamlee3211@gmail.com">Email</a> <a href="https://twitter.com/abecidadam">Twitter</a> <a href="https://www.linkedin.com/in/adam-lee-653aa018b/">LinkedIn</a> <a href="/assets/pdf/AdamLee_CV_2022_8_13.pdf" download>CV</a>
+  <a href="mailto:adamlee3211@gmail.com">Email</a>  /  <a href="https://twitter.com/abecidadam">Twitter</a>  /  <a href="https://www.linkedin.com/in/adam-lee-653aa018b/">LinkedIn</a>  /  <a href="/assets/pdf/AdamLee_CV_2022_8_13.pdf" download>CV</a>
   
   </div>
 
@@ -79,7 +79,10 @@ permalink: /
   <a href="{{ href }}" class="post-cat">{{ cat[0] }}</a>
   <ul>
     {% for post in cat[1] limit:5 %}
-      <li><a href="{{ post.url }}">{{ post.title }}</a></li>
+      <li><a href="{{ post.url }}">{{ post.title }}</a>
+      <!-- ({{ post.tags | join: ", " }}) -->
+      <!-- - {{ post.date | date: "%-d %B %Y"}} -->
+      </li>
     {% endfor %}
     {% if cat[1].size > 5 %}
       <a href="{{ href }}"> View More </a>
