@@ -26,7 +26,8 @@ permalink: /
 }
 .profile {
   width:35%;
-  float: left;
+  height:auto;
+  text-align: center;
 }
 .main {
   margin-top:2rem;
@@ -35,11 +36,14 @@ permalink: /
 <!-- <h1>Adam Lee</h1> -->
 <div class="container">
 
-  <img class="profile" src="/assets/img/profile.jpeg">
+  <!-- <img class="profile" src="/assets/img/profile.jpeg"> -->
 
   <div class="description">
   <h1>Adam Lee</h1>
-  Hi I'm currently a computer science major at GeorgiaTech and previously attended Seoul National University (SNU) as an Electrical Engineering major in 2021. While at SNU, I co-founded XREAL, the first metaverse club based in Korea. My primary interests are in transformers, NERF, and 3D Reconstruction. However I also spend time building defi apps on Ethereum. 
+  <div style="display:fex;justify-content:center;">
+  <img class="profile" src="/assets/img/profile2.jpeg">
+  </div>
+  Hi I'm currently a computer science major at GeorgiaTech. I previously attended Seoul National University (SNU) in 2021 as an Electrical and Computer Engineering major. While at SNU, I co-founded XREAL, the first metaverse club based in Korea. My primary research interests are in transformers, NERF, and 3D Reconstruction. However I also spend time building defi apps on Ethereum. 
   <br>
   <br>
   (현재 병특을 구하는 중입니다!)
