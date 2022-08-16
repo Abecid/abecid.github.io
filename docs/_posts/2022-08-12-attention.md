@@ -23,19 +23,133 @@ This is a breakthrough paper which introduces a novel architecture called Transf
 The Transformer has an encoder-decoder structure like other competitive neural sequence transduction models. 
 
 They are both composed of N=6 layers (which was arbitrarily chosen by the authors, could be reconfigured). 
+
+The relative positions of the words in the sentence are injected through positional encoding which are simply summed to the input embeddings.
+
+After Multi-headed Attention which is explained below, the resulting vectors are then added and are normalized using layer normalization. There are also two residual connections in the encoder. 
+
+(The decoder has a similar architecture)
+
 <h3>Self-Attention</h3>
 <img src="/assets/posts/paper_review/1.transformer/attention.png">
 <img src="/assets/posts/paper_review/1.transformer/attention_equation.png">
 <br>
-The input is consisted of Query, Key, Value vectors. After the dot product, the result is divided by the square root of the dimension dk for normalization and better convergence. 
+The input is consisted of Query, Key, Value vectors. After the dot product, the result is divided by the square root of the dimension dk for preventing vanishing gradients and better convergence. 
 
 In multi-head attention, the query, key, value vectors and linearly projected h times where h=8 (this value is also reconfigurable). 
 
-
+These separate vectors are added as explained above.
 
 <h2>Python Implementation</h2>
+```Python
+def attention(q, k, v, d_k, mask=None, dropout=None):
+    
+    scores = torch.matmul(q, k.transpose(-2, -1)) /  math.sqrt(d_k)
+if mask is not None:
+        mask = mask.unsqueeze(1)
+        scores = scores.masked_fill(mask == 0, -1e9)
+scores = F.softmax(scores, dim=-1)
+    
+    if dropout is not None:
+        scores = dropout(scores)
+        
+    output = torch.matmul(scores, v)
+    return output
+```
 
-<h2>PyTorch Project</h2>
+```
+class MultiHeadAttention(nn.Module):
+    def __init__(self, heads, d_model, dropout = 0.1):
+        super().__init__()
+        
+        self.d_model = d_model
+        self.d_k = d_model // heads
+        self.h = heads
+        
+        self.q_linear = nn.Linear(d_model, d_model)
+        self.v_linear = nn.Linear(d_model, d_model)
+        self.k_linear = nn.Linear(d_model, d_model)
+        self.dropout = nn.Dropout(dropout)
+        self.out = nn.Linear(d_model, d_model)
+    
+    def forward(self, q, k, v, mask=None):
+        
+        bs = q.size(0)
+        
+        # perform linear operation and split into h heads
+        
+        k = self.k_linear(k).view(bs, -1, self.h, self.d_k)
+        q = self.q_linear(q).view(bs, -1, self.h, self.d_k)
+        v = self.v_linear(v).view(bs, -1, self.h, self.d_k)
+        
+        # transpose to get dimensions bs * h * sl * d_model
+       
+        k = k.transpose(1,2)
+        q = q.transpose(1,2)
+        v = v.transpose(1,2)
+# calculate attention using function we will define next
+        scores = attention(q, k, v, self.d_k, mask, self.dropout)
+        
+        # concatenate heads and put through final linear layer
+        concat = scores.transpose(1,2).contiguous()\
+        .view(bs, -1, self.d_model)
+        
+        output = self.out(concat)
+    
+        return output
+```
 
-<h2>Key Takeaways</h2>
+```
+class Encoder(nn.Module):
+    def __init__(self, vocab_size, d_model, N, heads):
+        super().__init__()
+        self.N = N
+        self.embed = Embedder(vocab_size, d_model)
+        self.pe = PositionalEncoder(d_model)
+        self.layers = get_clones(EncoderLayer(d_model, heads), N)
+        self.norm = Norm(d_model)
+    def forward(self, src, mask):
+        x = self.embed(src)
+        x = self.pe(x)
+        for i in range(N):
+            x = self.layers[i](x, mask)
+        return self.norm(x)
+    
+class Decoder(nn.Module):
+    def __init__(self, vocab_size, d_model, N, heads):
+        super().__init__()
+        self.N = N
+        self.embed = Embedder(vocab_size, d_model)
+        self.pe = PositionalEncoder(d_model)
+        self.layers = get_clones(DecoderLayer(d_model, heads), N)
+        self.norm = Norm(d_model)
+    def forward(self, trg, e_outputs, src_mask, trg_mask):
+        x = self.embed(trg)
+        x = self.pe(x)
+        for i in range(self.N):
+            x = self.layers[i](x, e_outputs, src_mask, trg_mask)
+        return self.norm(x)
+
+class Transformer(nn.Module):
+    def __init__(self, src_vocab, trg_vocab, d_model, N, heads):
+        super().__init__()
+        self.encoder = Encoder(src_vocab, d_model, N, heads)
+        self.decoder = Decoder(trg_vocab, d_model, N, heads)
+        self.out = nn.Linear(d_model, trg_vocab)
+    def forward(self, src, trg, src_mask, trg_mask):
+        e_outputs = self.encoder(src, src_mask)
+        d_output = self.decoder(trg, e_outputs, src_mask, trg_mask)
+        output = self.out(d_output)
+        return output
+```
+
+<a href="https://pytorch.org/tutorials/beginner/transformer_tutorial.html">Official PyTorch Guide</a>
+
+<h2>References</h2>
+<ol>
+  <a href="https://arxiv.org/abs/1706.03762"><li>Attention Is All You Need (2017)</li></a>
+  <li>https://sh-tsang.medium.com/review-attention-is-all-you-need-transformer-96c787ecdec1</li>
+  <li>https://machinelearningmastery.com/the-transformer-model/</li>
+  <li>https://towardsdatascience.com/how-to-code-the-transformer-in-pytorch-24db27c8f9ec</li>
+</ol>
 
