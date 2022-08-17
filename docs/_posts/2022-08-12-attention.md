@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Attention is all you need - Transformer"
+title:  "Attention is all you need: Transformer"
 date:   2022-08-12 12:02:31 +0900
 category: Paper Review
 tags: [NLP, Deep Learning]
