@@ -79,16 +79,16 @@ permalink: /
       {% assign href = "/" %}
   {% endcase %}
 
-  <a href="{{ href }}" class="post-cat">{{ cat[0] }}</a>
+  <a href="{{ href }}" class="post-cat"><h4>{{ cat[0] }}</h4></a>
   <ul>
-    {% for post in cat[1] limit:5 %}
+    {% for post in cat[1] limit:3 %}
       <li><a href="{{ post.url }}">{{ post.title }}</a>
       <!-- ({{ post.tags | join: ", " }}) -->
       <!-- - {{ post.date | date: "%-d %B %Y"}} -->
       </li>
     {% endfor %}
-    {% if cat[1].size > 5 %}
-      <a href="{{ href }}"> View More </a>
+    {% if cat[1].size > 3 %}
+      <a href="{{ href }}"> View More.. </a>
     {% endif %}
   </ul>
 {% endfor %}
