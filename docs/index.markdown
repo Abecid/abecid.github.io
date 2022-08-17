@@ -46,7 +46,7 @@ permalink: /
   <div style="display:fex;justify-content:center;">
   <img class="profile" src="/assets/img/profile2.jpeg">
   </div>
-  Hi I'm a 4th year computer science major at GeorgiaTech. I previously attended Seoul National University (SNU) in 2021 as an Electrical and Computer Engineering major. While at SNU, I co-founded XREAL, the first metaverse club based in Korea. My research interests are transformers, code generation, NERF, multi-modality, and 3D Reconstruction. I also spend time building defi apps on Ethereum. 
+  Hi I'm a 4th year computer science major at GeorgiaTech. I previously attended Seoul National University (SNU) in 2021 as an Electrical and Computer Engineering major. While at SNU, I co-founded XREAL, the first metaverse club based in Korea. My research interests are transformers, code generation, NERF, Multimodal models, and 3D Reconstruction. I also spend time building defi apps on Ethereum. 
   <br>
   <br>
   (현재 병특을 구하는 중입니다!)
