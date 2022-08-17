@@ -41,6 +41,7 @@ In multi-head attention, the query, key, value vectors and linearly projected h 
 These separate vectors are added as explained above.
 
 <h2>Python Implementation</h2>
+
 ```Python
 def attention(q, k, v, d_k, mask=None, dropout=None):
     
@@ -56,8 +57,7 @@ scores = F.softmax(scores, dim=-1)
     output = torch.matmul(scores, v)
     return output
 ```
-
-```
+```Python
 class MultiHeadAttention(nn.Module):
     def __init__(self, heads, d_model, dropout = 0.1):
         super().__init__()
@@ -87,7 +87,7 @@ class MultiHeadAttention(nn.Module):
         k = k.transpose(1,2)
         q = q.transpose(1,2)
         v = v.transpose(1,2)
-# calculate attention using function we will define next
+        # calculate attention using function we will define next
         scores = attention(q, k, v, self.d_k, mask, self.dropout)
         
         # concatenate heads and put through final linear layer
@@ -98,8 +98,7 @@ class MultiHeadAttention(nn.Module):
     
         return output
 ```
-
-```
+```Python
 class Encoder(nn.Module):
     def __init__(self, vocab_size, d_model, N, heads):
         super().__init__()
