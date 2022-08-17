@@ -13,7 +13,7 @@ tags: [NLP, Deep Learning]
 
 <img src="/assets/posts/paper_review/1.transformer/title.png">
 
-<h2>Brief Summary & Comments</h2>
+<h2>Brief Summary & Significance</h2>
 This is a breakthrough paper which introduces a novel architecture called Transformer. This model dispenses recurrence and convolutions entirely, solely relying on an attention mechanism. This model achieved state-of-the-art results in Machine Translation, achieving 27.5 BLEU on English-to-German translation and 41.1 on English-to-French translation. 
 
 <h2>Transformer Architecture & Self-Attention</h2>
@@ -148,6 +148,8 @@ class Transformer(nn.Module):
 <h2>References</h2>
 <ol>
   <a href="https://arxiv.org/abs/1706.03762"><li>Attention Is All You Need (2017)</li></a>
+  <a href="https://papers.nips.cc/paper/2017/file/3f5ee243547dee91fbd053c1c4a845aa-Reviews.html"><li>NeurIPS 2017 Reviews</li></a>
+  <li>https://hub.packtpub.com/paper-in-two-minutes-attention-is-all-you-need/</li>
   <li>https://sh-tsang.medium.com/review-attention-is-all-you-need-transformer-96c787ecdec1</li>
   <li>https://machinelearningmastery.com/the-transformer-model/</li>
   <li>https://towardsdatascience.com/how-to-code-the-transformer-in-pytorch-24db27c8f9ec</li>
