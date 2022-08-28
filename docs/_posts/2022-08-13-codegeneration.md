@@ -3,7 +3,7 @@ layout: post
 title:  "Future of Code Generation"
 date:   2022-08-13 15:02:31 +0900
 category: Blog
-tags: [ NLP, Deep Learning]
+tags: [Deep Learning, NLP]
 ---
 
 {% if page.tags.size > 0 %}
