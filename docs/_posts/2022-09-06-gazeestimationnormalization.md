@@ -276,13 +276,28 @@ return img_warped
 
 The complete code can be found [here]().
 
-### 4-3) Results
-Sample Video
-Image with annotation
-Normalized Image
+### 4-3) Results  
+1. Image With Landmark Annotations  
+![Sample Image with Landmark Annotations](/assets/posts/paper_review/5.gazenormalization/samples/sample_original.png)  
+2. Normalized Image  
+![Normalized Image](/assets/posts/paper_review/5.gazenormalization/samples/sample_normalized.png)    
+3. Sample Video  
+<iframe width="560" height="315" src="https://www.youtube.com/embed/UfjoRIEpn7s" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>  
+
+The model successfully annotates the original image and normalizes it by rotating the roll and maintaining a constant distance resulting in a consistent image size.
 
 ### 4-4) Tests
-Long/Short Distance, High/Low Rotational Shift, With/WO Mask, Other Occlusion
+1. Distance
+- Image from a far distance
+![Distant Image](/assets/posts/paper_review/5.gazenormalization/tests/1.distance.png)   
+- Normalized image
+![Distant Normalized Image](/assets/posts/paper_review/5.gazenormalization/tests/2.distance_normalized.png)   
+2. MaskSample Video  
+<iframe width="560" height="315" src="https://www.youtube.com/embed/qfxD4_KBv9k" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+The normalized image is a little unstable (due to occluded landmarks from the mask)
+3. Occlusion
+<iframe width="560" height="315" src="https://www.youtube.com/embed/5alYwgWpxB4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+There is great instability when there is occlusion of the face. I tested which part of the face being occluded resulted in the most distortion, affecting the normalization.
 
 ## 5. Challenging Aspects
 1. Method
