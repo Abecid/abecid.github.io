@@ -47,13 +47,13 @@ Revisiting Data Normalization for Appearance-Based Gaze Estimation ([Source Pape
 **Paper states**
 > Role and importance of data normalization remains unclear  
 
-And claims to suty for the first time using principled evaluations on both simulated and real data. Proposes modification to remove the scaling factor and the new formulation performs significantly better (between 9.5% and 32.7%). 
+And claims to study for the first time using principled evaluations on both simulated and real data. Proposes modification to remove the scaling factor and the new formulation performs significantly better (between 9.5% and 32.7%). 
 
 
 ### 1-2) Recent development of appearance-based gaze estimation  
 Fixed head pose -> fixed distance between user and camera -> Real-world environment
 
-> Large data contains sufficient variabilty but manual collection and annotation is costly
+> Large data contains sufficient variability but manual collection and annotation is costly
 
 
 ### 1-3) Image resizing is equivalent to 3D scaling rather than 3D shifting.
@@ -68,7 +68,7 @@ Fixed head pose -> fixed distance between user and camera -> Real-world environm
 ### 2-1) Eye Image Normalization
 ![Normalization Overview](/assets/posts/paper_review/5.gazenormalization/fig2.normalization_overview.png "Normalization Overview")
 
-Starts from an aribitrary pose of the target face.  
+Starts from an arbitrary pose of the target face.  
 x-axis: line connecting midpoints of the two eyes from right eye to left eye  
 y-axis: perpendicular to the x-axis inside the triangle plane from the eye to the mouth  
 z-axis: perpendicular to the triangle and pointing backwards from the face.  
@@ -98,10 +98,10 @@ $$M = SR $$
 **If the input is a 2D face image,**  
 Image normalization is achieved via perspective warping  
 $$W = C_{n}MC^{-1}_{r}$$  
-$$C_{r}$$: Original camera projection matrix from camera caliberation  
+$$C_{r}$$: Original camera projection matrix from camera calibration  
 $$C_{n}$$: Camera projection matrix for the normalized camera
 
-### 2-2) Modified Data Normalization
+### 2-2) Modified Data Normalization  
 It is important to handle the geometric transformation caused by the eye image normalization and apply the same transformation to the gaze direction vector.
 
 $$g_{r}$$: ground-truth gaze direction vector  
@@ -114,7 +114,7 @@ $$R_{n}$$: Head rotation matrix
 Since scaling does not affect the rotation matrix, the head rotation matrix after normalization is computed only with rotation as
 $$R_{n} = RR_{r}$$  
 
-**A modified version of data nomalization for 2d images is proposed**  
+**A modified version of data normalization for 2d images is proposed**  
 Propose to only rotate the original gaze vector to obtain the normalized gaze vector **without scaling matrix**.  
 $$g_{n} = Rg_{r}$$  
 
@@ -122,7 +122,7 @@ Which can be interpreted as applying the S matrix to $$C_{r}$$ instead of the 3D
 $$W = (C_{n}S) (RC^{-1}_{r})$$
 
 ## 3. Performance
-Since this paper emphasizes itself for being the first to quantize the effects of normalization, the boosted performace is an essential component of this paper.
+Since this paper emphasizes itself for being the first to quantize the effects of normalization, the boosted performance is an essential component of this paper.
 
 ### 3-1) Evaluation on Synthetic Images
 > real-world datasets inevitably have limited head pose variations due to device constraints. To fully evaluate the effect of data normalization on gaze estimation performance, we first use synthetic eye images with controlled head pose variations.
@@ -139,14 +139,14 @@ Since this paper emphasizes itself for being the first to quantize the effects o
 
 ## 4. Code
 ### 4-1) Pseudo Code
-Building a program that takes in images and applies the normalizion technique requires multiple steps.   
+Building a program that takes in images and applies the normalization technique requires multiple steps.   
 
-1. Pre-defined data & Hyperparameters
+1. Pre-defined data & Hyperparameters  
 There are some data that we need pre-defined in order to test the program  
 - **3D Coordinates of face** (n, 3): n is the number of 3D points of the face. The coordinates should mimic the normal human face in 3D
-- **Camera Matrix** (3, 3): This is $$C_{r}$$, the original camera projection matrix from camera caliberation
+- **Camera Matrix** (3, 3): This is $$C_{r}$$, the original camera projection matrix from camera calibration
 - **Camera Distortion** (1,4): This is the camera distortion to later use in [solvePnP](https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga549c2075fac14829ff4a58bc931c033d) to estimate the head pose. The length could be different, check the [official docs](https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga549c2075fac14829ff4a58bc931c033d) for more reference.
-- **Template Landmark Index** (m; m < n): Indexes in the landmark provided by MediaPipe's [FaceMesh API](https://google.github.io/mediapipe/solutions/face_mesh) to later use for drawing critical points on the face and buliding the 3D face coordinates.
+- **Template Landmark Index** (m; m < n): Indexes in the landmark provided by MediaPipe's [FaceMesh API](https://google.github.io/mediapipe/solutions/face_mesh) to later use for drawing critical points on the face and building the 3D face coordinates.
 - **Face Key Landmark Index** (l ; l <  m): Key indexes in the face landmark that will be used to calculate the center of the face (both in 2D and 3D) 
 - **Hyperparameters**
   - focal_norm (int): The focal values that will be used in $$C_{n}$$ (the camera projection matrix for the normalized camera)
@@ -166,7 +166,7 @@ There are some data that we need pre-defined in order to test the program
   > - rotational vector (rvec) and translational vector (tvec) are computed that transforms a 3D object from world coordinate system to the camera coordinate system  
   > $$\begin{align*} \begin{bmatrix} X_c \\ Y_c \\ Z_c \\ 1 \end{bmatrix} &= \hspace{0.2em} ^{c}\bf{T}_w \begin{bmatrix} X_{w} \\ Y_{w} \\ Z_{w} \\ 1 \end{bmatrix} \\ \begin{bmatrix} X_c \\ Y_c \\ Z_c \\ 1 \end{bmatrix} &= \begin{bmatrix} r_{11} & r_{12} & r_{13} & t_x \\ r_{21} & r_{22} & r_{23} & t_y \\ r_{31} & r_{32} & r_{33} & t_z \\ 0 & 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} X_{w} \\ Y_{w} \\ Z_{w} \\ 1 \end{bmatrix} \end{align*}$$  
 - **Normalization Process**
-  - The rotation vector is transfored to a rotation matrix using [rodrigues](https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga61585db663d9da06b68e70cfbf6a1eac) and the 3D face coordinates are generated and the 3D coordinates of the center of the face is calculated  
+  - The rotation vector is transformed to a rotation matrix using [rodrigues](https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga61585db663d9da06b68e70cfbf6a1eac) and the 3D face coordinates are generated and the 3D coordinates of the center of the face is calculated  
   > **Rodrigues Transformation**  
   > $$\theta := \lVert r \rVert$$  
   > $$r := \frac{r}{\theta} $$   
@@ -178,9 +178,9 @@ There are some data that we need pre-defined in order to test the program
   - The transformation matrix W is calculated with $$C_{n}MC^{-1}_{r}$$
   - The final normalized image is generated using [warpPerspective](https://docs.opencv.org/4.x/da/d54/group__imgproc__transform.html#gaf73673a7e8e18ec6963e3774e6a94b87)
   > **Perspective Transformation**
-  ![Pespective Transformation Overiew](/assets/posts/paper_review/5.gazenormalization/fig11.warp_overview.png)  
-  ![Pespective Transformation Vectors](/assets/posts/paper_review/5.gazenormalization/fig12.warp_vectors.png)  
-  ![Pespective Transformation Illustration](/assets/posts/paper_review/5.gazenormalization/fig13.warp_display.png)  
+  ![Perspective Transformation Overview](/assets/posts/paper_review/5.gazenormalization/fig11.warp_overview.png)  
+  ![Perspective Transformation Vectors](/assets/posts/paper_review/5.gazenormalization/fig12.warp_vectors.png)  
+  ![Perspective Transformation Illustration](/assets/posts/paper_review/5.gazenormalization/fig13.warp_display.png)  
 
 
 
@@ -198,9 +198,9 @@ with mp_face_mesh.FaceMesh(
         success, image = cap.read()
         results = process_image(image, face_mesh)
 ```
-This is a pretty straightforward processs where the front camera of the computer starts recording video and captures on image, which is then processed with MediaPipe's FaceMesh.  
-The result is a hashmap, which has a preperty *multi_face_landmarks* with size (n) where n is the number of faces.  
-Each face in *multi_face_landmarks* has property *landmark* that stores thel landmarks size (n, 2) where n is the number of landmarks. 
+This is a pretty straightforward process where the front camera of the computer starts recording video and captures on image, which is then processed with MediaPipe's FaceMesh.  
+The result is a hashmap, which has a property *multi_face_landmarks* with size (n) where n is the number of faces.  
+Each face in *multi_face_landmarks* has property *landmark* that stores the landmarks size (n, 2) where n is the number of landmarks. 
 2. Landmarks are converted to 2D pixel coordinates  
 ```python
 def face_detect(image_shape, multi_face_landmark):
@@ -212,9 +212,9 @@ def face_detect(image_shape, multi_face_landmark):
         landmarks = np.append(landmarks, np.array([[min(width, landmark.x*width), min(height, landmark.y*height)]]), axis=0)
     return landmarks, face_center(landmarks)
 ```
-We are only extracting the landmarks we are interested in, which is sroted in *TEMPLATE_LANDMARK_INDEX*.  
+We are only extracting the landmarks we are interested in, which is sorted in *TEMPLATE_LANDMARK_INDEX*.  
 The 2D pixel coordinates are calculated by multiplying the width and height of the image.  
-All of the landmakrs are appended in an array *landmarks*   
+All of the landmarks are appended in an array *landmarks*   
 3. The head pose is estimated  
 ```python
 landmarks = landmarks.astype(np.float32)
@@ -229,7 +229,7 @@ The landmarks are first reshaped to (n, 1, 2) where n is the number of points in
 With the 3D face model(n, 1, 3), key landmarks(n, 1, 2), camera matrix(3, 3), distortion(5,) the rotational vector and translational vector are returned.
 
 
-- Normalizationi Process
+- Normalization Process
 1. Get the 3D coordinates of the face with the camera coordinate system  
 ```python
 # Pose translation matrix
@@ -265,7 +265,7 @@ right /= np.linalg.norm(right)
 # rotation matrix R
 R = np.c_[right, down, forward].T
 ```
-4. Calculate the transformation matrix W, warp the image to get the final normalized iamge  
+4. Calculate the transformation matrix W, warp the image to get the final normalized image  
 ```python
 # transformation matrix
 W = np.dot(np.dot(cam_norm, S), np.dot(R, np.linalg.inv(camera_matrix))) 
