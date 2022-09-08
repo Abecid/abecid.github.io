@@ -10,102 +10,185 @@ tags: [Deep Learning, Computer Vision, Gaze, Normalization]
   Tags: {{ page.tags | sort | join: ", " }}
 {% endif %}
 
-<img src="/assets/posts/paper_review/5.gazenormalization/FrontPage.png">
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-<h2>Intro</h2>
-Revisiting Data Normalization for Appearance-Based Gaze Estimation
-<a href="https://perceptualui.org/publications/zhang18_etra.pdf">Source Paper (PDF File)</a>
-<h4>Context</h4>
-Appearance-based gaze estimation
-Challanges
-- Variability in head pose
-- user-camera distance
-Normalization
-- Cancel out geometric variability: Map input images to normalized space
+![Paper Front Page](/assets/posts/paper_review/5.gazenormalization/FrontPage.png "Paper Front Page")
 
-Paper states
-> Role and importance of data normalization remains unclear
+**The Cauchy-Schwarz Inequality**
+
+$$\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)$$
+
+## 1. Intro (Context)
+Revisiting Data Normalization for Appearance-Based Gaze Estimation ([Source Paper](https://perceptualui.org/publications/zhang18_etra.pdf))
+
+### 1-1) Appearance-based gaze estimation  
+1. What is appearance-based gaze estimation?  
+**3 main types**
+- 3D eye model recovery-based method
+- 2D eye feature regression-based method
+- appearance based method
+
+**Characteristics of Alternatives**
+- Require personal calibration (for 3D eye model recovery)
+- Require dedicated devices (infrared cameras)
+- Directly use the detected geometric eye features (pupil center and glint) to regress the point of gaze
+
+**Characteristics of the Appearance-based Methods**
+- Do not require dedicated devices (web cameras)
+- Feature extractor to extract gaze features from high-dimensional raw image data
+- Robust regression function to learn the mappings from appearance to human gaze
+- Large number of training samples to train the regression model
+
+2. Challanges
+  - Variability in head pose
+  - user-camera distance  
+
+3. Normalization
+  - Cancel out geometric variability: Map input images to normalized space
+
+**Paper states**
+> Role and importance of data normalization remains unclear  
+
 And claims to suty for the first time using principled evaluations on both simulated and real data. Proposes modification to remove the scaling factor and the new formulation performs significantly better (between 9.5% and 32.7%). 
 
-Recent development of appearance-based gaze estimation.
-Fixed head pose -> fixed distance between user and camera -> Real-world environment.
 
-Large data contains sufficient variabilty but manual collection and annotation is costly.
+### 1-2) Recent development of appearance-based gaze estimation  
+Fixed head pose -> fixed distance between user and camera -> Real-world environment
 
-Image resizing is equivalent to 3D scaling rather than 3D shifting.
-(Image Samples)
+> Large data contains sufficient variabilty but manual collection and annotation is costly
 
 
-<h2>Methodology</h2>
+### 1-3) Image resizing is equivalent to 3D scaling rather than 3D shifting.
+![3D Scaling](/assets/posts/paper_review/5.gazenormalization/fig1.distance_resize_scale.png "3D Scaling")  
+*Although there is some difference between (b), taken at distance 2d compared to (d), taken at distance d and resized, there is very little difference between (d) and (c) which was scaled while being taken at distance d*
+
+
+
+## 2. Methodology
 > The key idea is to standardize the translation and rotation between camera and face coordinate system via camera rotation and scaling.
 
-<h4>Eye Image Normalization</h4>
+### 2-1) Eye Image Normalization
+![Normalization Overview](/assets/posts/paper_review/5.gazenormalization/fig2.normalization_overview.png "Normalization Overview")
 
-Starts from an aribitrary pose of the target face.
-x-axis: line connecting midpoints of the two eyes from right eye to left eye
-y-axis: perpendicular to the x-axis inside the triangle plane from the eye to the mouth
-z-axis: perpendicular to the triangle and pointing backwards from the face.
+Starts from an aribitrary pose of the target face.  
+x-axis: line connecting midpoints of the two eyes from right eye to left eye  
+y-axis: perpendicular to the x-axis inside the triangle plane from the eye to the mouth  
+z-axis: perpendicular to the triangle and pointing backwards from the face.  
 
-$e_{r}$: The midpoint of the right eye as the origin of the head coordinate system.
-$R_{r}$: Translation and rotation from the camera coordinate system to the head coordinate system.
+$$e_{r}$$: The midpoint of the right eye as the origin of the head coordinate system.  
+$$R_{r}$$: Translation and rotation from the camera coordinate system to the head coordinate system.  
 
-Normalized image must meet three conditions
-1. The normalized camera looks at the origin of the head coordinate system and the center of the eye is located at the center of the normalized image.
-2. The x-axes of the head and camera coordinate systems are on the same plane (x-axis of the head coordinate system appears horizontal)
-3. The normalized camera is located at a fixed distance $d_{n} from the eye center and the eye always has the same size.
+**Normalized image must meet three conditions**
+> 1. The normalized camera looks at the origin of the head coordinate system and the center of the eye is located at the center of the normalized image.
+> 2. The x-axes of the head and camera coordinate systems are on the same plane (x-axis of the head coordinate system appears horizontal)
+> 3. The normalized camera is located at a fixed distance $d_{n} from the eye center and the eye always has the same size.
 
-$z_{c}$: Rotated z-axis of the camera coordinate system
-$x_{r}$: x-axis of the head coordinate system
+$$z_{c}$$: Rotated z-axis of the camera coordinate system  
+$$x_{r}$$: x-axis of the head coordinate system  
 
-$z_{c}$ has to be $e_{r}$.
-$y_{c} = z_{c} * x_{r} $ 
-$y_{c} \perp z_{c}$, $y_{c} \perp x_{r}$
-$x_{c} = y_{c} * z_{c} $
+$$z_{c}$$ has to be $$e_{r}$$  
+$$y_{c} = z_{c} \times x_{r} $$   
+$$y_{c} \perp z_{c}$$, $$y_{c} \perp x_{r}$$  
+$$x_{c} = y_{c} \times z_{c} $$  
 
-(R Image)
-(S Image)
-M = S * R
+![R Equation](/assets/posts/paper_review/5.gazenormalization/fig3.requation.png "R Equation")  
+$$S = \begin{bmatrix} 1 & 0 & 0\\0 & 1 & 0\\0 & 0 & \frac{d_{n}}{\lVert e_{r}\rVert}\end{bmatrix}$$  
+$$M = SR $$  
 
-This is for a 3D face mesh.
+-> This is for a 3D face mesh
 
-If the input is a 2D face image,
-(W Image)
-$C_{r}$: Original camera projection matrix from camera caliberation
-$C_{n}$: Camera projection matrix for the normalized camera
+**If the input is a 2D face image,**  
+Image normalization is achieved via perspective warping
+![W Equation](/assets/posts/paper_review/5.gazenormalization/fig5.wequation.png "W Equation")  
+$$C_{r}$$: Original camera projection matrix from camera caliberation  
+$$C_{n}$$: Camera projection matrix for the normalized camera
 
-<h4>Modified Data Normalization</h4>
+### 2-2) Modified Data Normalization
 It is important to handle the geometric transformation caused by the eye image normalization and apply the same transformation to the gaze direction vector.
 
-$g_{r}$: ground-truth gaze direction vector
-$g_{n}$: normalized gaze vector
+$$g_{r}$$: ground-truth gaze direction vector  
+$$g_{n}$$: normalized gaze vector  
 
-For 3D space, (g_n = M * g_r)
-$R_{n}$: Head rotation matrix
-(R_n = R * R_r)
+For 3D space, this was previously proposed:  
+$$g_{n} = Mg_{r}$$  
 
-A modified version of data nomalization for 2d images is proposed.
-Propose to only rotate the original gaze vector to obtain the normalized gaze vector
-(g_n = R * g_r)
+$$R_{n}$$: Head rotation matrix  
+Since scaling does not affect the rotation matrix, the head rotation matrix after normalization is computed only with rotation as
+$$(R_{n} = RR_{r})$$  
 
-<h2>Performance</h2>
+**A modified version of data nomalization for 2d images is proposed**  
+Propose to only rotate the original gaze vector to obtain the normalized gaze vector  
+$$(g_{n} = Rg_{r})$$  
+
+## 3. Performance
 Since this paper emphasizes itself for being the first to quantize the effects of normalization, the boosted performace is an essential component of this paper.
 
-<h4>Evaluation on Synthetic Images</h4>
+### 3-1) Evaluation on Synthetic Images
+> real-world datasets inevitably have limited head pose variations due to device constraints. To fully evaluate the effect of data normalization on gaze estimation performance, we first use synthetic eye images with controlled head pose variations.
 
-<h4>Evaluation on Real Images</h4>
+![Result with Synthetic Data](/assets/posts/paper_review/5.gazenormalization/fig8.synthetic_result.png)
+*The modified normalization method performs 5.9 degrees better in Mean error*
 
-<h2>Code</h2>
+![Result with Synthetic Data with Different Distances](/assets/posts/paper_review/5.gazenormalization/fig9.syntehtic_result_distance.png)
+*The modified normalization method is stable across different distances between the eye and the camera*
+
+### 3-2) Evaluation on Real Images
+![Result with Real Data](/assets/posts/paper_review/5.gazenormalization/fig10.real_result.png)
+*Network is fine-tuned and tested on MPIIGaze. Although the modified version performs 0.5 degrees better in Mean error, the difference is much smaller compared to the results evaluated with synthetic data*
+
+## 4. Code
+### 4-1) Pseudo Code
+Building a program that takes in images and applies the normalizion technique requires multiple steps.   
+
+1. Pre-defined data & Hyperparameters
+There are some data that we need pre-defined in order to test the program  
+- 3D Coordinates of face (n, 3): n is the number of 3D points of the face. The coordinates should mimic the normal human face in 3D
+- Camera Matrix (3, 3): This is $$C_{r}$$, the original camera projection matrix from camera caliberation
+- Camera Distortion (1,4): This is the camera distortion to later use in solvePnP to estimate HeadPose. The length could be different, check the [official docs](https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga549c2075fac14829ff4a58bc931c033d) for more reference.
+- Template Landmark Index (m; m < n): Indexes in the landmark provided by MediaPipe's FaceMesh API to later use for drawing critical points on the face and buliding the 3D face coordinates.
+- Face Key Landmark Index (l ; l <  m): Key indexes in the face landmark that will be used to calculate the center of the face (both in 2D and 3D) 
+- Hyperparameters
+  - focal_norm (int): The focal values that will be used in $$C_{n}$$ (the camera projection matrix for the normalized camera)
+  - distance_norm (int): The normalized distance for the normalized processes to be used in S (scaling matrix)
+  - roiSize (2): the size of the normalized image (used in $$C_{n}$$ to center the image)
+
+2. Code Architecture
+**Preparation Process**
+- Video is captured using OpenCV and an image is read
+- The image is processed with MediaPipe's FaceMesh API  
+- The resulting landmarks will be filtered with our pre-defined "Temple Landmark Index" and scaled to represent 2D pixel coordinates  
+- The key landmark points in the face is drawn  
+- The 2D landmark points are resized to 3D and processed with the 3D face using SolvePnP to get the rotation and translation vector  
+
+**Normalization Process**
+- The rotation vector is transfored to a rotation matrix using rodrigues and the 3D face coordinates are generated and the 3D coordinates of the center of the face is calculated  
+- The distance between the eye and the camera is calculated with normalization and the scaling matrix is calculated  
+- The R matrix is calculated starting with $$Z_{c}$$ with a series of cross multiplication  
+- The transformation matrix W is calculated with $$C_{n}M\inv{C_{r}}$$
+- The final normalized image is generated using warpPerspective
 
 
-<h2>Challenging Aspects</h2>
+### 4-2) Sample Code
+
+
+### 4-3) Results
+Sample Video
+
+Long/Short Distance, High/Low Rotational Shift, With/WO Mask, Other Occlusion
+
+### 4-4) Tests
+
+## 5. Challenging Aspects
 1. Method
 Vector, Camera Coordinates & World Coordinates
+Matrix Multiplication
 2. Code
 MediaPipe, Conversion of 2D Landmark points to Pixel Points
 
-<h2>Thoughts</h2>
+## 6. Thoughts
 There could be more ways to normalize image data.
 Besides learning, data pre-processing is also very important.
 Intuition for neural networks to learn well is to restrict the differences between the training data to learn.
 
-<h2>References</h2>
+## 7. References
+1. [Appearance-based Gaze Estimation With Deep Learning: A Review and Benchmark](https://arxiv.org/abs/2104.12668)
