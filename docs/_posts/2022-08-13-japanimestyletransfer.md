@@ -3,7 +3,7 @@ layout: post
 title:  "Anime Style Transfer"
 date:   2022-08-13 15:02:31 +0900
 category: Projects
-tags: [ GAN, Deep Learning]
+tags: [Deep Learning, GAN]
 ---
 
 {% if page.tags.size > 0 %}
