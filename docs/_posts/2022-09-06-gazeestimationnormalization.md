@@ -31,13 +31,13 @@ Revisiting Data Normalization for Appearance-Based Gaze Estimation ([Source Pape
   - Require personal calibration (for 3D eye model recovery)
   - Require dedicated devices (infrared cameras)
   - Directly use the detected geometric eye features (pupil center and glint) to regress the point of gaze
-- **Characteristics of the Appearance-based Methods**
+- **Characteristics of Appearance-based Methods**
   - Do not require dedicated devices (web cameras)
   - Feature extractor to extract gaze features from high-dimensional raw image data
   - Robust regression function to learn the mappings from appearance to human gaze
   - Large number of training samples to train the regression model
 
-2. Challanges
+2. Challenges
   - Variability in head pose
   - user-camera distance  
 
