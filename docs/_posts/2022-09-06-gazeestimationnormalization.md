@@ -119,7 +119,11 @@ Propose to only rotate the original gaze vector to obtain the normalized gaze ve
 $$g_{n} = Rg_{r}$$  
 
 Which can be interpreted as applying the S matrix to $$C_{r}$$ instead of the 3D coordinate system.  
-$$W = (C_{n}S) (RC^{-1}_{r})$$
+* This results in the exact same image warping, it does not affect the physical space in terms of scaling.
+- The gaze vector is only affected by rotation matrix R. 
+
+The inverse can also be easily computed as the following:
+$$\hat{g}_{r} = R^{-1}\hat{g}_{n}$$
 
 ## 3. Performance
 Since this paper emphasizes itself for being the first to quantize the effects of normalization, the boosted performance is an essential component of this paper.
@@ -253,17 +257,15 @@ S = np.array([
 3. Calculate the rotational matrix R  
 ```python
 # z-axis
-forward = (center/distance).reshape(3)
+forward = (center).reshape(3)
 # x_r: x-axis of the head coordinate system
 hRx = hR[:,0]
 # y-axis
 down = np.cross(forward, hRx)
-down /= np.linalg.norm(down)
 # x-axis
 right = np.cross(down, forward)
-right /= np.linalg.norm(right)
 # rotation matrix R
-R = np.c_[right, down, forward].T
+R = np.c_[right/np.linalg.norm(right), down/np.linalg.norm(down), forward/distance].T
 ```
 4. Calculate the transformation matrix W, warp the image to get the final normalized image  
 ```python
