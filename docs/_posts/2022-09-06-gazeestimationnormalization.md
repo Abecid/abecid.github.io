@@ -298,7 +298,8 @@ The model successfully annotates the original image and normalizes it by rotatin
 ![Distant Normalized Image](/assets/posts/paper_review/5.gazenormalization/tests/2.distance_normalized.png)   
 2. MaskSample Video  
 <iframe width="560" height="315" src="https://www.youtube.com/embed/qfxD4_KBv9k" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-The normalized image is a little unstable (due to occluded landmarks from the mask)
+
+The normalized image is a little unstable (due to occluded landmarks from the mask)  
 3. Occlusion
 <iframe width="560" height="315" src="https://www.youtube.com/embed/5alYwgWpxB4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 There is great instability when there is occlusion of the face. I tested which part of the face being occluded resulted in the most distortion, affecting the normalization.
