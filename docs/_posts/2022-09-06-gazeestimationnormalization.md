@@ -254,7 +254,7 @@ S = np.array([
     [0.0, 0.0, z_scale],
 ])
 ```
-3. Calculate the rotational matrix R  
+3. Calculate the rotational matrix R and transformation matrix M  
 ```python
 # z-axis
 forward = (center).reshape(3)
@@ -266,11 +266,13 @@ down = np.cross(forward, hRx)
 right = np.cross(down, forward)
 # rotation matrix R
 R = np.c_[right/np.linalg.norm(right), down/np.linalg.norm(down), forward/distance].T
+# Transformation Matrix M (For 3D input)
+M = np.dot(S, R)
 ```
 4. Calculate the transformation matrix W, warp the image to get the final normalized image  
 ```python
 # transformation matrix
-W = np.dot(np.dot(cam_norm, S), np.dot(R, np.linalg.inv(camera_matrix))) 
+W = np.dot(cam_norm, np.dot(M, np.linalg.inv(camera_matrix))) 
 # image normalization
 img_warped = cv2.warpPerspective(img, W, roiSize)
 return img_warped
