@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "High-Resolution Image Synthesis with Latent Diffusion Models: Stable Diffusion"
+title:  "High-Resolution Image Synthesis with Latent Diffusion Models: Latent Diffusion"
 date:   2022-09-06 10:40:31 +0900
 category: Paper Review
 tags: [Deep Learning, Computer Vision, Generative Model, Multimodal, Diffusion]
