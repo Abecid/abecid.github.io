@@ -13,21 +13,29 @@ tags: [Deep Learning, Computer Vision, Self-Supervised Learning, Knowledge Disti
 <h2>Intro</h2>
 Self-supervised learning
 
-IR and RGB loss (taken at same instance)
+1. SSL structure
+- IR and RGB loss (taken at same instance)
 
-IR-IR with similar x,y points
-RGB-RGB with similar x,y points
+- IR-IR with similar x,y points
+- RGB-RGB with similar x,y points
 
-IR-RGB with similar x,y points
+- IR-RGB with similar x,y points
 
-loss function
+- right, left, center x,y point estimates
+
+2. loss function
 - cross entropy
 - mse
 - further modification
     - apply both gradients to teacher with alpha parameter
 
-architecture
+3. architecture
 - 1 model (shared weights) v. 2 models (teacher and student model)
 - more layers?
 
+---
 
+09.22
+Measure the loss between IR and RGB outputs with the same pretrained model
+
+Loss between right,left,center estimates of the model
