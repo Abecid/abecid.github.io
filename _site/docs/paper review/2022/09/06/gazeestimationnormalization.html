@@ -1,0 +1,389 @@
+
+<p>Tags: Computer Vision, Deep Learning, Gaze, Normalization</p>
+
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<p><img src="/assets/posts/paper_review/5.gazenormalization/FrontPage.png" alt="Paper Front Page" title="Paper Front Page" /></p>
+
+<p><strong>The Cauchy-Schwarz Inequality</strong></p>
+
+\[\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)\]
+
+<h2 id="1-intro-context">1. Intro (Context)</h2>
+<p>Revisiting Data Normalization for Appearance-Based Gaze Estimation (<a href="https://perceptualui.org/publications/zhang18_etra.pdf">Source Paper</a>)</p>
+
+<h3 id="1-1-appearance-based-gaze-estimation">1-1) Appearance-based gaze estimation</h3>
+<ol>
+  <li>What is appearance-based gaze estimation?
+    <ul>
+      <li><strong>3 main types</strong>
+        <ul>
+          <li>3D eye model recovery-based method</li>
+          <li>2D eye feature regression-based method</li>
+          <li>appearance based method</li>
+        </ul>
+      </li>
+      <li><strong>Characteristics of Alternatives</strong>
+        <ul>
+          <li>Require personal calibration (for 3D eye model recovery)</li>
+          <li>Require dedicated devices (infrared cameras)</li>
+          <li>Directly use the detected geometric eye features (pupil center and glint) to regress the point of gaze</li>
+        </ul>
+      </li>
+      <li><strong>Characteristics of Appearance-based Methods</strong>
+        <ul>
+          <li>Do not require dedicated devices (web cameras)</li>
+          <li>Feature extractor to extract gaze features from high-dimensional raw image data</li>
+          <li>Robust regression function to learn the mappings from appearance to human gaze</li>
+          <li>Large number of training samples to train the regression model</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Challenges
+    <ul>
+      <li>Variability in head pose</li>
+      <li>user-camera distance</li>
+    </ul>
+  </li>
+  <li>Normalization
+    <ul>
+      <li>Cancel out geometric variability: Map input images to normalized space</li>
+    </ul>
+  </li>
+</ol>
+
+<p><strong>Paper states</strong></p>
+<blockquote>
+  <p>Role and importance of data normalization remains unclear</p>
+</blockquote>
+
+<p>And claims to study for the first time using principled evaluations on both simulated and real data. Proposes modification to remove the scaling factor and the new formulation performs significantly better (between 9.5% and 32.7%).</p>
+
+<h3 id="1-2-recent-development-of-appearance-based-gaze-estimation">1-2) Recent development of appearance-based gaze estimation</h3>
+<p>Fixed head pose -&gt; fixed distance between user and camera -&gt; Real-world environment</p>
+
+<blockquote>
+  <p>Large data contains sufficient variability but manual collection and annotation is costly</p>
+</blockquote>
+
+<h3 id="1-3-image-resizing-is-equivalent-to-3d-scaling-rather-than-3d-shifting">1-3) Image resizing is equivalent to 3D scaling rather than 3D shifting.</h3>
+<p><img src="/assets/posts/paper_review/5.gazenormalization/fig1.distance_resize_scale.png" alt="3D Scaling" title="3D Scaling" /><br />
+<em>Although there is some difference between (b), taken at distance 2d compared to (d), taken at distance d and resized, there is very little difference between (d) and (c) which was scaled while being taken at distance d</em></p>
+
+<h2 id="2-methodology">2. Methodology</h2>
+<blockquote>
+  <p>The key idea is to standardize the translation and rotation between camera and face coordinate system via camera rotation and scaling.</p>
+</blockquote>
+
+<h3 id="2-1-eye-image-normalization">2-1) Eye Image Normalization</h3>
+<p><img src="/assets/posts/paper_review/5.gazenormalization/fig2.normalization_overview.png" alt="Normalization Overview" title="Normalization Overview" /></p>
+
+<p>Starts from an arbitrary pose of the target face.<br />
+x-axis: line connecting midpoints of the two eyes from right eye to left eye<br />
+y-axis: perpendicular to the x-axis inside the triangle plane from the eye to the mouth<br />
+z-axis: perpendicular to the triangle and pointing backwards from the face.</p>
+
+<p>\(e_{r}\): The midpoint of the right eye as the origin of the head coordinate system.<br />
+\(R_{r}\): Translation and rotation from the camera coordinate system to the head coordinate system.</p>
+
+<p><strong>Normalized image must meet three conditions</strong></p>
+<ol>
+  <li>The normalized camera looks at the origin of the head coordinate system and the center of the eye is located at the center of the normalized image.</li>
+  <li>The x-axes of the head and camera coordinate systems are on the same plane (x-axis of the head coordinate system appears horizontal)</li>
+  <li>The normalized camera is located at a fixed distance $d_{n} from the eye center and the eye always has the same size.</li>
+</ol>
+
+<p>\(z_{c}\): Rotated z-axis of the camera coordinate system<br />
+\(x_{r}\): x-axis of the head coordinate system</p>
+
+<p>\(z_{c}\) has to be \(e_{r}\)<br />
+\(y_{c} = z_{c} \times x_{r}\) <br />
+\(y_{c} \perp z_{c}\), \(y_{c} \perp x_{r}\)<br />
+\(x_{c} = y_{c} \times z_{c}\)</p>
+
+<p><img src="/assets/posts/paper_review/5.gazenormalization/fig3.requation.png" alt="R Equation" title="R Equation" /><br />
+\(S = \begin{bmatrix} 1 &amp; 0 &amp; 0\\0 &amp; 1 &amp; 0\\0 &amp; 0 &amp; \frac{d_{n}}{\lVert e_{r}\rVert}\end{bmatrix}\)<br />
+\(M = SR\)</p>
+
+<p>-&gt; This is for a 3D face mesh</p>
+
+<p><strong>If the input is a 2D face image,</strong><br />
+Image normalization is achieved via perspective warping<br />
+\(W = C_{n}MC^{-1}_{r}\)<br />
+\(C_{r}\): Original camera projection matrix from camera calibration<br />
+\(C_{n}\): Camera projection matrix for the normalized camera</p>
+
+<h3 id="2-2-modified-data-normalization">2-2) Modified Data Normalization</h3>
+<p>It is important to handle the geometric transformation caused by the eye image normalization and apply the same transformation to the gaze direction vector.</p>
+
+<p>\(g_{r}\): ground-truth gaze direction vector<br />
+\(g_{n}\): normalized gaze vector</p>
+
+<p>For 3D space, this was previously proposed:<br />
+\(g_{n} = Mg_{r}\)</p>
+
+<p>\(R_{n}\): Head rotation matrix<br />
+Since scaling does not affect the rotation matrix, the head rotation matrix after normalization is computed only with rotation as
+\(R_{n} = RR_{r}\)</p>
+
+<p><strong>A modified version of data normalization for 2d images is proposed</strong><br />
+Propose to only rotate the original gaze vector to obtain the normalized gaze vector <strong>without scaling matrix</strong>.<br />
+\(g_{n} = Rg_{r}\)</p>
+
+<p>Which can be interpreted as applying the S matrix to \(C_{r}\) instead of the 3D coordinate system.</p>
+<ul>
+  <li>This results in the exact same image warping, it does not affect the physical space in terms of scaling.</li>
+  <li>The gaze vector is only affected by rotation matrix R.</li>
+</ul>
+
+<p>The inverse can also be easily computed as the following:
+\(\hat{g}_{r} = R^{-1}\hat{g}_{n}\)</p>
+
+<h2 id="3-performance">3. Performance</h2>
+<p>Since this paper emphasizes itself for being the first to quantize the effects of normalization, the boosted performance is an essential component of this paper.</p>
+
+<h3 id="3-1-evaluation-on-synthetic-images">3-1) Evaluation on Synthetic Images</h3>
+<blockquote>
+  <p>real-world datasets inevitably have limited head pose variations due to device constraints. To fully evaluate the effect of data normalization on gaze estimation performance, we first use synthetic eye images with controlled head pose variations.</p>
+</blockquote>
+
+<p><img src="/assets/posts/paper_review/5.gazenormalization/fig8.synthetic_result.png" alt="Result with Synthetic Data" /><br />
+<em>The modified normalization method performs 5.9 degrees better in Mean error</em></p>
+
+<p><img src="/assets/posts/paper_review/5.gazenormalization/fig9.syntehtic_result_distance.png" alt="Result with Synthetic Data with Different Distances" /><br />
+<em>The modified normalization method is stable across different distances between the eye and the camera</em></p>
+
+<h3 id="3-2-evaluation-on-real-images">3-2) Evaluation on Real Images</h3>
+<p><img src="/assets/posts/paper_review/5.gazenormalization/fig10.real_result.png" alt="Result with Real Data" /><br />
+<em>Network is fine-tuned and tested on MPIIGaze. Although the modified version performs 0.5 degrees better in Mean error, the difference is much smaller compared to the results evaluated with synthetic data</em></p>
+
+<h2 id="4-code">4. Code</h2>
+<h3 id="4-1-pseudo-code">4-1) Pseudo Code</h3>
+<p>Building a program that takes in images and applies the normalization technique requires multiple steps.</p>
+
+<ol>
+  <li>Pre-defined data &amp; Hyperparameters<br />
+There are some data that we need pre-defined in order to test the program
+    <ul>
+      <li><strong>3D Coordinates of face</strong> (n, 3): n is the number of 3D points of the face. The coordinates should mimic the normal human face in 3D</li>
+      <li><strong>Camera Matrix</strong> (3, 3): This is \(C_{r}\), the original camera projection matrix from camera calibration</li>
+      <li><strong>Camera Distortion</strong> (1,4): This is the camera distortion to later use in <a href="https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga549c2075fac14829ff4a58bc931c033d">solvePnP</a> to estimate the head pose. The length could be different, check the <a href="https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga549c2075fac14829ff4a58bc931c033d">official docs</a> for more reference.</li>
+      <li><strong>Template Landmark Index</strong> (m; m &lt; n): Indexes in the landmark provided by MediaPipe’s <a href="https://google.github.io/mediapipe/solutions/face_mesh">FaceMesh API</a> to later use for drawing critical points on the face and building the 3D face coordinates.</li>
+      <li><strong>Face Key Landmark Index</strong> (l ; l &lt;  m): Key indexes in the face landmark that will be used to calculate the center of the face (both in 2D and 3D)</li>
+      <li><strong>Hyperparameters</strong>
+        <ul>
+          <li>focal_norm (int): The focal values that will be used in \(C_{n}\) (the camera projection matrix for the normalized camera)</li>
+          <li>distance_norm (int): The normalized distance for the normalized processes to be used in S (scaling matrix)</li>
+          <li>roiSize (2): the size of the normalized image (used in \(C_{n}\) to center the image)</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Code Architecture
+    <ul>
+      <li><strong>Preparation Process</strong>
+        <ul>
+          <li>Video is captured using <a href="https://docs.opencv.org/3.4/d8/dfe/classcv_1_1VideoCapture.html#a5d5f5dacb77bbebdcbfb341e3d4355c1">OpenCV</a> and an image is read</li>
+          <li>The image is processed with MediaPipe’s FaceMesh API</li>
+          <li>The resulting landmarks will be filtered with our pre-defined “Temple Landmark Index” and scaled to represent 2D pixel coordinates</li>
+          <li>The key landmark points in the face is drawn</li>
+          <li>The 2D landmark points are resized to 3D and processed with the 3D face using SolvePnP to get the rotation and translation vector
+            <blockquote>
+              <p><strong>solvePnP</strong></p>
+              <ul>
+                <li>World coordinates \(X_{w}, Y_{w}, Z_{w}\) are projected to image plane (u,v)<br />
+\(\begin{align*} \begin{bmatrix} u \\ v \\ 1 \end{bmatrix} &amp;= \bf{A} \hspace{0.1em} \Pi \hspace{0.2em} ^{c}\bf{T}_w \begin{bmatrix} X_{w} \\ Y_{w} \\ Z_{w} \\ 1 \end{bmatrix} \\ \begin{bmatrix} u \\ v \\ 1 \end{bmatrix} &amp;= \begin{bmatrix} f_x &amp; 0 &amp; c_x \\ 0 &amp; f_y &amp; c_y \\ 0 &amp; 0 &amp; 1 \end{bmatrix} \begin{bmatrix} 1 &amp; 0 &amp; 0 &amp; 0 \\ 0 &amp; 1 &amp; 0 &amp; 0 \\ 0 &amp; 0 &amp; 1 &amp; 0 \end{bmatrix} \begin{bmatrix} r_{11} &amp; r_{12} &amp; r_{13} &amp; t_x \\ r_{21} &amp; r_{22} &amp; r_{23} &amp; t_y \\ r_{31} &amp; r_{32} &amp; r_{33} &amp; t_z \\ 0 &amp; 0 &amp; 0 &amp; 1 \end{bmatrix} \begin{bmatrix} X_{w} \\ Y_{w} \\ Z_{w} \\ 1 \end{bmatrix} \end{align*}\)</li>
+                <li>rotational vector (rvec) and translational vector (tvec) are computed that transforms a 3D object from world coordinate system to the camera coordinate system<br />
+\(\begin{align*} \begin{bmatrix} X_c \\ Y_c \\ Z_c \\ 1 \end{bmatrix} &amp;= \hspace{0.2em} ^{c}\bf{T}_w \begin{bmatrix} X_{w} \\ Y_{w} \\ Z_{w} \\ 1 \end{bmatrix} \\ \begin{bmatrix} X_c \\ Y_c \\ Z_c \\ 1 \end{bmatrix} &amp;= \begin{bmatrix} r_{11} &amp; r_{12} &amp; r_{13} &amp; t_x \\ r_{21} &amp; r_{22} &amp; r_{23} &amp; t_y \\ r_{31} &amp; r_{32} &amp; r_{33} &amp; t_z \\ 0 &amp; 0 &amp; 0 &amp; 1 \end{bmatrix} \begin{bmatrix} X_{w} \\ Y_{w} \\ Z_{w} \\ 1 \end{bmatrix} \end{align*}\)</li>
+              </ul>
+            </blockquote>
+          </li>
+        </ul>
+      </li>
+      <li><strong>Normalization Process</strong>
+        <ul>
+          <li>The rotation vector is transformed to a rotation matrix using <a href="https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga61585db663d9da06b68e70cfbf6a1eac">rodrigues</a> and the 3D face coordinates are generated and the 3D coordinates of the center of the face is calculated
+            <blockquote>
+              <p><strong>Rodrigues Transformation</strong><br />
+\(\theta := \lVert r \rVert\)<br />
+\(r := \frac{r}{\theta}\) <br />
+A := [0, -rz, ry; rz, 0, -rx; -ry, rx, 0]<br />
+\(R := cos(\theta)I + (1-cos(\theta))rr^T + sin(\theta)A\)</p>
+              <ul>
+                <li>The rotation matrix is given with the rotation vector</li>
+              </ul>
+            </blockquote>
+          </li>
+          <li>The distance between the eye and the camera is calculated with normalization and the scaling matrix is calculated</li>
+          <li>The R matrix is calculated starting with \(Z_{c}\) with a series of cross multiplication</li>
+          <li>The transformation matrix W is calculated with \(C_{n}MC^{-1}_{r}\)</li>
+          <li>The final normalized image is generated using <a href="https://docs.opencv.org/4.x/da/d54/group__imgproc__transform.html#gaf73673a7e8e18ec6963e3774e6a94b87">warpPerspective</a>
+            <blockquote>
+              <p><strong>Perspective Transformation</strong>
+<img src="/assets/posts/paper_review/5.gazenormalization/fig11.warp_overview.png" alt="Perspective Transformation Overview" /><br />
+<img src="/assets/posts/paper_review/5.gazenormalization/fig12.warp_vectors.png" alt="Perspective Transformation Vectors" /><br />
+<img src="/assets/posts/paper_review/5.gazenormalization/fig13.warp_display.png" alt="Perspective Transformation Illustration" /></p>
+            </blockquote>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="4-2-sample-code">4-2) Sample Code</h3>
+<ul>
+  <li>Preparation Process
+    <ol>
+      <li>Video is captured and processed using OpenCV and MediaPipe
+        <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">cap</span> <span class="o">=</span> <span class="n">cv2</span><span class="p">.</span><span class="n">VideoCapture</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">mp_face_mesh</span><span class="p">.</span><span class="n">FaceMesh</span><span class="p">(</span>
+  <span class="n">max_num_faces</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+  <span class="n">refine_landmarks</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+  <span class="n">min_detection_confidence</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+  <span class="n">min_tracking_confidence</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span> <span class="k">as</span> <span class="n">face_mesh</span><span class="p">:</span>
+  <span class="k">while</span> <span class="n">cap</span><span class="p">.</span><span class="n">isOpened</span><span class="p">():</span>
+  <span class="n">success</span><span class="p">,</span> <span class="n">image</span> <span class="o">=</span> <span class="n">cap</span><span class="p">.</span><span class="n">read</span><span class="p">()</span>
+  <span class="n">results</span> <span class="o">=</span> <span class="n">process_image</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">face_mesh</span><span class="p">)</span>
+</code></pre></div>        </div>
+        <p>This is a pretty straightforward process where the front camera of the computer starts recording video and captures on image, which is then processed with MediaPipe’s FaceMesh.<br />
+The result is a hashmap, which has a property <em>multi_face_landmarks</em> with size (n) where n is the number of faces.<br />
+Each face in <em>multi_face_landmarks</em> has property <em>landmark</em> that stores the landmarks size (n, 2) where n is the number of landmarks.</p>
+      </li>
+      <li>Landmarks are converted to 2D pixel coordinates
+        <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">face_detect</span><span class="p">(</span><span class="n">image_shape</span><span class="p">,</span> <span class="n">multi_face_landmark</span><span class="p">):</span>
+  <span class="n">height</span> <span class="o">=</span> <span class="n">image_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="n">width</span> <span class="o">=</span> <span class="n">image_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+  <span class="n">landmarks</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="p">.</span><span class="n">float64</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">TEMPLATE_LANDMARK_INDEX</span><span class="p">:</span>
+   <span class="n">landmark</span> <span class="o">=</span> <span class="n">multi_face_landmark</span><span class="p">.</span><span class="n">landmark</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+   <span class="n">landmarks</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">landmarks</span><span class="p">,</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([[</span><span class="nb">min</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">landmark</span><span class="p">.</span><span class="n">x</span><span class="o">*</span><span class="n">width</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">landmark</span><span class="p">.</span><span class="n">y</span><span class="o">*</span><span class="n">height</span><span class="p">)]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">landmarks</span><span class="p">,</span> <span class="n">face_center</span><span class="p">(</span><span class="n">landmarks</span><span class="p">)</span>
+</code></pre></div>        </div>
+        <p>We are only extracting the landmarks we are interested in, which is sorted in <em>TEMPLATE_LANDMARK_INDEX</em>.<br />
+The 2D pixel coordinates are calculated by multiplying the width and height of the image.<br />
+All of the landmarks are appended in an array <em>landmarks</em></p>
+      </li>
+      <li>The head pose is estimated
+        <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">landmarks</span> <span class="o">=</span> <span class="n">landmarks</span><span class="p">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">landmarks</span> <span class="o">=</span> <span class="n">landmarks</span><span class="p">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">num_pts</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">estimateHeadPose</span><span class="p">(</span><span class="n">landmarks</span><span class="p">,</span> <span class="n">face_model</span><span class="p">,</span> <span class="n">camera</span><span class="p">,</span> <span class="n">distortion</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+  <span class="n">ret</span><span class="p">,</span> <span class="n">rvec</span><span class="p">,</span> <span class="n">tvec</span> <span class="o">=</span> <span class="n">cv2</span><span class="p">.</span><span class="n">solvePnP</span><span class="p">(</span><span class="n">face_model</span><span class="p">,</span> <span class="n">landmarks</span><span class="p">,</span> <span class="n">camera</span><span class="p">,</span> <span class="n">distortion</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">cv2</span><span class="p">.</span><span class="n">SOLVEPNP_EPNP</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">iteration</span><span class="p">:</span>
+   <span class="n">ret</span><span class="p">,</span> <span class="n">rvec</span><span class="p">,</span> <span class="n">tvec</span> <span class="o">=</span> <span class="n">cv2</span><span class="p">.</span><span class="n">solvePnP</span><span class="p">(</span><span class="n">face_model</span><span class="p">,</span> <span class="n">landmarks</span><span class="p">,</span> <span class="n">camera</span><span class="p">,</span> <span class="n">distortion</span><span class="p">,</span> <span class="n">rvec</span><span class="p">,</span> <span class="n">tvec</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">rvec</span><span class="p">,</span> <span class="n">tvec</span>
+</code></pre></div>        </div>
+        <p>The landmarks are first reshaped to (n, 1, 2) where n is the number of points in the 3D face model.<br />
+With the 3D face model(n, 1, 3), key landmarks(n, 1, 2), camera matrix(3, 3), distortion(5,) the rotational vector and translational vector are returned.</p>
+      </li>
+    </ol>
+  </li>
+  <li>Normalization Process
+    <ol>
+      <li>Get the 3D coordinates of the face with the camera coordinate system
+        <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Pose translation matrix
+</span><span class="n">ht</span> <span class="o">=</span> <span class="n">ht</span><span class="p">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="c1"># Pose rotation vector converted to a rotation matrix
+</span><span class="n">hR</span> <span class="o">=</span> <span class="n">cv2</span><span class="p">.</span><span class="n">Rodrigues</span><span class="p">(</span><span class="n">hr</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">Fc</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">dot</span><span class="p">(</span><span class="n">hR</span><span class="p">,</span> <span class="n">face</span><span class="p">)</span> <span class="o">+</span> <span class="n">ht</span>
+</code></pre></div>        </div>
+      </li>
+      <li>Calculate the distance from the eye to the camera and the scaling matrix S
+        <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># actual distance bcenterween eye and original camera
+</span><span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">linalg</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">center</span><span class="p">)</span>
+<span class="n">z_scale</span> <span class="o">=</span> <span class="n">distance_norm</span><span class="o">/</span><span class="n">distance</span>
+<span class="c1"># scaling matrix
+</span><span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">array</span><span class="p">([</span> 
+  <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+  <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+  <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">z_scale</span><span class="p">],</span>
+<span class="p">])</span>
+</code></pre></div>        </div>
+      </li>
+      <li>Calculate the rotational matrix R and transformation matrix M
+        <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># z-axis
+</span><span class="n">forward</span> <span class="o">=</span> <span class="p">(</span><span class="n">center</span><span class="p">).</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="c1"># x_r: x-axis of the head coordinate system
+</span><span class="n">hRx</span> <span class="o">=</span> <span class="n">hR</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+<span class="c1"># y-axis
+</span><span class="n">down</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">cross</span><span class="p">(</span><span class="n">forward</span><span class="p">,</span> <span class="n">hRx</span><span class="p">)</span>
+<span class="c1"># x-axis
+</span><span class="n">right</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">cross</span><span class="p">(</span><span class="n">down</span><span class="p">,</span> <span class="n">forward</span><span class="p">)</span>
+<span class="c1"># rotation matrix R
+</span><span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">c_</span><span class="p">[</span><span class="n">right</span><span class="o">/</span><span class="n">np</span><span class="p">.</span><span class="n">linalg</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">right</span><span class="p">),</span> <span class="n">down</span><span class="o">/</span><span class="n">np</span><span class="p">.</span><span class="n">linalg</span><span class="p">.</span><span class="n">norm</span><span class="p">(</span><span class="n">down</span><span class="p">),</span> <span class="n">forward</span><span class="o">/</span><span class="n">distance</span><span class="p">].</span><span class="n">T</span>
+<span class="c1"># Transformation Matrix M (For 3D input)
+</span><span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">dot</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">R</span><span class="p">)</span>
+</code></pre></div>        </div>
+      </li>
+      <li>Calculate the transformation matrix W, warp the image to get the final normalized image
+        <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># transformation matrix
+</span><span class="n">W</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">dot</span><span class="p">(</span><span class="n">cam_norm</span><span class="p">,</span> <span class="n">np</span><span class="p">.</span><span class="n">dot</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">np</span><span class="p">.</span><span class="n">linalg</span><span class="p">.</span><span class="n">inv</span><span class="p">(</span><span class="n">camera_matrix</span><span class="p">)))</span> 
+<span class="c1"># image normalization
+</span><span class="n">img_warped</span> <span class="o">=</span> <span class="n">cv2</span><span class="p">.</span><span class="n">warpPerspective</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">roiSize</span><span class="p">)</span>
+<span class="k">return</span> <span class="n">img_warped</span>
+</code></pre></div>        </div>
+      </li>
+    </ol>
+  </li>
+</ul>
+
+<p>The complete code can be found <a href="https://github.com/Abecid/Data-Normalization-for-Appearance-Based-Gaze-Estimation">here</a>.</p>
+
+<h3 id="4-3-results">4-3) Results</h3>
+<ol>
+  <li>Image With Landmark Annotations<br />
+<img src="/assets/posts/paper_review/5.gazenormalization/samples/sample_original.png" alt="Sample Image with Landmark Annotations" /></li>
+  <li>Normalized Image<br />
+<img src="/assets/posts/paper_review/5.gazenormalization/samples/sample_normalized.png" alt="Normalized Image" /></li>
+  <li>Sample Video</li>
+</ol>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/UfjoRIEpn7s" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
+
+<p>The model successfully annotates the original image and normalizes it by rotating the roll and maintaining a constant distance resulting in a consistent image size.</p>
+
+<h3 id="4-4-tests">4-4) Tests</h3>
+<ol>
+  <li>Distance
+    <ul>
+      <li>Image from a far distance
+<img src="/assets/posts/paper_review/5.gazenormalization/tests/1.distance.png" alt="Distant Image" /></li>
+      <li>Normalized image
+<img src="/assets/posts/paper_review/5.gazenormalization/tests/2.distance_normalized.png" alt="Distant Normalized Image" /></li>
+    </ul>
+  </li>
+  <li>MaskSample Video</li>
+</ol>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/qfxD4_KBv9k" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
+
+<p>The normalized image is a little unstable (due to occluded landmarks from the mask)</p>
+<ol>
+  <li>Occlusion</li>
+</ol>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/5alYwgWpxB4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
+<p>There is great instability when there is occlusion of the face. I tested which part of the face being occluded resulted in the most distortion, affecting the normalization.</p>
+
+<h2 id="5-challenging-aspects">5. Challenging Aspects</h2>
+<ol>
+  <li>Method
+Vector, Camera Coordinates &amp; World Coordinates
+Matrix Multiplication</li>
+  <li>Code
+MediaPipe, Conversion of 2D Landmark points to Pixel Points</li>
+</ol>
+
+<h2 id="6-thoughts">6. Thoughts</h2>
+<p>There could be more ways to normalize image data.
+Besides learning, data pre-processing is also very important.
+Intuition for neural networks to learn well is to restrict the differences between the training data to learn.</p>
+
+<h2 id="7-references">7. References</h2>
+<ol>
+  <li><a href="https://arxiv.org/abs/2104.12668">Appearance-based Gaze Estimation With Deep Learning: A Review and Benchmark</a></li>
+  <li><a href="https://docs.opencv.org/4.x/d5/d1f/calib3d_solvePnP.html">PnP Pose Computation</a></li>
+  <li><a href="https://docs.opencv.org/3.4/d9/d0c/group__calib3d.html#ga61585db663d9da06b68e70cfbf6a1eac">Rodrigues</a></li>
+  <li><a href="https://theailearner.com/tag/cv2-warpperspective/">Perspective Transformation</a></li>
+  <li><a href="https://mathinsight.org/cross_product">Cross Product</a></li>
+  <li><a href="https://courses.cs.washington.edu/courses/csep576/11sp/pdf/ImageFormation.pdf">Image Formation and Cameras</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Camera_matrix">Camera Matrix</a></li>
+</ol>

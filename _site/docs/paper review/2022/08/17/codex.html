@@ -1,0 +1,67 @@
+
+<p>Tags: Code Generation, Deep Learning, NLP</p>
+
+<p><a href="https://arxiv.org/abs/2107.03374">Source Paper</a></p>
+
+<p><img src="/assets/posts/paper_review/3.codex/title.png" /></p>
+
+<h2>1. Brief Summary &amp; Significance</h2>
+<p>After the release of the ground breaking GPT-3 by OpenAI, which was highly touted as a general language model and demonstrated great results in zero/one/few shot-learning, Codex is a model fine-tuned on GPT-3 with public code from GitHub. This paper introduces a new evaluation set called <a href="https://github.com/openai/human-eval">HumanEval</a> and achieves greater performance in code generation than other language models such as GPT-3 and GPT-J. Code is generated from a docstring. Codex-S is fine-tuned via supervised learning and performs better than Codex.</p>
+
+<h2>2. Evaluation Framework</h2>
+<h4>1) Functional Correctness</h4>
+<p><img src="/assets/posts/paper_review/3.codex/fig2.png" />
+Generated code are evaluated using test cases, the same way human developers judge code in test-driven development. Previous work evaluated functional correctness using the pass@k metric, where k code samples are generated per problem, a problem is considered solved if any sample passes the unit tests, and the total fraction of problems solved is reported.</p>
+
+<p>However this paper modifies this metric by generating n ≥ k samples per task (in this paper, n = 200 and k ≤ 100 are used), count the number of correct samples c ≤ n which pass unit tests, and calculate the unbiased estimator
+<img src="/assets/posts/paper_review/3.codex/eq1.png" />
+<br />This method is also slightly modified in the numpy implementation for numerical stability.</p>
+
+<h4>2) HumanEval</h4>
+<p>The HumanEval dataset is a set of 164 handwritten programming problems which was used to evaluate functional correctness. Each problem includes a function signature, docstring, body, and several unit tests, with an average of 7.7 tests per problem. The data set is publicly available <a href="https://www.github.com/openai/human-eval">here</a>.</p>
+
+<h2>3. Fine-tuning</h2>
+<p>Codex was fine-tuned with GPT models containing up to 12B parameters on code.</p>
+<h4>1) Data Collection</h4>
+<p>The training data set was collected in May 2020 from 54M public repositories and the files were then filtered resulting in a final data set that totaled 159GB.</p>
+<h4>2) Methods</h4>
+<blockquote>
+  <p>Since Codex is evaluated on natural language prompts, we hypothesized that it would be beneficial to fine-tune from the GPT-3 (Brown et al., 2020) model family, which already contains strong natural language representations. Surprisingly, we did not observe improvements when starting from a pre-trained language model, possibly because the finetuning dataset is so large. Nevertheless, models fine-tuned from GPT converge more quickly, so we apply this strategy for all subsequent experiments.</p>
+</blockquote>
+
+<ul>
+  <li>Codex was trained using the same learning rate as the corresponding GPT model, with a 175 step linear warmup and cosine learning rate decay. A total of 100 billion tokens were trained using the Adam optimizer.</li>
+  <li>To compute pass@k, each HumanEval problem is assembled into a prompt.</li>
+  <li>Tokens are sampled from Codex until one of the following stop sequences is encountered : ‘\nclass’, ‘\ndef’, ‘\n#’, ‘\nif’, or ‘\nprint’, <strong>since the model will continue generating additional functions or statements otherwise</strong>.</li>
+</ul>
+
+<h4>3) Results</h4>
+<p><img src="/assets/posts/paper_review/3.codex/fig4.png" />
+<img src="/assets/posts/paper_review/3.codex/fig6.png" />
+<br />Just as language model test loss follows a power law in model size, test loss after code fine-tuning follows a similar power law.</p>
+
+<p><img src="/assets/posts/paper_review/3.codex/fig5.png" />
+<br />Best temperature varies for each model based on the number of samples (k). Higher the k, a more flat distribution with diverse results perform better.</p>
+
+<p><img src="/assets/posts/paper_review/3.codex/table1.png" />
+<br />The best Codex models outperform previous GPT models.</p>
+
+<h2>4. Limitations</h2>
+<h4>1) Codex is not sample efficient to train</h4>
+<blockquote>
+  <p>Our training dataset comprises a significant fraction of publicly available Python code on GitHub, totaling hundreds of millions of lines of code. Even seasoned developers do not encounter anywhere near this amount of code over their careers. Indeed, a strong student who completes an introductory computer science course is expected to be able to solve a larger fraction of problems than Codex-12B.</p>
+</blockquote>
+<h4>2) Codex has trouble with complexity</h4>
+<p><img src="/assets/posts/paper_review/3.codex/fig11.png" />
+<br />Codex struggles to parse through increasingly long and higher-level or system-level specifications.</p>
+<blockquote>
+  <p>We find that as the number of chained building blocks in the docstring increases, model performance decreases exponentially. This behavior is uncharacteristic of a human programmer, who should be able to correctly implement a program for a chain of arbitrary length if they can do so for a chain of length two.</p>
+</blockquote>
+
+<p>Codex can also make mistakes binding operations to variables, especially when the number of operations and variables in the docstring is large. For instance, in the following prompt, Codex-12B does not decrement the variable w and also fails to return the product of all numbers.
+<br /><img src="/assets/posts/paper_review/3.codex/code1.png" /></p>
+
+<h2>5. References</h2>
+<ol>
+<li><a href="https://arxiv.org/abs/2107.03374">Evaluating Large Language Models Trained on Code</a></li>
+</ol>
