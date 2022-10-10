@@ -13,4 +13,11 @@ tags: [Research]
 <h2>Intro</h2>
 Why Research is a Great Fit For Me
 
+Most things in life, standard curriculum. People merely follow protocols and guidelines. 
 
+Research is an open sea.
+
+Trial and error. Constant hypothesis validation.  
+
+Constant ideation to solve the problem.
+Setting the direction (attack vector) is most important.
