@@ -13,6 +13,7 @@ tags: [Deep Learning, Computer Vision, Knowledge Distillation, IR]
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
 ### Abstract
+Transfering knowledge, domain adaptation. 
 
 ### Introduction
 

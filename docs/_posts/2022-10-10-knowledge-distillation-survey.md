@@ -107,3 +107,51 @@ Snapshot distillation
 3. Cross-Modal Distillation
 4. Graph based Distillation
 5. Attention-based Distillation
+
+## FEATURE-MAP-LEVEL ONLINE ADVERSARIAL KNOWLEDGE DISTILLATION
+[Source](https://openreview.net/attachment?id=Bkl086VYvH&name=original_pdf)
+ICLR 2020  
+
+### Abstract
+Online knowledge distillation that transfers the knowledge of the feature map using an adversarial training framework.  
+By training a discrimination network to distinguish the featuremaps from different networks and training networks to fool it, networks can learn the other network's feature map distribution.  
+Cyclic learning for training more than two networks together.  
+
+### Introduction
+Online distillation: training networks to learn from each other.  
+First to apply feature map based knowledge distillation in online learning.  
+![Fig2-1](/assets/posts/research/2.knowledge-distillation-survey/fig2-1.png "Fig2-1")
+Direct alignment method only tries to minimize the distance between feature map points and ignores distributional differences.  
+
+Newly proposed feature map based loss to distill the feature map indirectly via discrimiinators.  
+
+### Related works
+1. Model Compression
+    - Knowledge distillation by Hinton et al. (2015)
+        - Used softened logit (with termperature) which has higher entropy
+        - Learn with conventional CE loss with labeled data and with the final outputs of a teacher network.  
+    - Feature representation
+        - [FitNet(2014)](/https://arxiv.org/abs/1412.6550), ATA(Zagoruyko 2016a), FT(Kim 2018), KTAN(Liu 2018) use intermediate feature representation to transfer knowledge
+2. Online Knowledge Distillation
+    - [DML (Zhang 2018)](https://openaccess.thecvf.com/content_cvpr_2018/papers/Zhang_Deep_Mutual_Learning_CVPR_2018_paper.pdf) 
+        - Ensemble of students learn from each other. Achieves results even better than offline Knowledge Distillation in one benchmark
+    - ONE (Lan 2018)
+        - Rather than mutually distilling between the networks, ONE generates a gated ensemble logit of the training networks and uses it as a target to align for each network.  
+
+    - Current drawbacks
+        - Dependent only on the logit and do not make any use of the feature map information
+3. Proposed Method
+- Adversarial training to let each to learn each other's distribution.  
+- Cyclic learning scheme for training more than two networks simultaneously. The number of discriminators is K (number of networks participating)  
+    - One-way cyclic manner.  
+
+
+## Show, Attend and Distill:Knowledge Distillation via Attention-based Feature Matching
+[Source](https://ojs.aaai.org/index.php/AAAI/article/download/16969/16776)  
+2021 AAAI
+
+### Abstract
+Most studies manually tie intermediate features of the teacher and student and transfer knowledge through pre-defined links.  
+Proposed method utilizes an attention-based meta-network that learns relative similarities between features, and applies identified similarities to control distillation intensities of all possible pairs.  
+As a result, the proposed method determined competent links more efficiently than previous approaches.  
+
