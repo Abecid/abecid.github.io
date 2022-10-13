@@ -155,5 +155,12 @@ Newly proposed feature map based loss to distill the feature map indirectly via 
 ### Abstract
 Most studies manually tie intermediate features of the teacher and student and transfer knowledge through pre-defined links.  
 Proposed method utilizes an attention-based meta-network that learns relative similarities between features, and applies identified similarities to control distillation intensities of all possible pairs.  
-As a result, the proposed method determined competent links more efficiently than previous approaches.  
+As a result, the proposed method determines competent links more efficiently than previous approaches.  
 
+### Introduction
+Most studies manually link the teacher and student features and perform distillation through the links individually.  
+This manual selection does not consider the similarity between the teacher and student features, which risks forcing an incorrect intermediate processs to the student.  
+Also the link selection limits fully utilizing the whole knowledge of the teacher by choosing a few of all possible linkns.  
+
+Feature link selection: Jang et al 2019.  
+New feature linking method proposed based on the attention mechanism.  
