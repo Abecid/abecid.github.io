@@ -2,7 +2,7 @@
 layout: post
 title:  "Knowledge Distillation IR"
 date:   2022-10-11 17:11:31 +0900
-category: Research
+category: [Research]
 tags: [Deep Learning, Computer Vision, Knowledge Distillation, IR]
 ---
 

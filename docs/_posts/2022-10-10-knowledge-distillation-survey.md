@@ -2,7 +2,7 @@
 layout: post
 title:  "Knowledge Distillation Survey"
 date:   2022-10-10 11:11:31 +0900
-category: Research
+category: [Research, Featured]
 tags: [Deep Learning, Computer Vision, Knowledge Distillation, Survey]
 ---
 

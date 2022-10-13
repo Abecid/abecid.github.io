@@ -2,7 +2,7 @@
 layout: post
 title:  "Anime Style Transfer"
 date:   2022-08-13 15:02:31 +0900
-category: Projects
+category: [Projects, Featured]
 tags: [Deep Learning, GAN]
 ---
 

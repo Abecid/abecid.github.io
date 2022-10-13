@@ -62,7 +62,21 @@ permalink: /
 {% endfor %} -->
 
 <div class="main">
-{% assign href = "/" %}
+{% assign href = "/featured" %}
+
+<a href="{{ href }}" class="post-cat"><h4>Featured</h4></a>
+<ul>
+  {% for post in site.categories.Featured limit:3 %}
+    <li><a href="{{ post.url }}">{{ post.title }}</a>
+    <!-- ({{ post.tags | join: ", " }}) -->
+    <!-- - {{ post.date | date: "%-d %B %Y"}} -->
+    </li>
+  {% endfor %}
+  {% if site.categories.Featured.size > 3 %}
+    <a href="{{ href }}"> View More.. </a>
+  {% endif %}
+</ul>
+
 {% for cat in site.categories %}
   {% case cat[0] %}
     {% when "Paper Review" %}
@@ -75,6 +89,8 @@ permalink: /
       {% assign href = "/projects" %}
     {% when "Other Pursuits" %}
       {% assign href = "/pursuits" %}
+    {% when "Featured" %}
+      {% break %}
     {% else %}
       {% assign href = "/" %}
   {% endcase %}

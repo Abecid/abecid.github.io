@@ -2,7 +2,7 @@
 layout: post
 title:  "Revisiting Data Normalization for Appearance-Based Gaze Estimation"
 date:   2022-09-06 10:45:31 +0900
-category: Paper Review
+category: [Paper Review, Featured]
 tags: [Deep Learning, Computer Vision, Gaze, Normalization]
 ---
 
