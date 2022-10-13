@@ -108,6 +108,8 @@ Snapshot distillation
 4. Graph based Distillation
 5. Attention-based Distillation
 
+***
+
 ## FEATURE-MAP-LEVEL ONLINE ADVERSARIAL KNOWLEDGE DISTILLATION
 [Source](https://openreview.net/attachment?id=Bkl086VYvH&name=original_pdf)
 ICLR 2020  

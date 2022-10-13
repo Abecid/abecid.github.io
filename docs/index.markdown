@@ -90,20 +90,40 @@ permalink: /
     {% when "Other Pursuits" %}
       {% assign href = "/pursuits" %}
     {% when "Featured" %}
-      {% break %}
+      {% continue %}
     {% else %}
       {% assign href = "/" %}
   {% endcase %}
 
   <a href="{{ href }}" class="post-cat"><h4>{{ cat[0] }}</h4></a>
   <ul>
-    {% for post in cat[1] limit:3 %}
+    {% assign base_max_posts = 3 %}
+    {% assign base_minus_one = base_max_posts | minus:1 %}
+    {% assign max_posts = base_max_posts %}
+    {% assign complete_post_counter = 0 %}
+
+    {% for post in cat[1] limit:max_posts %}
+      {% if post.tags contains "Unfinished" %}
+        {% assign max_posts = max_posts | plus:1 %}
+      {% else %}
+        {% if complete_post_counter == base_minus_one %}
+          {% break %}
+        {% endif %}
+        {% assign complete_post_counter = complete_post_counter | plus:1 %}
+      {% endif %}
+    {% endfor %}
+
+    {% for post in cat[1] limit:max_posts %}
+      {% if post.tags contains "Unfinished" %}
+        {% assign max_posts = max_posts | plus:1 %}
+        {% continue %}
+      {% endif %}
       <li><a href="{{ post.url }}">{{ post.title }}</a>
       <!-- ({{ post.tags | join: ", " }}) -->
       <!-- - {{ post.date | date: "%-d %B %Y"}} -->
       </li>
     {% endfor %}
-    {% if cat[1].size > 3 %}
+    {% if cat[1].size > max_posts %}
       <a href="{{ href }}"> View More.. </a>
     {% endif %}
   </ul>
