@@ -66,6 +66,23 @@ tags: [Deep Learning, Computer Vision, Self-Supervised Learning, Knowledge Disti
         <li>Scarlett is all you need</li>
       </ul>
   </ul>
+  <h4>Week 3.</h4>
+  <ul>
+    <li>Train Res-net with CW1 and Everyone</li>
+    <li>Student Pool</li>
+      <ul>
+        <li>Multiple students learn from teacher</li>
+        <li>Students teach each other</li>
+      </ul>
+    <li>Discriminator</li>
+    <li>Featuremap; attention-based</li>
+    <li>Adjust Learning Rate</li>
+      <ul>
+        <li>Decay Rate</li>
+        <li>Schedule</li>
+      </ul>
+    <li>Supervsied Learning</li>
+  </ul>
   </details>
 
 </details>
