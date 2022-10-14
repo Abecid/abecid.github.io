@@ -49,7 +49,6 @@ tags: [Deep Learning, Computer Vision, Self-Supervised Learning, Knowledge Disti
     </ul>
 
   </details>
-  
   <details>
   <summary>October</summary>
   <h4>Broad Plan</h4>
@@ -85,10 +84,9 @@ tags: [Deep Learning, Computer Vision, Self-Supervised Learning, Knowledge Disti
     <li>Supervsied Learning</li>
   </ul>
   </details>
-
   <summary>Future Work</summary>
   <ol>
-    <li>Pretrain a larger model: Restnet on our datasets</li>
+    <li>Pretrain a larger model: Resnet on our datasets</li>
       <ul>
         <li>Utilization for knowledge distillation on gaze model (both RGB and IR)</li>
       </ul>
@@ -105,7 +103,6 @@ tags: [Deep Learning, Computer Vision, Self-Supervised Learning, Knowledge Disti
     <li>NERF</li>
     <li>Neural Architecture Search</li>
   </ol>
-
 </details>
 
 
