@@ -147,6 +147,7 @@ Newly proposed feature map based loss to distill the feature map indirectly via 
 - Cyclic learning scheme for training more than two networks simultaneously. The number of discriminators is K (number of networks participating)  
     - One-way cyclic manner.  
 
+***
 
 ## Show, Attend and Distill:Knowledge Distillation via Attention-based Feature Matching
 [Source](https://ojs.aaai.org/index.php/AAAI/article/download/16969/16776)  
@@ -164,3 +165,19 @@ Also the link selection limits fully utilizing the whole knowledge of the teache
 
 Feature link selection: Jang et al 2019.  
 New feature linking method proposed based on the attention mechanism.  
+
+***
+
+## Online Knowledge Distillation via Collaborative Learning
+[Srouce](https://openaccess.thecvf.com/content_CVPR_2020/papers/Guo_Online_Knowledge_Distillation_via_Collaborative_Learning_CVPR_2020_paper.pdf)
+
+### Abstract
+Knowledge Distillation via Collaberative Learning: KDCL
+- Treats all models as students and collaboratively trains them. 
+
+### Introduction
+- Students directly learn from the prediction of other students in Deep Mutual Learning
+    - Output of students could conflict with each other and does harm to model with high performance.  
+- ONE: multi-branch network while establishing teacher on the fly.  
+    - Knowledge transfer only accurs at the upper layers; inflexible
+    - Gate module is the soft target; which is not a guarantee
