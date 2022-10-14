@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Visualcamp : SSL"
+title:  "Visualcamp : SSL Research"
 date:   2022-09-22 15:48:31 +0900
 category: Research
 tags: [Deep Learning, Computer Vision, Self-Supervised Learning, Knowledge Distillation, Visualcamp]
@@ -10,32 +10,64 @@ tags: [Deep Learning, Computer Vision, Self-Supervised Learning, Knowledge Disti
   Tags: {{ page.tags | sort | join: ", " }}
 {% endif %}
 
-<h2>Intro</h2>
-Self-supervised learning
+## Self-supervised Learning Research Log
 
-1. SSL structure
-- IR and RGB loss (taken at same instance)
+<details open>
+  <summary>2022</summary>
+  <details>
+    <summary>September</summary>
+    <h4>Broad Plan</h4>
+    <ol>
+      <li>SSL Structure</li>
+        <ul>
+          <li>IR and RGB loss (taken at same instance)</li>
+          <li>IR-IR with similar x,y points</li>
+          <li>RGB-RGB with similar x,y points</li>
+          <li>IR-RGB with similar x,y points  </li>
+          <li>right, left, center x,y point estimates  </li>
+        </ul>
+      <li>Loss Function</li>
+        <ul>
+          <li>cross entropy  </li>
+          <li>mse  </li>
+          <li>further modification  </li>
+            <ul>
+              <li>apply both gradients to teacher with alpha parameter  </li>
+            </ul>
+        </ul>
+      <li>Architecture</li>
+        <ul>
+          <li>1 model (shared weights) v. 2 models (teacher and student model)  </li>
+          <li>more layers?  </li>
+        </ul>
+    </ol>
+    <hr>
+    <h4>9.22</h4>
+    <ul>
+      <li>Measure the loss between IR and RGB outputs with the same pretrained model  </li>
+      <li>Loss between right,left,center estimates of the model  </li>
+    </ul>
 
-- IR-IR with similar x,y points
-- RGB-RGB with similar x,y points
+  </details>
+  
+  <details>
+  <summary>October</summary>
+  <h4>Broad Plan</h4>
+  <ul>
+    <li>Fine-tune bigger Res-net model: Train both RGB and IR image models  </li>
+    <li>Featuremap loss  </li>
+    <li>Domain adversarial training  </li>
+    <li>Pool student models and RGB model, train together</li>
+    <li>Attention embedding</li>
+    <li>Paper</li>
+      <ul>
+        <li>Knowledge Distillation and Domain Generalization at Once</li>
+        <li>Novel architecture and loss function to combine both</li>
+        <li>Scarlett is all you need</li>
+      </ul>
+  </ul>
+  </details>
 
-- IR-RGB with similar x,y points
+</details>
 
-- right, left, center x,y point estimates
 
-2. loss function
-- cross entropy
-- mse
-- further modification
-    - apply both gradients to teacher with alpha parameter
-
-3. architecture
-- 1 model (shared weights) v. 2 models (teacher and student model)
-- more layers?
-
----
-
-09.22
-Measure the loss between IR and RGB outputs with the same pretrained model
-
-Loss between right,left,center estimates of the model
