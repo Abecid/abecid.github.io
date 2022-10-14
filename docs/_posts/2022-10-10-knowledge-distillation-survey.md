@@ -108,6 +108,12 @@ Snapshot distillation
 4. Graph based Distillation
 5. Attention-based Distillation
 
+### Core Takeaways
+1. Focus on Feature-based knowledge
+2. Mix offline, online distillation
+3. Adversarial Training
+4. Attention-based distillation
+
 ***
 
 ## FEATURE-MAP-LEVEL ONLINE ADVERSARIAL KNOWLEDGE DISTILLATION
@@ -147,6 +153,9 @@ Newly proposed feature map based loss to distill the feature map indirectly via 
 - Cyclic learning scheme for training more than two networks simultaneously. The number of discriminators is K (number of networks participating)  
     - One-way cyclic manner.  
 
+### Core Takeaways
+1. Use a discriminator when training online distillation with feautre-based knowledge
+
 ***
 
 ## Show, Attend and Distill:Knowledge Distillation via Attention-based Feature Matching
@@ -166,6 +175,9 @@ Also the link selection limits fully utilizing the whole knowledge of the teache
 Feature link selection: Jang et al 2019.  
 New feature linking method proposed based on the attention mechanism.  
 
+### Core Takeaways
+1. Link features using an attention mechanism
+
 ***
 
 ## Online Knowledge Distillation via Collaborative Learning
@@ -181,3 +193,6 @@ Knowledge Distillation via Collaberative Learning: KDCL
 - ONE: multi-branch network while establishing teacher on the fly.  
     - Knowledge transfer only accurs at the upper layers; inflexible
     - Gate module is the soft target; which is not a guarantee
+
+### Core Takeaways
+1. Student pool training

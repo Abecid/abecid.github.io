@@ -69,6 +69,7 @@ tags: [Deep Learning, Computer Vision, Self-Supervised Learning, Knowledge Disti
   <h4>Week 3.</h4>
   <ul>
     <li>Train Res-net with CW1 and Everyone</li>
+    <li>Train a separate network on distance data</li>
     <li>Student Pool</li>
       <ul>
         <li>Multiple students learn from teacher</li>
@@ -84,6 +85,26 @@ tags: [Deep Learning, Computer Vision, Self-Supervised Learning, Knowledge Disti
     <li>Supervsied Learning</li>
   </ul>
   </details>
+
+  <summary>Future Work</summary>
+  <ol>
+    <li>Pretrain a larger model: Restnet on our datasets</li>
+      <ul>
+        <li>Utilization for knowledge distillation on gaze model (both RGB and IR)</li>
+      </ul>
+    <li>Knowledge distillation on a smaller gaze model! </li>
+      <ul>
+        <li>Neural architecture search</li>
+      </ul>
+    <li>Knowledge distillaion - domain generalization</li>
+      <ul>
+        <li>Unified model for both</li>
+        <li>Adjust loss function</li>
+      </ul>
+    <li>Diffusion</li>
+    <li>NERF</li>
+    <li>Neural Architecture Search</li>
+  </ol>
 
 </details>
 
