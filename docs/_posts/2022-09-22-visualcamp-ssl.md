@@ -67,6 +67,9 @@ tags: [Deep Learning, Computer Vision, Self-Supervised Learning, Knowledge Disti
   </ul>
   <h4>Week 3.</h4>
   <ul>
+    <li>Convert IR to RGB camera extrinsic calibration</li>
+    <li>Convert target gaze coordinate from world coordinate systme to gaze-model coordinate system</li>
+    <li>Use entire training dataset (currently using 1/3)</li>
     <li>Train Res-net with CW1 and Everyone</li>
     <li>Train a separate network on distance data</li>
     <li>Student Pool</li>
