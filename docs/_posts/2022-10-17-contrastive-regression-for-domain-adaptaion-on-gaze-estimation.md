@@ -19,13 +19,13 @@ CVPR 2022
 ![Title](/assets/posts/paper_review/7.contrastive_domain_gaze/title.png "Title")  
 
 ## Abstract
-Appearance-based Gaze Estimation depends on expensive and cumbersome annotation capture. When lacking precise aannotation, the large domain gap hinders the performance of trained models on new domains.  
+Appearance-based Gaze Estimation depends on expensive and cumbersome annotation capture. When lacking precise annotation, the large domain gap hinders the performance of trained models on new domains.  
 
-A novel gaze adaptation appraoch, Contrastive Regression Gaze Adaptation (CRGA) for generalizing gaze estimation on the target domain in an unsupervised manner.  
+A novel gaze adaptation approach, Contrastive Regression Gaze Adaptation (CRGA) for generalizing gaze estimation on the target domain in an unsupervised manner.  
 
 - CRGA leverages
     - Contrastive Domain Generalization (CDG) module to learn the stable representation from the source domain
-    - Contrastive Self-training Adaptation (CSA) module to learn from the psudo labels on the target domain
+    - Contrastive Self-training Adaptation (CSA) module to learn from the pseudo labels on the target domain
 
 - Contrastive Regression (CR) loss
     - Novel contrastive loss of regression by pulling features with closer gaze directions closer together while pushing features with farther gaze directions farther apart.  
@@ -38,10 +38,10 @@ A novel gaze adaptation appraoch, Contrastive Regression Gaze Adaptation (CRGA) 
 
 ## 1. Introduction
 ![Fig1](/assets/posts/paper_review/7.contrastive_domain_gaze/fig1.png "Fig1")  
-**Despite the success of appearance-based gaze estimation, expensive and cumbersme annotation capture contraints its application.**  
-- Large-scale datasets have been proposed to alletiae this problem.
+**Despite the success of appearance-based gaze estimation, expensive and cumbersome annotation capture constraints its application.**  
+- Large-scale datasets have been proposed to alleviate this problem.
     - Promising performance in teh within-dataset test (training and testing from same dataset)
-    - Degraded daramatically in cross-dataset test, due to the gap between different domains (different subjeccts, background environments, illuminations)
+    - Degraded dramatically in cross-dataset test, due to the gap between different domains (different subjects, background environments, illuminations)
 
 - Other works
     - Narrow the cross-dataset gap
@@ -54,14 +54,14 @@ A novel gaze adaptation appraoch, Contrastive Regression Gaze Adaptation (CRGA) 
     - Drawbacks
         - Lacks a self-supervised approach to address the cross-dataset gap
 
-- Existing unsupervised and supervised contrastive learning for classification cannot accomodate to gaze regression tasks.  
+- Existing unsupervised and supervised contrastive learning for classification cannot accommodate to gaze regression tasks.  
     - Unsupervised contrastive learning
         - positive: different views of same image; negative: views of other images
         - Extracts global semantic information that benefits classification tasks
         - However, global semantic information could mislead regression tasks
     - Supervised contrastive learning
 
-> CRGA proposed for generalizing gaze estimation on the target domain in an unsupervsied maner  
+> CRGA proposed for generalizing gaze estimation on the target domain in an unsupervised manner  
 > Contrastive Regression (CR) loss to learn robust domain-invariant representation for regression tasks
 
 - First to introduce contrastive learning into regression tasks to improve domain generalization and adaptation performance.
@@ -77,7 +77,7 @@ A novel gaze adaptation appraoch, Contrastive Regression Gaze Adaptation (CRGA) 
     - Adversarial training
     - Ensemble of networks to learn collaboratively with the guidance of outliers
 
-### 2-2. Constrastive Learning
+### 2-2. Contrastive Learning
 > Surpasses supervised methods when transferring the representation to cross-domain and downstream tasks
 
 ## 3. Methodology
@@ -112,7 +112,7 @@ CRGA consists of two modules
     - Improve adaptation performance on the target domain
 
 #### 1) Contrastive Domain Generalization
-Data augmentation oeprators: $$A, \tilde{A}$$  
+Data augmentation operators: $$A, \tilde{A}$$  
 Input Images  
 $$I = A(\textit{input}), \tilde{I}=\tilde{A}(\textit{input})$$  
 
@@ -136,7 +136,7 @@ Use $$\tilde{g}^{\tau}$$  as the label of the target data
 $$L_{CSA}$$
 ![Eq8](/assets/posts/paper_review/7.contrastive_domain_gaze/eq8.png "Eq8")
 
-Source data used as the regularizaiton term with an annealed temperature $$\gamma$$ (from 0 to 1)
+Source data used as the regularization term with an annealed temperature $$\gamma$$ (from 0 to 1)
 ![Eq9](/assets/posts/paper_review/7.contrastive_domain_gaze/eq9.png "Eq9")
 
 ## 4. Experiments

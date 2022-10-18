@@ -131,7 +131,7 @@ First to apply feature map based knowledge distillation in online learning.
 ![Fig2-1](/assets/posts/research/2.knowledge-distillation-survey/fig2-1.png "Fig2-1")
 Direct alignment method only tries to minimize the distance between feature map points and ignores distributional differences.  
 
-Newly proposed feature map based loss to distill the feature map indirectly via discrimiinators.  
+Newly proposed feature map based loss to distill the feature map indirectly via discriminators.  
 
 ### Related works
 1. Model Compression

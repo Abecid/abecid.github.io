@@ -45,7 +45,7 @@ Evaluation of RUDA framework on four cross-domain tasks
 > Authors find that human gaze, as a 3D direction vector, is rotation-consistent.  
 Define the relative rotation angle as the sub-label (not an absolute angle)  
 
-**Authors sropose Rotation-enhanced Unsupervised Domain Adaptation (RUDA) framework for gaze estimation.**  
+**Authors propose Rotation-enhanced Unsupervised Domain Adaptation (RUDA) framework for gaze estimation.**  
 - Creates sub-labels between original and randomly rotated images
 - Estimator is generalized to target domain via rotation consistency of estimation results
 
@@ -68,8 +68,8 @@ Define the relative rotation angle as the sub-label (not an absolute angle)
             - Face images
             - Both
     - Cross-domain gaze estimation
-        - Person-specific gaze estimation network with few sampels via meta-learning
-        - Eliminate inter-personal diversity by ensuring predictino consistency
+        - Person-specific gaze estimation network with few samples via meta-learning
+        - Eliminate inter-personal diversity by ensuring prediction consistency
         - Eliminate gaze-irrelevant feature; improve cross dataset accuracy without target domain data
         - Plug-and-play cross-domain gaze estimation with the guidance of outliers
         - Redirect head and gaze in a self-supervised manner by embedding transformation including rotation
@@ -90,7 +90,7 @@ Augmentations proposed
 - Color jittering
 - Introducing noise
 
-However, existing data augmentation appraoches only bring limited performance improvement, when adopted in unsupervised gaze adaptation tasks
+However, existing data augmentation approaches only bring limited performance improvement, when adopted in unsupervised gaze adaptation tasks
 
 **Rotation Consistency**  
 ![Eq1](/assets/posts/paper_review/8.generalizing_gaze_rotation/eq1.png "eq1")  
@@ -104,7 +104,7 @@ $$R^{g}$$: Rotation matrix of the gaze direction
 
 ## 4. Method
 ### 4-1. Task Definition
-### 4-2. Rotation-Enhanced Unsupervsied Domain Adaptation for Gaze Estimation
+### 4-2. Rotation-Enhanced Unsupervised Domain Adaptation for Gaze Estimation
 ### 4-3. Implementation Details
 
 ## 5. Experiments
