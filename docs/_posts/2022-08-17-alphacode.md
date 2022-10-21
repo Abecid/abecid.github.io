@@ -2,7 +2,7 @@
 layout: post
 title:  "Competition-Level Code Generation with AlphaCode"
 date:   2022-08-17 18:17:31 +0900
-category: [Paper Review, Featured]
+category: [Paper Review]
 tags: [NLP, Deep Learning, Code Generation]
 ---
 
