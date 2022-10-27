@@ -13,8 +13,8 @@ tags: [General]
 ## Intro
 Meta just released its quarterly earnings report this week and analysts and the media are calling it a catastrophic failure. The following is a brief summary of their earnings.
 
-> <Meta Quarterly Earnings Report Q3 2022>
-> Revenue: $ 27.7 Billion
+> <Meta Quarterly Earnings Report Q3 2022>  
+> Revenue: $ 27.7 Billion  
 > Net Income: $ 4.4 Billion
 
 So if these numbers represent failure what is the meaning of success? How does one measure it?
@@ -30,7 +30,7 @@ The answer is growth.
 
 Meta's revenue decreases 2 billion dollars from a year earlier and their income is down 52%(!) from a year earlier. So regardless of its absolute numbers and its numbers compared to other companies, Meta's Q3 performance is regarded as failure because of it's lack of growth, or rather it's decline. 
 
-#### So why is growth so important? 
+### So why is growth so important? 
 Obviously in the context in stock markets, growth is how current investors make money, not with the company's past success so that's what they care about. But this also applies more generally and to an individual level. 
 
 Constant change and growth triumphs everything else. 
