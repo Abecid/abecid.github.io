@@ -41,7 +41,7 @@ Imagine two students in school. One person consistently performs around top 10% 
 
 Also comparison to peers is also not indicative since the measurement and the game itself might be pointless. Being in the top 5% in the world in garbage collecting has no meaning. 
 
-And this is the case in the real world as well. Even though money -- revenue, and net income -- are one of the strongest indicators of a company's value they are not all! There are other factors that influence the world and improve one's revenues in the future. Realistically these could be AI publication records and R&D investments. So without growth, aka change, one might not even be optimizing for the right measurement in the first place. 
+And this is the case in the real world as well. Even though money -- revenue, and net income -- are one of the strongest indicators of a company's value they are not all! There are other factors that influence the world and improve one's revenues in the future. Realistically these could be AI publication records and R&D investments for companies. So without growth, aka change, one might not even be optimizing for the right measurement in the first place. 
 
 Growth and change are two sides of the same coin. Since one cannot have growth without making changes. (At state equilibrium)
 
