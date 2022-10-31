@@ -62,6 +62,8 @@ $$ \frac{\sum_{j} exp(sim(z_{i}, z_{j})/\tau)}{\sum_{k}\mathbb{1}_{k \ne i}\lver
 
 $$ S = -log \frac{sim(g_{i}, g_{k})}{cos(\pi/60)} $$
 
+$$ \gamma \lvert \hat{y}_{t} - \hat{y}_{s} \rvert $$
+
 Assume 3 degrees or less are the same
 
 $$ \sigma $$ is the Relu activation function. 
@@ -80,7 +82,9 @@ Finally a new training architecture.
 
 ## 4. Experiments
 ### 4.1. Datasets
+Pretrain with Eth-XGaze and MPII Dataset. Validation on near infrared images of AI Hub dataset.  
 ### 4.2. Training Details
+2 NVIDIA 3080 GPUs for one week. 
 ### 4.3. Near infrared performance
 ### 4.4. Ablation Study
 Epoch
