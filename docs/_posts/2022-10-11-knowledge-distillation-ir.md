@@ -45,7 +45,7 @@ Contrary to classification tasks, distancing method has to be scaled relative to
 Normalized Temperature-scaled Cross Entropy Loss  
 $$ \mathbb{l}_{i,j} = -\log\frac{\exp\left(\text{sim}\left(\mathbf{z}_{i}, \mathbf{z}_{j}\right)/\tau\right)}{\sum^{2N}_{k=1}\mathcal{1}_{[k\neq{i}]}\exp\left(\text{sim}\left(\mathbf{z}_{i}, \mathbf{z}_{k}\right)/\tau\right)} $$
 
-$$ \frac{\sum_{j} exp(sim(z_{i}, z_{j})/\tau)}{\sum_{k}\mathbb{1}_{k \ne i}\lvert S_{i, k} \rvert \cdot exp(sim(z_{i}, z_{k})/\tau)} $$
+$$ -\log\frac{\sum_{j} exp(sim(z_{i}, z_{j})/\tau)}{\sum_{k}\mathbb{1}_{k \ne i}\lvert S_{i, k} \rvert \cdot exp(sim(z_{i}, z_{k})/\tau)} $$
 
 $$ S = -log \frac{sim(g_{i}, g_{k})}{cos(\pi/60)} $$
 
@@ -71,6 +71,7 @@ Finally a new training architecture.
 ## Ablation Study
 Epoch
 Hyperparameter Tuning
+Loss function comparison
 
 ### Architecture
 
