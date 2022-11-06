@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "General Contrastive Regression Loss for IR"
+title:  "Contrastive Weighted Learning for Near-Infrared Gaze Estimation"
 date:   2022-10-11 17:11:31 +0900
 category: [Research]
 tags: [Deep Learning, Computer Vision, Knowledge Distillation, IR, Unfinished]
@@ -14,34 +14,34 @@ header-includes:
 
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
+# Contrastive Weighted Learning for Near-Infrared Gaze Estimation
+
 ## Abstract
-Appearance-based gaze estimation has been very successful with the use of deep learning. And there have been many works that improved domain generalization for gaze estimation. However, even though there have been much progress in domain generalization for gaze estimation, most of the recent work have been focused on cross-dataset performance-- accounting for different distributions in illuminations, head pose, and lighting. Although improving gaze estimation in different distributions with RGB images is important, near infrared image based gaze estimation is also critical for gaze estimation in the dark. Also there are inherent limitations relying solely on supervised learning for regression tasks. This paper contributes to solving these problems and proposes GazeCWL, a novel framework for gaze estimation with near-infrared images using contrastive learning. This leverages a adversarial attack technique for data augmentation and a novel contrastive loss function specifically for regression tasks that effectively clusters the features of different samples in the latent space. Our model outperforms previous domain generalization models in infrared image based gaze estimation and with thorough experiments in ablation studies we prove the efficacy of our method. 
+Appearance-based gaze estimation has been very successful with the use of deep learning. Many following works improved domain generalization for gaze estimation. However, even though there has been much progress in domain generalization for gaze estimation, most of the recent work have been focused on cross-dataset performance-- accounting for different distributions in illuminations, head pose, and lighting. Although improving gaze estimation in different distributions of RGB images is important, near-infrared image based gaze estimation is also critical for gaze estimation in dark settings. Also there are inherent limitations relying solely on supervised learning for regression tasks. This paper contributes to solving these problems and proposes GazeCWL, a novel framework for gaze estimation with near-infrared images using contrastive learning. This leverages adversarial attack techniques for data augmentation and a novel contrastive loss function specifically for regression tasks that effectively clusters the features of different samples in the latent space. Our model outperforms previous domain generalization models in infrared image based gaze estimation and outperforms the baseline by 45.6\% while improving the state-of-the-art by 8.6\%, we demonstrate the efficacy of our method.
 
 
 ## 1. Introduction
-Gaze estimation is a crucial technology that has many critical applications in various domains including human-computer interaction[2], virtual reality[3] and medical analysis[4]. Appearance based gaze estimation leveraging deep learning and convolutional neural networks have gained great traction over the past several years[12,13,14]. There have been especially notable progress in appearance based gaze estimation via supervised learning and domain adaptation for cross-dataset performance accounting for different lighting, illuminations, and head poses. However, near-infrared gaze estimation has not gained much traction in the literature. But with broader usage of gaze estimation in edge devices, there is increasing need for gaze estimation in the dark. And infrared images are much more reliable in these settings. 
+Gaze estimation techniques have many critical applications in various domains including human-computer interaction[2], virtual reality[3] and medical analysis[4]. Appearance based gaze estimation leveraging deep learning and convolutional neural networks have gained great traction over the past several years[12,13,14]. There have been especially notable progress in appearance based gaze estimation via supervised learning and domain adaptation for cross-dataset performance that accounts for different lighting, illuminations, and head poses. But with broader usage of gaze estimation in edge devices, there is increasing need for gaze estimation in the dark. And infrared images are much more reliable in these settings. 
 
 Even though domain generalization using more datasets have made improvements in performance, gaze annotations are difficult to obtain. Thus it is very challenging to create large datasets that are representative of real world distributions[16]. 
 
-Self-supervised learning (SSL) has been a successful alternative that hsa gained great traction recently, reducing the reliance on labeled samples[17,18,19]. 
-
 Also training with a diverse group of large datasets alone could be insufficient since each dataset has different distribution in illuminations and poses, but does not represent many of the real world scenarios that can be encountered with edge devices[21].
 
-Contrastive learning has been used in many SSL training frameworks, however, the general contrastive loss is most suited for classification tasks[10]. With regression, the slightest changes in the latent vector representation of features could hinder the performance drastically. Thus using the similarity between labels can be exploited as a proxy for the distance between samples in the feature space. 
+Self-supervised learning (SSL) has been a successful alternative that gained great traction recently, reducing the reliance on labeled samples[17,18,19]. 
 
-To the best of our knowledge, we are the first to improve gaze estimation with near infrared images using appearance based deep learning and contrastive learning. 
+Contrastive learning has been used in many SSL training frameworks. However, the general contrastive loss is most suited for classification tasks[10]. With regression, the slightest changes in the latent vector representation of features could hinder the performance drastically. Thus using the similarity between gaze labels can be exploited as a proxy for the distance between samples in the feature space. 
 
-We propose the following:
-1. GazeCWL, a novel framework for gaze estimation with near infrared images. GazeCWL works as a teacher-student model and leverages two novel techniques along with the AI Hub dataset[15] for knowledge distillation. 
-2. Data augmentation methods for gaze estimation in near-infrared images. Using both adversarial attack and data augmentation suited for near infrared images for more effective adaptation. 
-2. Propose CRWL, a novel contrastive loss function for better clustering of features in the latent space. 
+To the best of our knowledge, we are the first to improve gaze estimation with near-infrared images using appearance based deep learning and contrastive learning. We propose the following:  
+1. GazeCWL, a novel framework for gaze estimation with near-infrared images. GazeCWL works as a teacher-student model and leverages two novel techniques along with the AI Hub dataset[15] for knowledge distillation. 
+2. Data augmentation methods for gaze estimation in near-infrared images. Using both adversarial attack and data augmentation suited for near-infrared images for more effective adaptation. 
+2. CRWL, a novel contrastive loss function for better clustering of features in the latent space. 
 
-Our model achieves significant performance improvements compared to existing domain generalization methods. 
+Our model achieves significant performance improvements compared to existing domain generalization methods, outperforming the baseline by 45.6\% and improving the state-of-the-art by 8.6\%. 
 
 
 ## 2. Related Works
 ### 2.1. Appearance based gaze estimation
-Appearance based gaze estimation has recently gained great attention as it does not require dedicated devices[6]. Appearance based methods directly map images to the gaze vector and performs better than model methods which rely eye-geometry[12,24]. 
+Appearance based gaze estimation has recently gained great attention as it does not require dedicated devices[6]. Appearance based methods directly map images to the gaze vector and perform better than model methods which rely on eye-geometry[12,24].
 
 ### 2.2. Domain adaptation
 Several datasets are frequently used for training gaze estimation models, including ETH-XGaze[8], Gaze Capture[5], and MPII[7]. However as each of these datasets have different distributions in lighting, illumination, and pose, several methods have been previously proposed to increase domain generalization and thus improve corss-dataset performance. 
@@ -51,35 +51,27 @@ Many works have employed adversarial training for better domain generalization. 
 ### 2.3. Contrastive learning
 Contrastive learning is a form of unsupervised learning where the goal is to increase the distance between the anchor sample and negative samples and decrease the distance between the anchor sample and positive samples. 
 
-The most notable version of contrastive loss is NT-Xent, highlighted by [9].
-
-Previously contrastive loss has been used in the context of classification tasks and is thus not best suited for regression tasks [10]. 
-
-Wang et al.[10] proposed a contrastive loss by using the distribution of the labels as the weights with KL-divergence. 
-
-Jindal et al.[20] recently proposed a GazeCRL, a contrastive learning framework for gaze estimation. 
+The most notable version of contrastive loss is NT-Xent, highlighted by Chen et al.[9]. Previously contrastive loss has been used in the context of classification tasks and is thus not best suited for regression tasks[10]. Wang et al.[10] proposed a contrastive loss by using the distribution of the labels as the weights with KL-divergence. Jindal et al.[20] recently proposed a GazeCRL, a contrastive learning framework for gaze estimation. 
 
 [//]: # Normalized Temperature-scaled Cross Entropy Loss  
 [//]: # $$ \mathbb{l}_{i,j} = -\log\frac{\exp\left(\text{sim}\left(\mathbf{z}_{i}, \mathbf{z}_{j}\right)/\tau\right)}{\sum^{2N}_{k=1}\mathcal{1}_{[k\neq{i}]}\exp\left(\text{sim}\left(\mathbf{z}_{i}, \mathbf{z}_{k}\right)/\tau\right)} $$  
 
 ## 3. Methodology
-Our objective is to improve the performance of gaze estimation with near infrared images. Since gaze is a very subtle feature from external appearance, we employ data augmentation and contrastive learning to better cluster features in the latent space yields better performance. 
+Our objective is to improve the performance of gaze estimation on the target domain of near-infrared images. Since gaze is a very subtle feature from external appearance, we employ data augmentation and contrastive learning to better cluster features in the latent space which yields better performance in domain adaptation. 
 
 $$ \min_{f}E_{x^{\tau},y^{\tau}}[L(f(x^{\tau}),g^{\tau})] $$
 
 ### 3.1. Overview
-We use the backbone of our gaze estimation model following EyeTracker[5] With pretrained weights trained on MPII and XGaze. Itracker takes three normalized images as inputs: left eye, right eye, face. The output of the model is the 2-dimensional camera plane. 
+We used the backbone of ITracker[5] for our gaze estimation model pretrained on two RGB gaze labeled datasets: MPII and XGaze. ITracker takes three normalized images as inputs: the left eye, the right eye, and the face. The output of the model is the gaze estimation on the 2-dimensional camera plane on the z-axis. 
 
-Teacher model and student model.  
-$$ x = i(g(x^{rgb})), i(x^{ir}) $$
+Preliminary data augmentation is done on both near-infrared and RGB images. $g$ denotes transformations to grayscale and $i$ denotes adversarial attack elaborated in Sec 3.2.
+$$ x' = i(g(x^{rgb})), i(x^{ir}) $$
 
-Contrastive loss weighted with label. 
-Together with supervised learning with outputs of the teacher model as the pseudo label. 
+The contrastive loss weighted with gaze label as the label contains information regarding the relationship between the features of samples. This is amalgamated with supervised learning using the outputs of the teacher model as the pseudo label for the student model. 
 
-Backpropagate to train the feature extractor with the contrastive loss. And train the predictor with the supervised output of the model. 
+Backpropagation is done to train the feature extractor with the CRWL. THen thethe predictor is trained in comparison to the pseudo label. 
 
-Optimized for validation with l2 distance.
-On the 2-dimensional camera plane. Again, using the outputs of the teacher model as the pseudo label.    
+The results are optimized for validation with l2 distance on the 2-dimensional camera plane. Again, using the outputs of the teacher model as the pseudo label.    
 $$ \lvert\lvert \hat{y}_{t} - \hat{y}_{s} \rvert\rvert $$
 
 ### 3.2. Adversarial Attack
@@ -114,8 +106,8 @@ Contrast to the NT-Xent, we scale the negative samples by the similarity between
 Cosine similarity  
 $$ sim(x,y) = \frac{x \cdot y}{\lvert\lvert x \rvert\rvert \lvert\lvert y \rvert\rvert} $$
 
-The similarity function for weighing the negative samples is as follows:
-$$ S = -log \frac{sim(g_{i}, g_{k})}{cos(\pi/60)} $$
+The similarity function for weighing the negative samples is as follows:  
+$$ S = -log \frac{sim(g_{i}, g_{k})}{cos(\pi/60)} $$  
 The additional division has been added to account for the kappa angle - the difference between visual and pupillary axis.
 
 ### 3.4. GazeCWL
@@ -172,18 +164,25 @@ l2 loss between prediction and output. Use teacher output as the pseudo label.
 
 ## 4. Experiments
 ### 4.1. Setup
-Pretrain the teacher with Eth-XGaze and MPII Dataset. Additional training and validation on near infrared images of AI Hub dataset[15].  
+We pretrain the teacher with six datasets: Eth-XGaze, Gaze-360, GazeCapture, RT-Gene, EyeDiap, and MPIIGaze. We then test other methods against the AI Hub near-infrared image dataset[15] to evaluate and compare the performance of each method on infrared images. We also employ techniques[32,33] to normalize the gaze datasets by standardizing the head pose by rotating the virtual camera. Additional training on the student model was done with the AI Hub near-infrared dataset.  
 ### 4.2. Training Details
-We perform our experiments on NVIDIA 3080 GPU. The resolution for input images in all the experiments is set as 224×224, following the conventions of [5], while different from [25], which employs 448×448as the resolution of input for training on Gaze360. We take ResNet-50 [26] as the backbone to extract features for all experiments  if  without  extra  annotation,  a  2-layers  MLP  as CR predictor to generate 128-dim CR feature vectors, and an FC layer to regress a 2-dim gaze vector for pitch and yaw angles respectively.   For domain generalization task CDGon source domainDE, we follow [27], set the batch size as 16, use the Adam optimizer with a learning rate of 1×10−3 and train for 100 epochs using a decay factor 0.1 every 10 epochs. For CDG on source domainDG, we follow [28], set the batch size as 16, use the Adam optimizer with a learning rate of 1×10−3 and train for 100 epochs.  For domain adaptation tasks, the hyperparameter setting keeps the same as that in domain generalization task CDG in source domainDE.
+We perform our experiments on NVIDIA RTX 3080. The resolution for input images in all the experiments is set as 224×224, following the conventions of [5], while different from [25], which employs 448×448as the resolution of input for training on Gaze360. We take ResNet-50 [26] as the backbone to extract features for all experiments  if  without  extra  annotation,  a  2-layers  MLP  as CR predictor to generate 128-dim CR feature vectors, and an FC layer to regress a 2-dim gaze vector for pitch and yaw angles respectively.   For domain generalization task CDGon source domainDE, we follow [27], set the batch size as 16, use the Adam optimizer with a learning rate of 1×10−3 and train for 100 epochs using a decay factor 0.1 every 10 epochs. For CDG on source domainDG, we follow [28], set the batch size as 16, use the Adam optimizer with a learning rate of 1×10−3 and train for 100 epochs.  For domain adaptation tasks, the hyperparameter setting keeps the same as that in domain generalization task CDG in source domainDE.
 ### 4.3. Domain adaptation
+We fine-tune models pretrained on RGB gaze images with near-infrared images using different domain adaptation methods. Using the vanilla domain adaptation, the source domain is available and we then perform CWRL on the target domain.  The CWRL module outperforms other models by a wide margin. 
 $$ \begin{center}  
  \begin{tabular}{||c c c c||} 
  \hline
  Method & IR Performance \\ [0.5ex] 
  \hline\hline
- Baseline[11] & 2.356 \\ 
+ Baseline[11] & 3.356 \\ 
+
+ GazeAdv[29] & 2.589 \\ 
+
+ PureGaze[31] & 2.312 \\ 
+
+ PnP-GA[32] & 2.038 \\ 
  
- CRGA & 2.196 \\
+ CRGA[10] & 1.996 \\
  
  GazeCWL & 1.823 \\
  
@@ -191,6 +190,7 @@ $$ \begin{center}
  
 \end{tabular}
 \end{center} $$
+First we use $$ L_{CWRL} $$ with $$ \tau $$ as the annealed temperature. Then we used the pseudo labels from the teacher model to perform several epochs of self-training. Results in tab. 1 demonstrates the efficacy of our method as it outperforms the baseline method by 45.6%. Out method also performs better on near-infrared based gaze estimation compared to other state-of-the-art domain adaptation methods in gaze estimation. 
 
 ### 4.4. Ablation Study
 #### 4.4.1 Hyperparameter Tuning  
@@ -249,7 +249,7 @@ $$ \begin{center}
 \end{center} $$
 
 ## 5. Conclusion
-In this paper we introduced GazeCWL, a novel contrastive learning framework for gaze estimation with near infrared images. Our framework employs data augmentation techniques specifically for near infrared images and utilize a novel contrastive loss function effective for regression tasks. Furthermore, we showed that GazeCWL is effective at clustering relevant features closer together in the latent space.GazeCWL can be used as a general framework for training with near infrared images on regression tasks, thus can be explored in the future for applications.
+In this paper we introduced GazeCWL, a novel contrastive learning framework for gaze estimation with near infrared images. Our framework employs data augmentation techniques specifically for near-infrared images and utilize a novel contrastive loss function effective for regression tasks. Furthermore, we showed that GazeCWL is effective at clustering relevant features closer together in the latent space.GazeCWL can be used as a general framework for training with near-infrared images on regression tasks, thus can be explored in the future for applications.
 
 ### References
 [1]  Philip Bachman, R Devon Hjelm, and William Buchwalter.Learning representations by maximizing mutual informationacross views.Advances in Neural Information ProcessingSystems, 32:15535–15545, 2019.  
@@ -279,4 +279,9 @@ In this paper we introduced GazeCWL, a novel contrastive learning framework for 
 [25] Yunfei Liu, Ruicong Liu, Haofei Wang, and Feng Lu.  Gen-eralizing  gaze  estimation  with  outlier-guided  collaborativeadaptation.   InProceedings of the IEEE/CVF InternationalConference on Computer Vision, pages 3835–3844, 2021.  
 [26] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.Deep residual learning for image recognition.   InProceed-ings of the IEEE conference on computer vision and patternrecognition, pages 770–778, 2016  
 [27] Xucong   Zhang,   Seonwook   Park,   Thabo   Beeler,   DerekBradley, Siyu Tang, and Otmar Hilliges.  Eth-xgaze: A largescale dataset for gaze estimation under extreme head poseand gaze variation.   InEuropean Conference on ComputerVision, pages 365–381. Springer, 2020.  
-[28] Petr Kellnhofer, Adria Recasens, Simon Stent, Wojciech Ma-tusik,  and Antonio Torralba.   Gaze360:  Physically uncon-strained gaze estimation in the wild.  InProceedings of theIEEE/CVF International Conference on Computer Vision,pages 6912–6921, 2019.
+[28] Petr Kellnhofer, Adria Recasens, Simon Stent, Wojciech Ma-tusik,  and Antonio Torralba.   Gaze360:  Physically uncon-strained gaze estimation in the wild.  InProceedings of theIEEE/CVF International Conference on Computer Vision,pages 6912–6921, 2019.  
+[29] Kang Wang, Rui Zhao, Hui Su, and Qiang Ji.  Generalizingeye tracking with bayesian adversarial learning. InProceed-ings of the IEEE/CVF Conference on Computer Vision andPattern Recognition, pages 11907–11916, 2019.  
+[30] Petr Kellnhofer, Adria Recasens, Simon Stent, Wojciech Ma-tusik,  and Antonio Torralba.   Gaze360:  Physically uncon-strained gaze estimation in the wild.  InProceedings of theIEEE/CVF  International  Conference  on  Computer  Vision,pages 6912–6921, 2019  
+[31] Yihua  Cheng,  Yiwei  Bao,  and  Feng  Lu.   Puregaze:  Puri-fying gaze feature for generalizable gaze estimation.arXivpreprint arXiv:2103.13173, 2021.  
+[32] Yunfei Liu, Ruicong Liu, Haofei Wang, and Feng Lu.  Gen-eralizing  gaze  estimation  with  outlier-guided  collaborativeadaptation.   InProceedings of the IEEE/CVF InternationalConference on Computer Vision, pages 3835–3844, 2021.  
+[33] Yihua  Cheng,  Haofei  Wang,  Yiwei  Bao,  and  Feng  Lu.Appearance-based  gaze  estimation  with  deep  learning:   Areview  and  benchmark.arXiv  preprint  arXiv:2104.12668,2021.
