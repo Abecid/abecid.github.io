@@ -103,7 +103,7 @@ permalink: /
     {% assign complete_post_counter = 0 %}
 
     {% for post in cat[1] limit:max_posts %}
-      {% if post.tags contains "Unfinished" %}
+      {% if post.tags contains "Hidden" %}
         {% assign max_posts = max_posts | plus:1 %}
       {% else %}
         {% if complete_post_counter == base_minus_one %}
@@ -114,7 +114,7 @@ permalink: /
     {% endfor %}
 
     {% for post in cat[1] limit:max_posts %}
-      {% if post.tags contains "Unfinished" %}
+      {% if post.tags contains "Hidden" %}
         {% assign max_posts = max_posts | plus:1 %}
         {% continue %}
       {% endif %}
