@@ -3,7 +3,7 @@ layout: post
 title:  "Contrastive Weighted Learning for Near-Infrared Gaze Estimation"
 date:   2022-10-11 17:11:31 +0900
 category: [Research]
-tags: [Deep Learning, Computer Vision, Knowledge Distillation, IR, Unfinished]
+tags: [Deep Learning, Computer Vision, Knowledge Distillation, IR]
 header-includes:
    - \usepackage{bbm}
 ---
