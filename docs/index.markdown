@@ -123,7 +123,7 @@ permalink: /
       <!-- - {{ post.date | date: "%-d %B %Y"}} -->
       </li>
     {% endfor %}
-    {% if cat[1].size > max_posts %}
+    {% if cat[1].size > 3 %}
       <a href="{{ href }}"> View More.. </a>
     {% endif %}
   </ul>
