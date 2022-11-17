@@ -16,7 +16,7 @@ tags: [Deep Learning, Computer Vision, NERF, Survey]
 ## 1. What is novel view synthesis?
 When an image is taken, a camera is at a certain pose (orientation and angle in the world coordinate system). Novel view synthesis is the domain of generating an image with an arbitrary target pose based on the provided source images and their respective camera poses[1]. 
 
-## 2. Introduction to Neral Radiance Fields (NeRF)
+## 2. Introduction to Neural Radiance Fields (NeRF)
 In 2020, a novel method called NeRF has been proposed to represent scenes as neural radiance fields for novel view synthesis[2]. The method is similar to COIN[3] as it trains multi-layer perceptrons, $$\Theta$$, to learn the optimal function to map spatial location to the rendering information. More specifically, the input is a 5D coordinate of spatial location (x,y,z) and viewing direction($$ \theta, \phi $$). And the output is the emitted radiance (R,G,B) and the volume density($$\sigma$$) at the given spatial location[2]. 
 
 Views are generated in the following process[5]: 
@@ -93,7 +93,7 @@ proposes a novel method that can run on common devices in real time. The paper i
 proposes a 3D morphable model that can accurately model a subject’s identity, pose and expression and render it in arbitrary illumination. It leverages a generative network that generates the radiance field of multiple samples based on certain inputs including identity, pose, and illumination[4]. 
 
 ## 8. Future directions
-As seen above, there have been several works that improved the inference speed, generalizability of neural radiance fields and utilized it for other applications. NeRF has been easily trainable with volume rendering being differentiable[7], and it can be utilized in many other computer vision tasks which can see performance boosts with 3d reconstruction of the scene from 2d images. Also increasing speed and generalizability remains as important problems to be solved even further. 
+As seen above, there have been several works that improved the inference speed, generalizability of neural radiance fields and utilized it for other applications. NeRF has been easily trainable with volume rendering being differentiable[7], and it can be utilized in many other computer vision tasks which can see performance boosts with 3d reconstruction of the scene from 2d images. Also increasing the speed and generalizability remain as important problems to be solved even further. 
 
 ## References
 [1] https://paperswithcode.com/task/novel-view-synthesis  
