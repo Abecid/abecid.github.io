@@ -59,11 +59,11 @@ NeRF outperformed other state-of-the-art view synthesis methods at the time, and
 With Signed Distance Function (SDF), a distance of point X from the boundary of a surface can be found. This function can be useful to determine if a point lies inside the boundary of the surface or outside the boundary[8].
 
 There were several papers proposed in 2019 from CVPR and ICCV using Signed Distance Functions to predict occupancy[7]
-1. Occupancy networks (Mescheder et al., 2019)  
+1. **Occupancy networks (Mescheder et al., 2019)**  
 Proposed implicit, coordinate-based learning of occupancy. The network consists of 5 ResNet blocks which take a feature vector and a 3D point. It predicts binary occupancy.
-2. DeepSDF (Park et al., 2019)  
+2. **DeepSDF (Park et al., 2019)**  
 Proposes to directly regress a signed distance function from a 3D coordinate. The model uses an 8-layer MPL with skip-connections to layer 4.
-3. PIFu (Saito et al., 2019)  
+3. **PIFu (Saito et al., 2019)**  
 Demonstrates that it is possible to learn highly detailed implicit models by re-projecting 3D points into a pixel-aligned feature representation.
 
 
@@ -71,9 +71,9 @@ Demonstrates that it is possible to learn highly detailed implicit models by re-
 Implicit surface representation is a method that defines the surface implicitly by a function[10]. The functions are not solved for variables x, y, z and whether a certain point is inside or on the surface can be found with the sign of the result of the implicit function $$f(x, y, z)$$[9]. 
 
 Several papers have been proposed building on this domain
-1. Structured Implicit Functions (Genova et al., 2019)
+1. **Structured Implicit Functions (Genova et al., 2019)**  
 Demonstrates that combining implicit representations is equivalent to summing them.
-2. Neural Articulated Shape Approximation (Deng et al., 2020c)
+2. **Neural Articulated Shape Approximation (Deng et al., 2020c)**  
 NASA utilizes implicit functions to represent articulated objects such as human bodies.
 
 
