@@ -3,7 +3,7 @@ layout: post
 title:  "Visualcamp : SSL Research"
 date:   2022-09-22 15:48:31 +0900
 category: Research
-tags: [Deep Learning, Computer Vision, Self-Supervised Learning, Knowledge Distillation, Visualcamp]
+tags: [Deep Learning, Computer Vision, Self-Supervised Learning, Knowledge Distillation, Visualcamp, Hidden]
 ---
 
 {% if page.tags.size > 0 %}
