@@ -100,3 +100,4 @@ Pre-training
 
 ## References
 [Illustrated Transformer](https://jalammar.github.io/illustrated-transformer/) . 
+[Transformer’s Encoder-Decoder: Let’s Understand The Model Architecture](https://kikaben.com/transformers-encoder-decoder/) . 
