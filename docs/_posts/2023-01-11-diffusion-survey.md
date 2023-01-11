@@ -21,9 +21,26 @@ Variational Autoencoder
 U-Net  
 Gaussian Distribution, KL-Divergence and Mean Squared Loss  
 
-[Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)  
-[High-Resolution Image Synthesis with Latent Diffusion Models](https://arxiv.org/abs/2112.10752)  
-[ILVR: Conditioning Method for Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2108.02938)  
-[Semantic Image Synthesis via Diffusion Models](https://arxiv.org/abs/2207.00050)  
-[Diffused Heads: Diffusion Models Beat GANs on Talking-Face Generation](https://arxiv.org/abs/2301.03396)  
+1. [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)  
+Predicts mean of noise sampled from gaussian distribution.  
 
+2. [Improved Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2102.09672)  
+
+3. [Denoising Diffusion Implicit Models](https://arxiv.org/abs/2010.02502)  
+
+4. [High-Resolution Image Synthesis with Latent Diffusion Models](https://arxiv.org/abs/2112.10752)  
+
+5. [ILVR: Conditioning Method for Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2108.02938)  
+
+6. [Semantic Image Synthesis via Diffusion Models](https://arxiv.org/abs/2207.00050)  
+
+7. [MCVD: Masked Conditional Video Diffusion for Prediction, Generation, and Interpolation](https://arxiv.org/abs/2205.09853)  
+
+8. [Diffused Heads: Diffusion Models Beat GANs on Talking-Face Generation](https://arxiv.org/abs/2301.03396)  
+
+
+
+## Demos
+
+## Code
+Colab Notebook (PyTorch)
