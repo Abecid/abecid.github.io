@@ -84,4 +84,15 @@ Each independent attention outputs are concatenated
 1. Position-wise Feed-forward Network
 2. Positional Encoding
 
+## 6. Model Proceedings
+
+## 7. Training
+Training Techniques  
+Loss functions  
+
+## 8. Training in Action
+Fine-tuning  
+Pre-training  
+
+## 9. Sample Code
 [PyTorch Implementation](https://github.com/Abecid/Deep-Learning-Implementations/tree/main/papers/transformer)
