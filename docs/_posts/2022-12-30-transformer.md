@@ -85,6 +85,7 @@ Each independent attention outputs are concatenated
 2. Positional Encoding
 
 ## 6. Model Proceedings
+One token at a time.  
 
 ## 7. Training
 Training Techniques  
@@ -96,3 +97,6 @@ Pre-training
 
 ## 9. Sample Code
 [PyTorch Implementation](https://github.com/Abecid/Deep-Learning-Implementations/tree/main/papers/transformer)
+
+## References
+[Illustrated Transformer](https://jalammar.github.io/illustrated-transformer/) . 
