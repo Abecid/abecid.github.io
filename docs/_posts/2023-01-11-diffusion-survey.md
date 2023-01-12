@@ -39,10 +39,10 @@ The variance schedule is not constant and can be set manually based on the domai
 
 ### 2-2. Parametrization
 A neural network, $$ p_{\theta}(x_{t-1}|x_{t}) $$ with
-$$\theta$$ as the parameters are learned with gradient descent.  
+$$\theta$$ as the parameters is learned with gradient descent.  
 
 $$ p_{\theta}(x_{t-1}|x_{t}) = \mathcal{N}(x_{t-1};\mu_{\theta}(x_{t},t),\sum_{\theta}(x_{t},t)) $$  
-Where mean and variance are respectively parametrized by $$\mu_{\theta}, \sum_{\theta}$$
+Where mean and variance are respectively parametrized by $$\mu_{\theta}, and \sum_{\theta}$$
 
 ### 2-3. Reparametrization Trick
 Since the sum of Gaussians is also Gussian, $$q(x_{t}|x_{0})$$ can be calculated as follows:  
@@ -56,15 +56,17 @@ $$ 1 > a_{1} > a_{2} > ... > a_{T} > 0$$
 
 With the definition of $$x_{t}$$ above, $$x_{0}$$ can be represented as follows:  
 $$ x_{0} = \frac{1}{\sqrt{\bar{a}_{t}}}(x_{t}-\sqrt{1-\bar{a}_{t}}\epsilon_{t}) $$  
-and the mean can be computed as follows:  
+and the mean function can be written as follows ([source](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/#nice:~:text=tx0-,Thanks,-to%20the%20nice)):  
 $$ \mu_{\theta}(x_{t},t) = \frac{1}{\sqrt{a}_{t}}(x_{t}-\frac{\beta_{t}}{\sqrt{1-\bar{a}_{t}}}\epsilon_{\theta}(x_{t},t)) $$  
 
 ### 2-4. Objective Function
 **A. Variational Lower Bound (ELBO)**  
-$$ L_{CE} = -log p_{\theta}(x_{0}) \leq \mathbb{E}_{q}[log\frac{q(x_{1:T}|x_{0})}{p_{\theta}(x_{0:T})}] = L_{VLB}$$  
+$$ L_{CE} = -log p_{\theta}(x_{0}) \leq \mathbb{E}_{q}[log\frac{q(x_{1:T}|x_{0})}{p_{\theta}(x_{0:T})}] = L_{VLB}$$ ([Explanation](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/#nice:~:text=x0)-,It,-is%20also%20straightforward))  
 Which is equivalent to the KL divergence between $$q(x_{1:T}|x_{0})$$ and $$p_{\theta}(x_{0:T})$$  
 > The KL divergence between two Gaussian distributions can be expressed as the **L2-loss between their means**  
-> $$ D_{KL}(p || q) = log\frac{\sigma_{2}}{\sigma_{1}} + \frac{\sigma^{2}_{1}+(\mu_{1}-\mu_{2})^{2}}{2\sigma^{2}_2} - \frac{1}{2} $$
+> $$ D_{KL}(p || q) = log\frac{\sigma_{2}}{\sigma_{1}} + \frac{\sigma^{2}_{1}+(\mu_{1}-\mu_{2})^{2}}{2\sigma^{2}_2} - \frac{1}{2} $$  
+
+Thus the model can be optimized with $$L_{VLB} $$ instead of $$L_{CE}$$  
 
 #### B. Complete Objective Function
 The objective can be further rewritten with several terms:  
@@ -81,9 +83,11 @@ KL Divergences between two Gaussian distributions can be computed in closed form
 #### C. Final Objective Function $$L_{t}$$
 To bring back the two importance functions (the reverse diffusion process $$ p_{\theta} $$, x_t, and the mean function $$ \mu_{\theta} $$)  
 $$ p_{\theta}(x_{t-1}|x_{t}) = \mathcal{N}(x_{t-1};\mu_{\theta}(x_{t},t),\sum_{\theta}(x_{t},t)) $$  
-$$x_{t} = \sqrt{\bar{a}_{t}}x_{0}+\sqrt{1-\bar{a}_{t}}\epsilon$$   
+$$x_{t} = \sqrt{\bar{a}_{t}}x_{0}+\sqrt{1-\bar{a}_{t}}\epsilon$$     
+$$ \mu_{\theta} $$ predicts $$ \bar{\mu}_{t} = \frac{1}{\sqrt{a}_{t}}(x_{t}-\frac{\beta_{t}}{\sqrt{1-\bar{a}_{t}}}\epsilon_{t}) $$  
+Since $$x_{t}$$ is available during training time, the gaussian noise term can be reparametrized to predict $$\epsilon_{t}$$  
 $$ \mu_{\theta}(x_{t},t) = \frac{1}{\sqrt{a}_{t}}(x_{t}-\frac{\beta_{t}}{\sqrt{1-\bar{a}_{t}}}\epsilon_{\theta}(x_{t},t)) $$  
-Since $$x_{t}$$ is available during training time, reparametrize to predict $$\epsilon_{t}$$ and $$L_{t}$$ is parameterized to minimize the difference from $$\bar{\mu}$$:  
+$$L_{t}$$ is parameterized to minimize the difference from $$\bar{\mu}$$:  
 $$L_{t}$$   
 $$ = \mathbb{E}_{t~[1,T],x_{0},\epsilon_{t}}[\left\lVert \epsilon_{t} - \epsilon_{\theta}(x_{t},t) \right\rVert^2] $$
 
