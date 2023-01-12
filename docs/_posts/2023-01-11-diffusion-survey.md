@@ -108,19 +108,19 @@ Gaussian Distribution, KL-Divergence and Mean Squared Loss
 
 ## 3. Survey
 ### 3-1. Summary of Papers
-1. [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)  
-UC Berkeley, NeurIPS 2020  
+#### 1. [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)  
+- UC Berkeley, NeurIPS 2020  
 
 1. Proposed diffusion models, parameterized Markov chain trained using variational inference to produce samples matching the data.  
 2. First to demonstrate that diffusion models are cabaple of generating high quality samples.  
-3. Implementation Details
-    - Process variances $$\beta_{t}$$ could be learnable parameters but are fixed to constants, thus posterior $$q$$ has no learnable parameters so $$L_{T}$$ is ignored
-    - During the reverse process $$p_{\theta}$$ deviation is set to $$\sum_{\theta}(x_{t},t) = \sigma^{2}_{t}I$$ where $$\sigma_{t}^{2} = \beta_{t}$$
-    - $$L_{t-1}$$ can be written as the l2 loss of the predicted mean
-4. Experiments
-    - T = 1000, forward process variances are set to constants $$\beta_{1}=10^{-4}$$ to $$\beta_{T}=0.02$$
-    - Used U-Net backbone with group normalization. Parameteres are shared across time. Positional encoding and self-attention are used. 
-    - FID score of 3.17, better sample quality than most models in the literature
+3. Implementation Details  
+- Process variances $$\beta_{t}$$ could be learnable parameters but are fixed to constants, thus posterior $$q$$ has no learnable parameters so $$L_{T}$$ is ignored
+- During the reverse process $$p_{\theta}$$ deviation is set to $$\sum_{\theta}(x_{t},t) = \sigma^{2}_{t}I$$ where $$\sigma_{t}^{2} = \beta_{t}$$
+- $$L_{t-1}$$ can be written as the l2 loss of the predicted mean
+4. Experiments  
+- T = 1000, forward process variances are set to constants $$\beta_{1}=10^{-4}$$ to $$\beta_{T}=0.02$$
+- Used U-Net backbone with group normalization. Parameteres are shared across time. Positional encoding and self-attention are used. 
+- FID score of 3.17, better sample quality than most models in the literature
 
 2. [Improved Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2102.09672)  
 
