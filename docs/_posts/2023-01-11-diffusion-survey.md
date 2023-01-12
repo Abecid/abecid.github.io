@@ -61,7 +61,7 @@ $$ \mu_{\theta}(x_{t},t) = \frac{1}{\sqrt{a}_{t}}(x_{t}-\frac{\beta_{t}}{\sqrt{1
 
 ### 2-4. Objective Function
 **A. Variational Lower Bound (ELBO)**  
-$$ L_{CE} = -log p_{\theta}(x_{0}) \leq \mathbb{E}_{q}[log\frac{q(x_{1:T}|x_{0})}{p_{\theta}(x_{0:T})}] = L_{VLB}$$ ([Explanation](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/#nice:~:text=x0)-,It,-is%20also%20straightforward))  
+$$ L_{CE} = -log p_{\theta}(x_{0}) \leq \mathbb{E}_{q}[log\frac{q(x_{1:T}|x_{0})}{p_{\theta}(x_{0:T})}] = L_{VLB}$$ (<a href="https://lilianweng.github.io/posts/2021-07-11-diffusion-models/#nice:~:text=x0)-,It,-is%20also%20straightforward">Explanation</a>)  
 Which is equivalent to the KL divergence between $$q(x_{1:T}|x_{0})$$ and $$p_{\theta}(x_{0:T})$$  
 > The KL divergence between two Gaussian distributions can be expressed as the **L2-loss between their means**  
 > $$ D_{KL}(p || q) = log\frac{\sigma_{2}}{\sigma_{1}} + \frac{\sigma^{2}_{1}+(\mu_{1}-\mu_{2})^{2}}{2\sigma^{2}_2} - \frac{1}{2} $$  
