@@ -3,7 +3,7 @@ layout: post
 title:  "Diffusion Survey"
 date:   2023-01-11 10:30:31 +0900
 category: Blog
-tags: [Deep Learning, Computer Vision, Diffusion, Survey, Multimodal]
+tags: [Deep Learning, Computer Vision, Diffusion, Survey, Generative Model, Multimodal]
 ---
 
 {% if page.tags.size > 0 %}
@@ -89,11 +89,13 @@ Since $$x_{t}$$ is available during training time, the gaussian noise term can b
 $$ \mu_{\theta}(x_{t},t) = \frac{1}{\sqrt{a}_{t}}(x_{t}-\frac{\beta_{t}}{\sqrt{1-\bar{a}_{t}}}\epsilon_{\theta}(x_{t},t)) $$  
 $$L_{t}$$ is parameterized to minimize the difference from $$\bar{\mu}$$:  
 $$L_{t}$$   
-$$ = \mathbb{E}_{t~[1,T],x_{0},\epsilon_{t}}[\left\lVert \epsilon_{t} - \epsilon_{\theta}(x_{t},t) \right\rVert^2] $$
+$$ = \mathbb{E}_{t,x_{0},\epsilon_{t}}[\left\lVert \epsilon_{t} - \epsilon_{\theta}(x_{t},t) \right\rVert^2] $$
 
-So in essence, the model optimizes to predict the $$ \epsilon_{t} $$ and the loss function can be simplified as:  
+In essence, the model optimizes to predict Gaussian noise $$ \epsilon_{t} $$ and the loss function can be simply viewed as:  
 $$ \left\lVert \epsilon_{t} - \epsilon_{\theta}(x_{t},t) \right\rVert^2 $$
 
+The model can be trained as follows:  
+![Diffusion Training](/assets/posts/blog/2.diffusion_survey/training.png "Training")  
 
 Markov Chain
 ELBO
@@ -107,8 +109,18 @@ Gaussian Distribution, KL-Divergence and Mean Squared Loss
 ## 3. Survey
 ### 3-1. Summary of Papers
 1. [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)  
-Predicts mean of noise sampled from gaussian distribution.  
-Noise $$B_{t}$$ scheduling  
+UC Berkeley, NeurIPS 2020  
+
+1. Proposed diffusion models, parameterized Markov chain trained using variational inference to produce samples matching the data.  
+2. First to demonstrate that diffusion models are cabaple of generating high quality samples.  
+3. Implementation Details
+    - Process variances $$\beta_{t}$$ could be learnable parameters but are fixed to constants, thus posterior $$q$$ has no learnable parameters so $$L_{T}$$ is ignored
+    - During the reverse process $$p_{\theta}$$ deviation is set to $$\sum_{\theta}(x_{t},t) = \sigma^{2}_{t}I$$ where $$\sigma_{t}^{2} = \beta_{t}$$
+    - $$L_{t-1}$$ can be written as the l2 loss of the predicted mean
+4. Experiments
+    - T = 1000, forward process variances are set to constants $$\beta_{1}=10^{-4}$$ to $$\beta_{T}=0.02$$
+    - Used U-Net backbone with group normalization. Parameteres are shared across time. Positional encoding and self-attention are used. 
+    - FID score of 3.17, better sample quality than most models in the literature
 
 2. [Improved Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2102.09672)  
 
