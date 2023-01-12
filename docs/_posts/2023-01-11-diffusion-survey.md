@@ -38,6 +38,8 @@ Predicts mean of noise sampled from gaussian distribution.
 
 8. [Diffused Heads: Diffusion Models Beat GANs on Talking-Face Generation](https://arxiv.org/abs/2301.03396)  
 
+9. [Cold Diffusion: Inverting Arbitrary ImageTransforms Without Noise](https://arxiv.org/abs/2208.09392)  
+
 
 
 ## Demos
