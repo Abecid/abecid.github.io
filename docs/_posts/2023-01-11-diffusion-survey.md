@@ -81,11 +81,11 @@ $$ L_{0} = -log p_{\theta}(x_{0}|x_{1}) $$
 KL Divergences between two Gaussian distributions can be computed in closed form as mentioned above. And $$L_{T}$$ can be ignored during training since q has no learnable prameters and $$x_{T}$$ is a Gaussian noise.   
 
 #### C. Final Objective Function $$L_{t}$$
-To bring back the two importance functions (the reverse diffusion process $$ p_{\theta} $$, x_t, and the mean function $$ \mu_{\theta} $$)  
+To bring back some important functions (the reverse diffusion process $$ p_{\theta} $$, x_t, and the mean function $$ \mu_{\theta} $$)  
 $$ p_{\theta}(x_{t-1}|x_{t}) = \mathcal{N}(x_{t-1};\mu_{\theta}(x_{t},t),\sum_{\theta}(x_{t},t)) $$  
 $$x_{t} = \sqrt{\bar{a}_{t}}x_{0}+\sqrt{1-\bar{a}_{t}}\epsilon$$     
 $$ \mu_{\theta} $$ predicts $$ \bar{\mu}_{t} = \frac{1}{\sqrt{a}_{t}}(x_{t}-\frac{\beta_{t}}{\sqrt{1-\bar{a}_{t}}}\epsilon_{t}) $$  
-Since $$x_{t}$$ is available during training time, the gaussian noise term can be reparametrized to predict $$\epsilon_{t}$$  
+Since $$x_{t}$$ is available during training time, function can be reparametrized to predict $$\epsilon_{t}$$  
 $$ \mu_{\theta}(x_{t},t) = \frac{1}{\sqrt{a}_{t}}(x_{t}-\frac{\beta_{t}}{\sqrt{1-\bar{a}_{t}}}\epsilon_{\theta}(x_{t},t)) $$  
 $$L_{t}$$ is parameterized to minimize the difference from $$\bar{\mu}$$:  
 $$L_{t}$$   
@@ -109,7 +109,7 @@ Gaussian Distribution, KL-Divergence and Mean Squared Loss
 ## 3. Survey
 ### 3-1. Summary of Papers
 #### 1. [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)  
-- UC Berkeley, NeurIPS 2020  
+- UC Berkeley, NeurIPS 2020, Jun 19 2020  
 
 1. Proposed diffusion models, parameterized Markov chain trained using variational inference to produce samples matching the data.  
 2. First to demonstrate that diffusion models are cabaple of generating high quality samples.  
@@ -122,23 +122,39 @@ Gaussian Distribution, KL-Divergence and Mean Squared Loss
 - Used U-Net backbone with group normalization. Parameteres are shared across time. Positional encoding and self-attention are used. 
 - FID score of 3.17, better sample quality than most models in the literature
 
-2. [Improved Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2102.09672)  
+#### 2. [Improved Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2102.09672)  
+- OpenAI, ICLR 2021 Reject , Feb 18 2021  
 
-3. [Denoising Diffusion Implicit Models](https://arxiv.org/abs/2010.02502)  
+1. Core Contributions
+    - Noise cosine schedule
+    - Learning sigma (variance), reduces the number of diffusion steps required for training
+2. Weaknesses
+    - Similar FIDs as other approaches and log-likelihood is not paramount for generative tasks
+3. Results
+    - On CIFAR-10, improved negative log-likelihood from 3.7 to 2.94
+4. Details
+    - Hybrid objective outperforms in log-likelihood than optimizing for log-likelihood directly
 
-4. [High-Resolution Image Synthesis with Latent Diffusion Models](https://arxiv.org/abs/2112.10752)  
 
-5. [ILVR: Conditioning Method for Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2108.02938)  
 
-6. [Semantic Image Synthesis via Diffusion Models](https://arxiv.org/abs/2207.00050)  
+#### 3. [Variational Diffusion Models](https://arxiv.org/abs/2107.00630)  
+- 
 
-7. [MCVD: Masked Conditional Video Diffusion for Prediction, Generation, and Interpolation](https://arxiv.org/abs/2205.09853)  
+#### 4. [Denoising Diffusion Implicit Models](https://arxiv.org/abs/2010.02502)  
 
-8. [Diffused Heads: Diffusion Models Beat GANs on Talking-Face Generation](https://arxiv.org/abs/2301.03396)  
+#### 5. [High-Resolution Image Synthesis with Latent Diffusion Models](https://arxiv.org/abs/2112.10752)  
 
-9. [Cold Diffusion: Inverting Arbitrary ImageTransforms Without Noise](https://arxiv.org/abs/2208.09392)  
+#### 6. [ILVR: Conditioning Method for Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2108.02938)  
 
-10. [Understanding Diffusion Models: A Unified Perspective](https://arxiv.org/abs/2208.11970)  
+#### 7. [Semantic Image Synthesis via Diffusion Models](https://arxiv.org/abs/2207.00050)  
+
+#### 8. [MCVD: Masked Conditional Video Diffusion for Prediction, Generation, and Interpolation](https://arxiv.org/abs/2205.09853)  
+
+#### 9. [Diffused Heads: Diffusion Models Beat GANs on Talking-Face Generation](https://arxiv.org/abs/2301.03396)  
+
+#### 10. [Cold Diffusion: Inverting Arbitrary ImageTransforms Without Noise](https://arxiv.org/abs/2208.09392)  
+
+#### 11. [Understanding Diffusion Models: A Unified Perspective](https://arxiv.org/abs/2208.11970)  
 
 ### 3-2. Insights
 - Common features
