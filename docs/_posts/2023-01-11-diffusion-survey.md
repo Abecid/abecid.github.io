@@ -88,7 +88,7 @@ $$ \mu_{\theta} $$ predicts $$ \bar{\mu}_{t} = \frac{1}{\sqrt{a}_{t}}(x_{t}-\fra
 Since $$x_{t}$$ is available during training time, function can be reparametrized to predict $$\epsilon_{t}$$  
 $$ \mu_{\theta}(x_{t},t) = \frac{1}{\sqrt{a}_{t}}(x_{t}-\frac{\beta_{t}}{\sqrt{1-\bar{a}_{t}}}\epsilon_{\theta}(x_{t},t)) $$  
 $$L_{t}$$ is parameterized to minimize the difference from $$\bar{\mu}$$:  
-$$L_{t}$$   
+$$L_{simple}$$   
 $$ = \mathbb{E}_{t,x_{0},\epsilon_{t}}[\left\lVert \epsilon_{t} - \epsilon_{\theta}(x_{t},t) \right\rVert^2] $$
 
 In essence, the model optimizes to predict Gaussian noise $$ \epsilon_{t} $$ and the loss function can be simply viewed as:  
@@ -129,16 +129,32 @@ Gaussian Distribution, KL-Divergence and Mean Squared Loss
     - Noise cosine schedule
     - Learning sigma (variance), reduces the number of diffusion steps required for training
 2. Weaknesses
-    - Similar FIDs as other approaches and log-likelihood is not paramount for generative tasks
+    - Similar FIDs as other approaches
+    - log-likelihood is not paramount for generative tasks
 3. Results
-    - On CIFAR-10, improved negative log-likelihood from 3.7 to 2.94
+    - On CIFAR-10, improved negative log-likelihood from 3.99 (Basedline DDPM) to 2.94
 4. Details
     - Hybrid objective outperforms in log-likelihood than optimizing for log-likelihood directly
+    - Learn variance  
+    > $$\sum_{\theta}(x_{t},t)=exp(\upsilon log \beta_{t}+(1-\upsilon)log \tilde{\beta}_{t})$$
+    - Hybrid loss to incorporate $$\sum_{\theta}$$
+    > $$L_{hypbrid} = L_{simple} + \lambda L_{vlb}$$
+    - Noise schedule (cosine)
+    > $$ \bar{\alpha}_{t} = \frac{f(t)}{f(0)}, f(t) = cos(\frac{t/T+s}{1+s} \cdot \frac{\pi}{2})^{2} $$  
+    ![Cosine Noise Schedule](/assets/posts/blog/2.diffusion_survey/2-noise_schedule.png "Cosine Noise Schedule")  
+    For reference $$\beta_{t} = 1 - \frac{\bar{\alpha}_{t}}{\bar{\alpha}_{t-1}}$$
+    - Importance of log-likelihood
+        - Generally believed that optimizing log-likelihood forces generative models to capture all of the modes the data distribution
+        - Small improvements in log-likelihood can have a dramatic impact on sample quality and learnt feature representations.
+5. Opinion
+    - Importance of optimizing for log-likelihood?
 
 
 
 #### 3. [Variational Diffusion Models](https://arxiv.org/abs/2107.00630)  
-- 
+- Google Research, NeurIPS 2021, Jul 1 2021
+
+
 
 #### 4. [Denoising Diffusion Implicit Models](https://arxiv.org/abs/2010.02502)  
 
