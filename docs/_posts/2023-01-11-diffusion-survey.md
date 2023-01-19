@@ -122,6 +122,7 @@ Gaussian Distribution, KL-Divergence and Mean Squared Loss
 - Used U-Net backbone with group normalization. Parameteres are shared across time. Positional encoding and self-attention are used. 
 - FID score of 3.17, better sample quality than most models in the literature
 
+
 #### 2. [Improved Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2102.09672)  
 - OpenAI, ICLR 2021 Reject , Feb 18 2021  
 
@@ -150,15 +151,23 @@ Gaussian Distribution, KL-Divergence and Mean Squared Loss
     - Importance of optimizing for log-likelihood?
 
 
-
 #### 3. [Variational Diffusion Models](https://arxiv.org/abs/2107.00630)  
 - Google Research, NeurIPS 2021, Jul 1 2021
 
 
-
 #### 4. [Denoising Diffusion Implicit Models](https://arxiv.org/abs/2010.02502)  
+- Stanford University, ICLR 2021, Oct 6 2020
+
+1. Contributions
+    - New forward process
+    - Increases speed of sampling time (Objective is the same)
+    - 
 
 #### 5. [High-Resolution Image Synthesis with Latent Diffusion Models](https://arxiv.org/abs/2112.10752)  
+- Runway ML, CVPR 2020, Dec 20 2021
+
+1. Contributions
+    - 
 
 #### 6. [ILVR: Conditioning Method for Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2108.02938)  
 
@@ -166,11 +175,13 @@ Gaussian Distribution, KL-Divergence and Mean Squared Loss
 
 #### 8. [MCVD: Masked Conditional Video Diffusion for Prediction, Generation, and Interpolation](https://arxiv.org/abs/2205.09853)  
 
-#### 9. [Diffused Heads: Diffusion Models Beat GANs on Talking-Face Generation](https://arxiv.org/abs/2301.03396)  
+#### 9. [Diffusion Models Beat GANs on Image Synthesis](https://arxiv.org/abs/2105.05233)
 
-#### 10. [Cold Diffusion: Inverting Arbitrary ImageTransforms Without Noise](https://arxiv.org/abs/2208.09392)  
+#### 10. [Diffused Heads: Diffusion Models Beat GANs on Talking-Face Generation](https://arxiv.org/abs/2301.03396)  
 
-#### 11. [Understanding Diffusion Models: A Unified Perspective](https://arxiv.org/abs/2208.11970)  
+#### 11. [Cold Diffusion: Inverting Arbitrary ImageTransforms Without Noise](https://arxiv.org/abs/2208.09392)  
+
+#### 12. [Understanding Diffusion Models: A Unified Perspective](https://arxiv.org/abs/2208.11970)  
 
 ### 3-2. Insights
 - Common features
