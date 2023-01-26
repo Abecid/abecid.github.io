@@ -154,14 +154,22 @@ Gaussian Distribution, KL-Divergence and Mean Squared Loss
 #### 3. [Variational Diffusion Models](https://arxiv.org/abs/2107.00630)  
 - Google Research, NeurIPS 2021, Jul 1 2021
 
+1. Contributions
+    - Introduces a family of diffusion based generative models with SOTA performance
+    - Optimizes for noise schedule
+    - VLB simplified in terms of the signal-to-noise ratio. 
+    - State-of-the-art likelihoods on image density estimation benchmarks with often significantly faster optimization
+    - Equivalence between models in the literature
+    - Continuous-time VLB is invariant to the noise schedule, except for the signal-to-noise ratio at its endpoints
+    - This enables the model to learn a noise schedule that minimizes the variance of the resulting VLB estimator, leading to faster optimization
 
 #### 4. [Denoising Diffusion Implicit Models](https://arxiv.org/abs/2010.02502)  
 - Stanford University, ICLR 2021, Oct 6 2020
 
 1. Contributions
-    - New forward process
-    - Increases speed of sampling time (Objective is the same)
-    - 
+    - New forward process (Non-Markovian)
+    - Increases speed of reverse process (Objective is the same)
+    - 10x, 50x faster to produce high quality samples
 
 #### 5. [High-Resolution Image Synthesis with Latent Diffusion Models](https://arxiv.org/abs/2112.10752)  
 - Runway ML, CVPR 2020, Dec 20 2021
@@ -170,6 +178,10 @@ Gaussian Distribution, KL-Divergence and Mean Squared Loss
     - 
 
 #### 6. [ILVR: Conditioning Method for Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2108.02938)  
+- SNU, Samsung, ICCV 2021 Oral, Aug 6 2021
+
+1. Contributions
+    - Propose Iterative Latent Variable Refinement (ILVR) to guide the generative process in DDPM.
 
 #### 7. [Semantic Image Synthesis via Diffusion Models](https://arxiv.org/abs/2207.00050)  
 
