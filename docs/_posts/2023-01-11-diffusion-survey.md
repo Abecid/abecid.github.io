@@ -175,15 +175,21 @@ Gaussian Distribution, KL-Divergence and Mean Squared Loss
 - Runway ML, CVPR 2020, Dec 20 2021
 
 1. Contributions
-    - 
+    - Faster high-resolution image synthesis with diffusion models by using the latent space instead of the pixel space.
+    - Trains an autoencoder in the latent space. 
 
 #### 6. [ILVR: Conditioning Method for Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2108.02938)  
 - SNU, Samsung, ICCV 2021 Oral, Aug 6 2021
 
 1. Contributions
     - Propose Iterative Latent Variable Refinement (ILVR) to guide the generative process in DDPM.
+    - Sample images from conditional distribution $$ p_{\theta}(x_{0:T} \mid c) = p(x_{T})\Pi^{T}_{t=1}p_{\theta}(x_{t-1} \mid x_{t}, c) $$ where c is the condition
+    - $$ \phi_{N}(\cdot) $$ denotes a low-pass filtering operation, a sequence of downsampling and upsampling. Condition c ensures that the donwampled image $$ \phi_{N}(x_{0}) $$ equals to $$ \phi_{N}(y) $$
+
 
 #### 7. [Semantic Image Synthesis via Diffusion Models](https://arxiv.org/abs/2207.00050)  
+- 
+
 
 #### 8. [MCVD: Masked Conditional Video Diffusion for Prediction, Generation, and Interpolation](https://arxiv.org/abs/2205.09853)  
 

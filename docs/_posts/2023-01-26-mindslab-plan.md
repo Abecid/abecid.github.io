@@ -16,6 +16,7 @@ End Goal: AGI Avatar (STT - NLP - STF - TTS)
 
 ## 1. Text to STF
 Spade
+Text to speech
 
 ## 2. maumGPT
 NanoGPT
@@ -28,6 +29,7 @@ Knowledge Distillation
 ## 3. STF Diffusion
 1. Diffusion
 2. Latent Diffusion
+- Text to Image
 - Code (Stable Diffusion)
 - Voice Conditioning
 - Text Conditioning (Video / Lipsync)
@@ -40,3 +42,7 @@ January
 - Diffusion Conditioning Code (Text)
 - Experiment with Audio for Lip Sync
 - Experiment with NLP for Lip Sync
+
+## 4. Music Generator
+- Music; wave, diffusion, conditioning
+- Text to music
