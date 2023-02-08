@@ -172,11 +172,14 @@ Gaussian Distribution, KL-Divergence and Mean Squared Loss
     - 10x, 50x faster to produce high quality samples
 
 #### 5. [High-Resolution Image Synthesis with Latent Diffusion Models](https://arxiv.org/abs/2112.10752)  
-- Runway ML, CVPR 2020, Dec 20 2021
+- Runway ML, CVPR 2022, Dec 20 2021
 
 1. Contributions
     - Faster high-resolution image synthesis with diffusion models by using the latent space instead of the pixel space.
-    - Trains an autoencoder in the latent space. 
+    - Trains an autoencoder in the latent space, which is perceptually equivalent to the image space. It is trained with perceptual loss and patch-based adversarial objecgtive which enforces local realism. 
+    - The encoder downsamples the image by the factor f, and use regularization techniques (KL) on the latent space. 
+    - This learned latent space can be used for other downstream tasks. 
+    - The 2 dimensional latent space can focus on the semantically important parts of the data more efficiently.
 
 #### 6. [ILVR: Conditioning Method for Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2108.02938)  
 - SNU, Samsung, ICCV 2021 Oral, Aug 6 2021
@@ -188,10 +191,23 @@ Gaussian Distribution, KL-Divergence and Mean Squared Loss
 
 
 #### 7. [Semantic Image Synthesis via Diffusion Models](https://arxiv.org/abs/2207.00050)  
-- 
+- Microsoft, Jun 30, 2022
+
+1. Contributions
+    - First to attempt diffusion modeles for semantic image synthesis. 
+    - The noisy image is fed into the encoder of the denoising network.
+    - The semantic layout is embedded into the the decoder of the denoising network by multi-layer spatially-adaptive normalization operators.
+    - This highly improves the quality and semantic correlation of generated images.
+    - Model is fine-tuned by randomly removing the semantic mask input.
+    - Sampled based on both with and without the semantic mask.
+    - With interpolation between the two, the model achieves higher fidelity and stronger correlation with the semantic mask input.
 
 
 #### 8. [MCVD: Masked Conditional Video Diffusion for Prediction, Generation, and Interpolation](https://arxiv.org/abs/2205.09853)  
+- Mila, NeurIPS 2022, May 19, 2022
+
+1. Contributions
+    - Model is trained by randonly and independenly masking all of the past or future frames. 
 
 #### 9. [Diffusion Models Beat GANs on Image Synthesis](https://arxiv.org/abs/2105.05233)
 
@@ -200,6 +216,10 @@ Gaussian Distribution, KL-Divergence and Mean Squared Loss
 #### 11. [Cold Diffusion: Inverting Arbitrary ImageTransforms Without Noise](https://arxiv.org/abs/2208.09392)  
 
 #### 12. [Understanding Diffusion Models: A Unified Perspective](https://arxiv.org/abs/2208.11970)  
+
+#### 13. [DiffTalk: Crafting Diffusion Models for Generalized Talking Head Synthesis]()
+
+#### 14. [Speech Driven Video Editing via an Audio-Conditioned Diffusion Model]()
 
 ### 3-2. Insights
 - Common features
