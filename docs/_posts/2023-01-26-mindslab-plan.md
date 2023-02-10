@@ -46,3 +46,12 @@ January
 ## 4. Music Generator
 - Music; wave, diffusion, conditioning
 - Text to music
+
+February
+  - DDIM
+  - Glide
+  - Dalle-2
+  - Latent Diffusion
+  - Video Editing
+  - Experiments
+  - Paper
