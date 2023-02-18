@@ -14,6 +14,15 @@ tags: [Deep Learning, Mindslab, Hidden]
 
 End Goal: AGI Avatar (STT - NLP - STF - TTS)
 
+1. Diffusion
+  - Generation
+2. NeRF
+  - Different View
+3. LLM
+  - Realistic Chat & Information Retrieval
+4. Audio
+  - Communication via TTS & STT
+
 ## 1. Text to STF
 Spade
 Text to speech
