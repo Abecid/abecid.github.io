@@ -1,9 +1,9 @@
 ---
 layout: post
-title:  "NeRF Overview"
-date:   2023-02-14 10:20:31 +0900
+title:  "3D, 4D, 5D Generation"
+date:   2023-02-20 02:20:31 +0900
 category: Blog
-tags: [Deep Learning, Computer Vision, NERF, Survey]
+tags: [Deep Learning, Computer Vision, Survey, Hidden]
 ---
 
 {% if page.tags.size > 0 %}
@@ -12,8 +12,4 @@ tags: [Deep Learning, Computer Vision, NERF, Survey]
 
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-# NeRF Overview
-Novel View Synthesis
-
-
-Applications
+# 3D, 4D, 5D Generation Overview
