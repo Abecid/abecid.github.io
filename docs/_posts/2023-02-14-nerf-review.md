@@ -60,6 +60,21 @@ Novel View Synthesis
     1. Conducting ray tracing for each pixel to generate a sample set of 3D points.
     2. Using those generated points and the 2D viewing direction as 5D inputs to the neural network to produce a 4D output of colors and density.
     3. Use classical volume rendering techniques to accumulate the output to synthesize a 2D image.
+    ![fig2](/assets/posts/blog/5.nerf/fig2.png "f2")  
+    - (a) Synthesize images by sampling 5D coordinates(location and viewing direction) along camera rays 
+    - (b) Feed those locations into an MLP to produce a color and volume density
+    - (c) Use volume rendering techniques to composite these values into an image
+    - (d) This rendering function is differentiable, the scene representation can be optimized by minimizing the residual between synthesized and ground truth observed images
+    >  Minimizing this error across multiple views encourages the network to predict a coherent model of the scene by assigning high volume densities and accurate colors to the locations that contain the true underlying scene content.
+
+### 2-2. Optimization
+1. Positional Encoding
+  
+2. Hierarchical Volume Sampling
+
+### 2-3. Neural Volume Rendering
+
+### 2-4. Characteristics
 
 ## 3. Beyond NeRF
 

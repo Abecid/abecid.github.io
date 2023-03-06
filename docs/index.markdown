@@ -46,7 +46,7 @@ permalink: /
   <div style="display:fex;justify-content:center;">
   <img class="profile" src="/assets/img/profile2.jpeg">
   </div>
-  Hi I'm a 4th year computer science major at GeorgiaTech. My research interests are LLMs, transformers, code generation, NERF, Multimodal models, and diffusion models. I also spend time building defi apps on Ethereum. 
+  Hi I was a computer science major at GeorgiaTech but will be attending Columbia University starting in Fall 2023. My research interests are transformers, code generation, NERF, Multimodal models, and diffusion models. I also spend time building defi apps on Ethereum. 
   <!--
   I previously attended Seoul National University (SNU) in 2021 as an Electrical and Computer Engineering major. While at SNU, I co-founded XREAL, the first metaverse club based in Korea.
   -->
