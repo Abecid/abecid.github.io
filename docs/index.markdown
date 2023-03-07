@@ -46,7 +46,8 @@ permalink: /
   <div style="display:fex;justify-content:center;">
   <img class="profile" src="/assets/img/profile2.jpeg">
   </div>
-  Hi, I was a computer science major at GeorgiaTech. Will be attending Columbia University starting Fall 2023. My research interests are transformers, code generation, NeRF, and diffusion models. I also spend time on virtual reality applications and music. 
+  Hi, I am Adam!  
+  I previously attended Georgia Tech as a computer science major. Staring Fall 2023, I will be attending Columbia University. My research interests are transformers, code generation, NeRF, and diffusion models. I also spend time on virtual reality applications and music. 
   <!--
   I previously attended Seoul National University (SNU) in 2021 as an Electrical and Computer Engineering major. While at SNU, I co-founded XREAL, the first metaverse club based in Korea.
   -->
