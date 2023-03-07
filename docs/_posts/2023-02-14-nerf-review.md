@@ -55,6 +55,11 @@ Novel View Synthesis
 ## 2. NeRF
 ### 2-1. Introduction
 ![ner](/assets/posts/blog/5.nerf/nerf-image2.png "nerf-image2")  
+- Input : (x,y,z,$$\theta, \phi$$) -> Output : (c, $$\sigma$$)
+    - 3D location : x,y,z
+    - Viewing Direction : $$\theta$$, $$\phi$$
+    - Color : c
+    - Volume Density : $$\sigma$$
 - When an image is taken, a camera is at a certain pose (orientation and angle in the world coordinate system). Novel view synthesis is the domain of generating an image with an arbitrary target pose based on the provided source images and their respective camera poses[1].
 - Process
     1. Conducting ray tracing for each pixel to generate a sample set of 3D points.
@@ -68,15 +73,31 @@ Novel View Synthesis
         - (d) This rendering function is differentiable, the scene representation can be optimized by minimizing the residual between synthesized and ground truth observed images
     >  Minimizing this error across multiple views encourages the network to predict a coherent model of the scene by assigning high volume densities and accurate colors to the locations that contain the true underlying scene content.
 
-### 2-2. Optimization
+### 2-2. Volume Rendering
+- $$ \sigma(x) $$ : differential probability of a ray terminating at location x
+- $$ r(t) = o + td $$ : 3D point on the camera ray at a distance t from the camera center
+    - o : Origin starting point of the ray (Camera center)
+    - t : Distance
+    - d : Direction of the camera ray (unit vector)
+- c : color (R, G, B)
+### 2-3. Optimization
 1. Positional Encoding
     - Neural networks are biased towards learning lower frequency functions. 
     - Transform input to higher dimension to enable better fitting of data that contains high frequency variation  
     $$ F_{\Theta} = F_{\Theta}' \circ \gamma $$  
-    $$ F_{\Theta}$$ is learned while $$\gamma$$ projects the input from $$\mathbb{R}$$ to $$\mathbb{R}^{2L}$$
+    $$ F_{\Theta}$$ is learned while $$\gamma$$ projects the input from $$\mathbb{R}$$ to $$\mathbb{R}^{2L}$$  
+    $$ F_{\Theta}' $$ is a MLP  
+    $$ \gamma(p) = (sin(2^{0}\pi p), cos(2^{0}\pi p), sin(2^{L-1}\pi p), cos(2^{L-1}\pi p))  $$
 
-  
 2. Hierarchical Volume Sampling
+    - Evaluating Neural Field Network at N queries along each camera ray is inefficient
+        - Free space and occluded regions are sampled repeatedly
+    - Increase rendering efficiency
+        - Optimize two networks: "coarse" and "fine"
+    1. Coarse Network
+        - Sample $$N_{c}$$ locations
+        - Evalue the Coarse network at these positions
+    2. 
 
 ### 2-3. Neural Volume Rendering
 
