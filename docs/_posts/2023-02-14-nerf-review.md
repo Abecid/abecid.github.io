@@ -20,8 +20,8 @@ Novel View Synthesis
 - Given a spatial [x, y, z] point as input, SDFs will output the distance from that point to the nearest surface of the underlying object being represented.
 - negative sign: inside, positive sign: outside the surface
 - $$ SDF(x) = s:x \in \mathbb{R}^{3}, s \in \mathbb{R} $$
-> **Usefulness**  
-> Stores a function instead of a direct representation of 3D shape (more efficient)
+- **Usefulness**  
+    > Stores a function instead of a direct representation of 3D shape (more efficient)
 
 ### 1-2. DeepSDF
 ![Demo](/assets/posts/blog/5.nerf/deepsdf.png "Demo")  
@@ -61,14 +61,20 @@ Novel View Synthesis
     2. Using those generated points and the 2D viewing direction as 5D inputs to the neural network to produce a 4D output of colors and density.
     3. Use classical volume rendering techniques to accumulate the output to synthesize a 2D image.
     ![fig2](/assets/posts/blog/5.nerf/fig2.png "f2")  
-    - (a) Synthesize images by sampling 5D coordinates(location and viewing direction) along camera rays 
-    - (b) Feed those locations into an MLP to produce a color and volume density
-    - (c) Use volume rendering techniques to composite these values into an image
-    - (d) This rendering function is differentiable, the scene representation can be optimized by minimizing the residual between synthesized and ground truth observed images
+    - Neural Radiance Field Scene Representation
+        - (a) Synthesize images by sampling 5D coordinates(location and viewing direction) along camera rays 
+        - (b) Feed those locations into an MLP to produce a color and volume density
+        - (c) Use volume rendering techniques to composite these values into an image
+        - (d) This rendering function is differentiable, the scene representation can be optimized by minimizing the residual between synthesized and ground truth observed images
     >  Minimizing this error across multiple views encourages the network to predict a coherent model of the scene by assigning high volume densities and accurate colors to the locations that contain the true underlying scene content.
 
 ### 2-2. Optimization
 1. Positional Encoding
+    - Neural networks are biased towards learning lower frequency functions. 
+    - Transform input to higher dimension to enable better fitting of data that contains high frequency variation  
+    $$ F_{\Theta} = F_{\Theta}' \circ \gamma $$  
+    $$ F_{\Theta}$$ is learned while $$\gamma$$ projects the input from $$\mathbb{R}$$ to $$\mathbb{R}^{2L}$$
+
   
 2. Hierarchical Volume Sampling
 
