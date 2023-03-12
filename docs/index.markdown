@@ -121,6 +121,14 @@ permalink: /
     -->
 
     {% assign base_max_posts = 3 %}
+    {% assign max_posts = base_max_posts %}
+    {% for post in cat[1] limit:max_posts %}
+      {% if post.tags contains "Hidden" %}
+        {% assign max_posts = max_posts | plus:1 %}
+      {% endif %}
+    {% endfor %}
+
+    <!-- {% assign base_max_posts = 3 %} -->
     {% for post in cat[1] limit:max_posts %}
       {% if post.tags contains "Hidden" %}
         {% assign max_posts = max_posts | plus:1 %}
