@@ -47,7 +47,7 @@ Novel View Synthesis
 -  Iterates ("marches") over a uniform grid of cubes superimposed over a region of the function
 - [Example](https://www.cs.carleton.edu/cs_comps/0405/shape/marching_cubes.html)
 
-### 1-2. DeepSDF
+### 1-4. DeepSDF
 ![Demo](/assets/posts/blog/5.nerf/deepsdf.png "Demo")  
 - Use a feedforward neural network to project SDF from (x,y,z)
 - Represent a shape
@@ -72,9 +72,9 @@ Novel View Synthesis
   - Requires 3D geometry to run inference
   - Searching for the best latent vector is expensive
 
-### 1-3. ONets
+### 1-5. ONets
 
-### 1-4. Scene Representation Networks  
+### 1-6. Scene Representation Networks  
 ![ner](/assets/posts/blog/5.nerf/SRN.png "nerf-image2")  
 - Represent a scene implicitly as acontinuous, differentiable function that maps a 3D world coordinate to a feature-based representationof the scene properties at that coordinate
 
@@ -110,18 +110,18 @@ Novel View Synthesis
 
 ### 2-2. Volume Rendering  
 1. Color at Ray
-  - $$C(r) = \int^{t_f}_{t_n}T(t)σ(r(t))c(r(t),d)dt$$  
-  - $$T(t) = exp(−\int^{t}_{t_n}σ(r(s))ds)$$
-    - Accumulated  transmittance  along  the  ray
-    - Probability  that  the  ray  travels  from $$t_n$$ to t without  hitting any other particle
-  - $$ \sigma(x) $$ : differential probability of a ray terminating at location x
-  - $$ r(t) = o + td $$ : 3D point on the camera ray at a distance t from the camera center
-      - o : Origin starting point of the ray (Camera center)
-      - t : Distance
-      - d : Direction of the camera ray (unit vector)
-  - c : color (R, G, B)
-  - $$t_n$$ : Near bounds
-  - $$t_f$$ : Far bounds
+    - $$C(r) = \int^{t_f}_{t_n}T(t)σ(r(t))c(r(t),d)dt$$  
+    - $$T(t) = exp(−\int^{t}_{t_n}σ(r(s))ds)$$
+        1. Accumulated  transmittance  along  the  ray
+        2. Probability  that  the  ray  travels  from $$t_n$$ to t without  hitting any other particle
+    - $$ \sigma(x) $$ : differential probability of a ray terminating at location x
+    - $$ r(t) = o + td $$ : 3D point on the camera ray at a distance t from the camera center
+        - o : Origin starting point of the ray (Camera center)
+        - t : Distance
+        - d : Direction of the camera ray (unit vector)
+    - c : color (R, G, B)
+    - $$t_n$$ : Near bounds
+    - $$t_f$$ : Far bounds
 2. Quadrature
     1. Partition  $$[t_n,t_f]$$  into N evenly-spaced bins
     2. sampling $$t_i ∼ \mathcal{u}[t_n+\frac{(i−1)}{N}(t_f−t_n), t_n+\frac{i}{N}(t_f−t_n)]$$
