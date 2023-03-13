@@ -45,6 +45,7 @@ Novel View Synthesis
 ![Demo](/assets/posts/blog/5.nerf/MarchingCubesCases.png "Demo") 
 - Creates a triangle mesh from an implicit function
 -  Iterates ("marches") over a uniform grid of cubes superimposed over a region of the function
+- [Example](https://www.cs.carleton.edu/cs_comps/0405/shape/marching_cubes.html)
 
 ### 1-2. DeepSDF
 ![Demo](/assets/posts/blog/5.nerf/deepsdf.png "Demo")  
