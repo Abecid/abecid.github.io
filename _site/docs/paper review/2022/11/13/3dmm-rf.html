@@ -1,0 +1,108 @@
+
+<p>Tags: 3DMM, Computer Vision, Deep Learning, GAN, NERF</p>
+
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h1 id="3dmm-rf-convolutional-radiance-fields-for-3d-face-modeling">3DMM-RF: Convolutional Radiance Fields for 3D Face Modeling</h1>
+<p><a href="https://arxiv.org/abs/2209.07366">Source Paper</a><br />
+Thu, 15 Sep 2022<br />
+ArXiv Preprint</p>
+
+<p><img src="/assets/posts/paper_review/15.3dmmrf/title.png" alt="Title" title="Title" /></p>
+
+<h2 id="abstract">Abstract</h2>
+<p>In this work, we present a facial 3D Morphable  Model,  which  exploits  3D Morphable Models and NERF, and can accurately model a subject’s identity, pose and expres-sion and render it in arbitrary illumination.</p>
+
+<p>This is achieved by utilizing a powerful deep style-based generator to over-come two main weaknesses of neural radiance fields, their rigidity and rendering speed.</p>
+
+<p>We introduce a style-based generative network that synthesizes in one pass all and only the required rendering samples of a neural radiance field. We create a vast labelled synthetic dataset of facial renders,and train the network on these data, so that it can accurately model and generalize on facial identity, pose and appearance.</p>
+
+<h2 id="1-introduction">1. Introduction</h2>
+<p>NERF consist of fully connectedneural  networks  that  learn  to  implicitly  represent  a  sceneand its appearance parameters.  Such networks can be opti-mized by using only a few dozens camera views of the sceneand can be queried to generate novel views of that scene.Despite their photorealistic renderings and high 3D consis-tency, most initial NeRF-based methods focus on modelingand overfitting on a single subject, at a single pose.</p>
+
+<p>In this work, we create an implicit 3D Morphable Model,by  leveraging  a  powerful  style-based  deep  generator  net-work, with a flexible radiance field representation and vol-ume rendering module</p>
+
+<h2 id="2-related-works">2. Related Works</h2>
+<p>3D Morphable Models
+NERF
+GAN</p>
+
+<h2 id="3-3d-face-model-by-neural-radiance-fields">3. 3D Face Model by Neural Radiance Fields</h2>
+<p>In this work,  we describe an implicit parametric facial model,  with  disentangled  identity,  pose  and  appearance. The  NeRF  representation  is  unfit  for  such  a  task,  as</p>
+<ol>
+  <li>it  represents  a  rigid(?)  scene,</li>
+  <li>optimizing  a  scene  with  a large number of identities,  poses and appearance requires an intractable optimization.</li>
+</ol>
+
+<p>In this manner,  we introduce3DMM-RF, a model that can represent and render a controllable non-rigid facial scene, using a style-based generator [40],  that generates an instance of an implicit neural radiance field. Moreover, 3DMM-RF learns to approximate the area of dense samples for each view, so that a rendering can be achieved with a single query of the network.</p>
+
+<p>3DMM-RF is a neural morphable model \(S\)</p>
+
+<p>Facial image I is rendered:<br />
+\(I \in R^{512x512x3}\)</p>
+
+\[I = S(z_{ID}, z_{exp}, z_{cam}, z_{ill})\]
+
+<p>\(z_{ID} \in R_{521}\) : Identity latent code
+\(z_{exp} \in R_{20}\) : 3DMM blendshapes (?)
+\(z_{cam} \in R_{3}\) : Camera Position
+\(z_{ill} \in R_{8}\) : Illumination Parameters</p>
+
+<p>\(S\) consists of:</p>
+<ul>
+  <li>G: Style based generator that generates a volumetric radiance field</li>
+  <li>Volume rendering module</li>
+  <li>D: Discriminator</li>
+</ul>
+
+<h3 id="31-architecture">3.1 Architecture</h3>
+<p><img src="/assets/posts/paper_review/15.3dmmrf/fig1.png" alt="Architecture" title="Architecture" /></p>
+<h4 id="311-scene-representation">3.1.1 Scene Representation</h4>
+<p>NERF
+\(F_{\Theta}(x, y, z, \theta, \phi) -&gt; (r, g, b, \sigma)\)<br />
+World coordinate: (x, y, z)
+Viewing Direction: (\(\theta, \phi\))
+colour (r, g, b)
+volume density (\(\sigma\))</p>
+
+<p>Rigid scene can be learned by the radiance field. By fitting \(F_{\Theta}\) on different views and scenes. (?)</p>
+
+<p>Contrary to typical NeRF approach of representing a scene with a trained MLP, we train a convolutional generator network G. Which generates all necessary K samples for each ray that passes through each pixel of the rendered image I in a single pass.</p>
+
+<h4 id="312-depth-based-smart-volume-rendering">3.1.2 Depth-based Smart Volume Rendering</h4>
+<p>NeRF has slow rendering since per pixel,</p>
+<ol>
+  <li>a uniform  sampling  step  is  re-quired  to  find  the  densest  area</li>
+  <li>another  to  extract  a dense  sampling  area  for  volume  rendering</li>
+</ol>
+
+<p>This means that samples, which area  bit  far  from  the  surface,  will  not  contribute  to  the  final RGB values.  Based on that idea, we significantly speed-up rendering, by predicting the ray-face intersection depth Dr,for the ray r and sample only around this area.</p>
+
+<p>Therefore,  by generating only all the required samples along  the  ray  that  are  close  to  the  facial  surface,  we  can directly employ the volume rendering, bypassing the multi-ple MLP queries required by NeRF and its importance sampling strategy.</p>
+
+<p>Each sample includes colour and volume density.</p>
+
+<p>Final colour C is measured using standard volume rendering<br />
+<img src="/assets/posts/paper_review/15.3dmmrf/eq2.png" alt="Eq2" title="eq2" /></p>
+
+<h4 id="313-convolutional-radiance-field-generator">3.1.3 Convolutional Radiance Field Generator</h4>
+<p>We  extend  the  above  single-ray  prediction  approach,  tothe prediction of all the rays required to render an image</p>
+
+<p>The generator consists of a fully-convolutional mapping network, which translates a subject’s identity vector zID to an extended latent space identity vector wID, and a synthesis network that generates all the ray samples of interest.</p>
+
+<h3 id="32-training-with-a-synthetic-face-dataset">3.2. Training with a Synthetic Face Dataset</h3>
+<p><img src="/assets/posts/paper_review/15.3dmmrf/fig2.png" alt="Architecture" title="Architecture" /><br />
+<img src="/assets/posts/paper_review/15.3dmmrf/fig3.png" alt="Architecture" title="Architecture" /></p>
+
+<p>Given the lack of accurately labelled facial images withpaired depth maps and labelled variations in illumination,expression and pose, we train the proposed architecture us-ing  a  synthetically  generated  dataset.</p>
+
+<p>\(L_{fitting} = L_{pht} + L_{vgg} + L_{ID} + L_{landmarks}\)
+\(L_{pht}\) : MSE loss (Photometry) between the rendered  and  the  final  image
+\(L_{vgg}\) : perpetual loss [92]
+\(L_{IR}\) : loss between ID feature maps
+\(L_{Landmarks}\) : facial landmark loss. L2−distance between the activation maps of both images which are fed into the facial landmark network</p>
+
+<h2 id="4-experiments">4. Experiments</h2>
+<p><img src="/assets/posts/paper_review/15.3dmmrf/fig4.png" alt="Title" title="Title" /><br />
+<img src="/assets/posts/paper_review/15.3dmmrf/fig5.png" alt="Title" title="Title" /><br />
+<img src="/assets/posts/paper_review/15.3dmmrf/fig6.png" alt="Title" title="Title" /></p>

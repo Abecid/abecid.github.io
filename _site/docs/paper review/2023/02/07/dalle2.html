@@ -1,0 +1,49 @@
+
+<p>Tags: Deep Learning, Multimodal</p>
+
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h1 id="dall-e-2">DALL-E 2</h1>
+<p><a href="https://arxiv.org/abs/2204.06125">Source Paper</a><br />
+13 April 2022  <br />
+OpenAI</p>
+
+<h2 id="1-main-contributions">1. Main Contributions</h2>
+<ul>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>a <em>prior</em> $$ P(z_{i}</td>
+          <td>y) \(that produces CLIP Image Embedding\)z_{i}$$ conditioned on image caption y</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>a <em>decoder</em> $$P(x</td>
+          <td>z_{i},y)\(that produces images x conditioned on CLIP Image Embeddings\)z_{i}$$ and text captions y</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+
+<p>## 2. Decoder Model
+    - Based on GLIDE, concatenate CLIP image embedding to the GLIDE text encoder outputs
+    - Classifier free guidance is enabled by randomly setting CLIP embeddings to zero 10% of the time and dropping the text caption 50% of the time
+    - Two upsampling models</p>
+
+<p>## 3. Prior Model
+    1. Autoregressive Model
+      - Image embedding \(z_{i}\) converted to a sequence and are predicted autoregressively conditioned on caption y.
+      - Causal attention masking using Transformers
+      - Classifier-free guidance by dropping the text condition 10% of the time
+    2. Diffusion Model
+      - Decoder-only transformer with a causal attention mask.
+      - Sequence of the encoded text, the CLIP text embedding, an embedding for the diffusion timestep,the noised CLIP image embedding, and a final embedding whose output from the Transformer is used topredict the unnoised CLIP image embedding.
+      - Predict \(z_{i}\) directly via l2 loss via l2 loss
+      \(L_{prior} = \E_{t~[1,T],z_{i}^{t}~q_{t}}[\lVert f_{\theta}(z_{i}^{t},t,y)-z_{i} \rVert^{2}]\)</p>

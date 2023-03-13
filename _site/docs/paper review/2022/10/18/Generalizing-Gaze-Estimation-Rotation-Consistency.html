@@ -1,0 +1,152 @@
+
+<p>Tags: Computer Vision, Deep Learning, Gaze Estimation</p>
+
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<p>Generalizing Gaze Estimation with Rotation Consistency<br />
+<a href="https://openaccess.thecvf.com/content/CVPR2022/papers/Bao_Generalizing_Gaze_Estimation_With_Rotation_Consistency_CVPR_2022_paper.pdf">Source Paper</a><br />
+CVPR 2022</p>
+
+<p><img src="/assets/posts/paper_review/8.generalizing_gaze_rotation/title.png" alt="Title" title="Title" /></p>
+
+<h2 id="abstract">Abstract</h2>
+<p>Generalizing gaze estimation to unseen environments is still challenging.<br />
+Authors discover the rotation-consistency property in gaze estimation.<br />
+Introduce the ‘sub-label’ for unsupervised domain adaptation.<br />
+Authors propose the Rotation-enhanced Unsupervised Domain Adaptation (RUDA) for gaze estimation.</p>
+<ul>
+  <li>Rotate the original images with different angles for training</li>
+  <li>Conduct domain adaptation under the constraint of rotation consistency</li>
+  <li>Target domain images are assigned with sub-labels, derived from relative rotation angles rather than untouchable real labels</li>
+  <li>A novel distribution loss that facilitates the domain adaptation
+Evaluation of RUDA framework on four cross-domain tasks</li>
+</ul>
+
+<h2 id="1-introduction">1. Introduction</h2>
+<ul>
+  <li>Existing appearance-based gaze estimation methods suffer from severe performance degradation when adapting to new domains, cased by:
+    <ul>
+      <li>Subject appearance</li>
+      <li>Image quality</li>
+      <li>Shooting angle</li>
+      <li>Illumination</li>
+    </ul>
+  </li>
+</ul>
+
+<p><strong>Target domain labels are not usually accessible, cannot directly train the gaze estimator in target domain.</strong></p>
+<ul>
+  <li>Unsupervised domain adaptation aim to find a gaze-relevant constraint generalizing the model to target domain without label.
+    <ul>
+      <li>Domain discriminator by adversarial learning</li>
+      <li>Appearance discriminator and a head pose classifier for adaptation</li>
+      <li>Guide the model with outliers</li>
+    </ul>
+  </li>
+</ul>
+
+<blockquote>
+  <p>Authors find that human gaze, as a 3D direction vector, is rotation-consistent.<br />
+Define the relative rotation angle as the sub-label (not an absolute angle)</p>
+</blockquote>
+
+<p><strong>Authors propose Rotation-enhanced Unsupervised Domain Adaptation (RUDA) framework for gaze estimation.</strong></p>
+<ul>
+  <li>Creates sub-labels between original and randomly rotated images</li>
+  <li>
+    <p>Estimator is generalized to target domain via rotation consistency of estimation results</p>
+  </li>
+  <li>Contributions
+    <ol>
+      <li>RUDA
+        <ul>
+          <li>Trains a rotation-augmented model in source domain</li>
+          <li>Adapt the model to target domain with physically-constrained gaze directions</li>
+        </ul>
+      </li>
+      <li>Found rotation consistency property
+        <ul>
+          <li>Used to generate sub-labels for unsupervised gaze adaptation</li>
+          <li>Design a novel distribution loss which supervise the model with rotation consistency and sub-labels</li>
+        </ul>
+      </li>
+      <li>Experimental results
+        <ul>
+          <li>RUDA achieves consistent improvement over the baseline model on four cross-domain gaze estimation tasks</li>
+          <li>Even outperforms some state-of-the-art methods trained on target domain with labels</li>
+        </ul>
+      </li>
+    </ol>
+  </li>
+</ul>
+
+<h2 id="2-related-work">2. Related Work</h2>
+<ol>
+  <li>Gaze Estimation
+    <ul>
+      <li>Calibration-free appearance-based gaze estimation with CNN
+        <ul>
+          <li>Various methods using different outputs
+            <ul>
+              <li>Eye images</li>
+              <li>Face images</li>
+              <li>Both</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>Cross-domain gaze estimation
+        <ul>
+          <li>Person-specific gaze estimation network with few samples via meta-learning</li>
+          <li>Eliminate inter-personal diversity by ensuring prediction consistency</li>
+          <li>Eliminate gaze-irrelevant feature; improve cross dataset accuracy without target domain data</li>
+          <li>Plug-and-play cross-domain gaze estimation with the guidance of outliers</li>
+          <li>Redirect head and gaze in a self-supervised manner by embedding transformation including rotation</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Unsupervised Domain Adaptation
+    <ul>
+      <li>Representation subspace distance (RSD) that aligns features from two domains for regression tasks</li>
+      <li>Adversarial learning</li>
+    </ul>
+
+    <blockquote>
+      <p>Most previous methods are designed for classification tasks instead of regression tasks.<br />
+UDA for gaze estimation still remains to be explored</p>
+    </blockquote>
+  </li>
+</ol>
+
+<h2 id="3-rotation-consistency-in-gaze-estimation">3. Rotation Consistency in Gaze Estimation</h2>
+<p>Main challenges in unsupervised gaze adaptation tasks</p>
+<ul>
+  <li>Shortage of target domain samples</li>
+  <li>Absence of ground truth labels</li>
+</ul>
+
+<p>Augmentations proposed</p>
+<ul>
+  <li>Color jittering</li>
+  <li>Introducing noise</li>
+</ul>
+
+<p>However, existing data augmentation approaches only bring limited performance improvement, when adopted in unsupervised gaze adaptation tasks</p>
+
+<p><strong>Rotation Consistency</strong><br />
+<img src="/assets/posts/paper_review/8.generalizing_gaze_rotation/eq1.png" alt="Eq1" title="eq1" /><br />
+F: Gaze mapping function from the image to gaze direction
+I: Input image
+R: Rotation matrix of the input image
+\(R^{g}\): Rotation matrix of the gaze direction</p>
+
+<p><img src="/assets/posts/paper_review/8.generalizing_gaze_rotation/eq2.png" alt="Eq2" title="eq2" /><br />
+<img src="/assets/posts/paper_review/8.generalizing_gaze_rotation/eq3.png" alt="Eq3" title="eq3" /></p>
+
+<h2 id="4-method">4. Method</h2>
+<h3 id="4-1-task-definition">4-1. Task Definition</h3>
+<h3 id="4-2-rotation-enhanced-unsupervised-domain-adaptation-for-gaze-estimation">4-2. Rotation-Enhanced Unsupervised Domain Adaptation for Gaze Estimation</h3>
+<h3 id="4-3-implementation-details">4-3. Implementation Details</h3>
+
+<h2 id="5-experiments">5. Experiments</h2>

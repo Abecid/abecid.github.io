@@ -1,0 +1,284 @@
+
+<p>Tags: Computer Vision, Deep Learning, Knowledge Distillation, Survey</p>
+
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h2 id="knowledge-distillation-a-survey">Knowledge Distillation: A Survey</h2>
+<p><a href="https://arxiv.org/abs/2006.05525">Source Paper</a>
+May 20, 2021</p>
+
+<h3 id="abstract">Abstract</h3>
+<ul>
+  <li>Model compression and acceleration.</li>
+  <li>Knowledge distillation: small student model learning from a larger teacher model.</li>
+  <li>Knowledge distillation from the perspectives of knowledge categories, training schemes, teacher-student architecture, and distillation algorithms.</li>
+</ul>
+
+<h3 id="1-introduction">1. Introduction</h3>
+<ul>
+  <li>Efficient deep models
+    <ol>
+      <li>Efficient building blocks
+        <ul>
+          <li>depthwise separable covolution
+            <ul>
+              <li>MobileNets</li>
+              <li>SuffleNets</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>Model compression and acceleration techniques
+        <ul>
+          <li>Parameter pruning and sharing</li>
+          <li>Low-rank factorization</li>
+          <li>Transferred compact convolutional filters</li>
+          <li>Knowledge distillation</li>
+        </ul>
+      </li>
+    </ol>
+  </li>
+</ul>
+
+<p>Knowledge distillation: small student model supervised by a large teacher model</p>
+
+<p><img src="/assets/posts/research/2.knowledge-distillation-survey/fig2.png" alt="Schematic structure image, Fig2" title="Fig2" /></p>
+
+<h3 id="2-knowledge-categories">2. Knowledge Categories</h3>
+<p><img src="/assets/posts/research/2.knowledge-distillation-survey/fig3.png" alt="Knowledge Types, Fig3" title="Fig3" /></p>
+<ol>
+  <li>Response-based knowledge
+ <img src="/assets/posts/research/2.knowledge-distillation-survey/fig4.png" alt="Fig4" title="Fig4" />
+    <blockquote>
+      <p>Mimic the final prediction of the teacher model</p>
+    </blockquote>
+
+    <p>z (vector of logits): outputs of the last fully connected layer of a model<br />
+ Distill Loss:<br />
+ \(L_{R}=(z_{t}, z_{s})\) (diveregence loss of logits)</p>
+
+    <ul>
+      <li>Image Classifinication<br />
+  p: softmax with temperature<br />
+  loss: Kullback Leibler divergence loss<br />
+  <img src="/assets/posts/research/2.knowledge-distillation-survey/eq1.png" alt="Fig4" title="eq1" /><br />
+  <img src="/assets/posts/research/2.knowledge-distillation-survey/eq2.png" alt="Fig4" title="eq2" /></li>
+    </ul>
+  </li>
+  <li>Feature-based knowledge<br />
+ Deep neural nets are good at learning feature representations with multiple layers.<br />
+ <img src="/assets/posts/research/2.knowledge-distillation-survey/fig6.png" alt="Fig6" title="Fig6" />
+    <ul>
+      <li>Loss functions used for distill loss
+        <ul>
+          <li>L1</li>
+          <li>L2</li>
+          <li>Cross-entropy</li>
+          <li>Maximum Mean Discrepancy Loss</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>Relation-based knowledge<br />
+ Previous knowledges use outputs of specific layers of the teacher model.<br />
+ Relationship-based knowledge uses the relationship between feature maps<br />
+ <img src="/assets/posts/research/2.knowledge-distillation-survey/fig7.png" alt="Fig7" title="Fig7" /></p>
+
+    <ul>
+      <li>Flow of Solution Processes (FSP)
+        <ul>
+          <li>Proposed by <a href="https://openaccess.thecvf.com/content_cvpr_2017/papers/Yim_A_Gift_From_CVPR_2017_paper.pdf">Yim et al. (2017)</a> to explore the relationships between different feature maps</li>
+          <li>Defined by the Gram matrix between two layers</li>
+          <li>Summarizes the relations between pairs of feature maps. Calculated using the inner products between features from two layers.</li>
+          <li>With the correlations between feature maps, knowledge distillation via singular value decomposition was proposed to extract key information in the feature maps.
+ Correlation function of similarity functions for each model’s feature maps<br />
+ <img src="/assets/posts/research/2.knowledge-distillation-survey/eq5.png" alt="Eq5" title="eq5" /></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="3-distillation-schemes">3. Distillation Schemes</h3>
+<ol>
+  <li>Offline Distillation
+    <ul>
+      <li>Teacher model trained</li>
+      <li>Teacher model is used to extract knowledge<br />
+ Focus on improving knowledge transfer</li>
+      <li>Design of knowledge</li>
+      <li>Loss function: features, distributions</li>
+    </ul>
+  </li>
+  <li>Online Distillation
+ Teacher and student model updated simultaneously.<br />
+ Knowledge distillation framework is end-to-end trainable.<br />
+ (When a large-capacity high performance teacher model is not available)</li>
+  <li>Self-Distillation
+Same networks used for the teacher and student models
+(Special case of online distillation)
+Self-attention distillation
+    <ul>
+      <li>Attention maps of its own layers as distillation targets for lower layers
+Snapshot distillation</li>
+      <li>Knowledge in the earlier epochs transferred to later epochs</li>
+      <li>Early exit layer tries to mimic the output of layer exit layers</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="4-teacher-student-architecture">4. Teacher-Student Architecture</h3>
+<ul>
+  <li>Mostly the student network is smaller</li>
+  <li>Neural architecture search in knowledge distillation</li>
+</ul>
+
+<h3 id="5-distillation-algorithms">5. Distillation Algorithms</h3>
+<ol>
+  <li>Adversarial Distillation
+    <ul>
+      <li>Adversarial generator used to generate synthetic data</li>
+      <li>Discriminator used to distinguish between student and teacher outputs</li>
+      <li>Teacher and student jointly optimized in online manner</li>
+    </ul>
+  </li>
+  <li>Multi-Teacher distillation</li>
+  <li>Cross-Modal Distillation</li>
+  <li>Graph based Distillation</li>
+  <li>Attention-based Distillation</li>
+</ol>
+
+<h3 id="core-takeaways">Core Takeaways</h3>
+<ol>
+  <li>Focus on Feature-based knowledge</li>
+  <li>Mix offline, online distillation</li>
+  <li>Adversarial Training</li>
+  <li>Attention-based distillation</li>
+</ol>
+
+<hr />
+
+<h2 id="feature-map-level-online-adversarial-knowledge-distillation">FEATURE-MAP-LEVEL ONLINE ADVERSARIAL KNOWLEDGE DISTILLATION</h2>
+<p><a href="https://openreview.net/attachment?id=Bkl086VYvH&amp;name=original_pdf">Source</a>
+ICLR 2020</p>
+
+<h3 id="abstract-1">Abstract</h3>
+<p>Online knowledge distillation that transfers the knowledge of the feature map using an adversarial training framework.<br />
+By training a discrimination network to distinguish the featuremaps from different networks and training networks to fool it, networks can learn the other network’s feature map distribution.<br />
+Cyclic learning for training more than two networks together.</p>
+
+<h3 id="introduction">Introduction</h3>
+<p>Online distillation: training networks to learn from each other.<br />
+First to apply feature map based knowledge distillation in online learning.<br />
+<img src="/assets/posts/research/2.knowledge-distillation-survey/fig2-1.png" alt="Fig2-1" title="Fig2-1" />
+Direct alignment method only tries to minimize the distance between feature map points and ignores distributional differences.</p>
+
+<p>Newly proposed feature map based loss to distill the feature map indirectly via discriminators.</p>
+
+<h3 id="related-works">Related works</h3>
+<ol>
+  <li>Model Compression
+    <ul>
+      <li>Knowledge distillation by Hinton et al. (2015)
+        <ul>
+          <li>Used softened logit (with termperature) which has higher entropy</li>
+          <li>Learn with conventional CE loss with labeled data and with the final outputs of a teacher network.</li>
+        </ul>
+      </li>
+      <li>Feature representation
+        <ul>
+          <li><a href="/https://arxiv.org/abs/1412.6550">FitNet(2014)</a>, ATA(Zagoruyko 2016a), FT(Kim 2018), KTAN(Liu 2018) use intermediate feature representation to transfer knowledge</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Online Knowledge Distillation
+    <ul>
+      <li><a href="https://openaccess.thecvf.com/content_cvpr_2018/papers/Zhang_Deep_Mutual_Learning_CVPR_2018_paper.pdf">DML (Zhang 2018)</a>
+        <ul>
+          <li>Ensemble of students learn from each other. Achieves results even better than offline Knowledge Distillation in one benchmark</li>
+        </ul>
+      </li>
+      <li>ONE (Lan 2018)
+        <ul>
+          <li>Rather than mutually distilling between the networks, ONE generates a gated ensemble logit of the training networks and uses it as a target to align for each network.</li>
+        </ul>
+      </li>
+      <li>Current drawbacks
+        <ul>
+          <li>Dependent only on the logit and do not make any use of the feature map information</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Proposed Method
+    <ul>
+      <li>Adversarial training to let each to learn each other’s distribution.</li>
+      <li>Cyclic learning scheme for training more than two networks simultaneously. The number of discriminators is K (number of networks participating)</li>
+    </ul>
+    <ul>
+      <li>One-way cyclic manner.</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="core-takeaways-1">Core Takeaways</h3>
+<ol>
+  <li>Use a discriminator when training online distillation with feautre-based knowledge</li>
+</ol>
+
+<hr />
+
+<h2 id="show-attend-and-distillknowledge-distillation-via-attention-based-feature-matching">Show, Attend and Distill:Knowledge Distillation via Attention-based Feature Matching</h2>
+<p><a href="https://ojs.aaai.org/index.php/AAAI/article/download/16969/16776">Source</a><br />
+2021 AAAI</p>
+
+<h3 id="abstract-2">Abstract</h3>
+<p>Most studies manually tie intermediate features of the teacher and student and transfer knowledge through pre-defined links.<br />
+Proposed method utilizes an attention-based meta-network that learns relative similarities between features, and applies identified similarities to control distillation intensities of all possible pairs.<br />
+As a result, the proposed method determines competent links more efficiently than previous approaches.</p>
+
+<h3 id="introduction-1">Introduction</h3>
+<p>Most studies manually link the teacher and student features and perform distillation through the links individually.<br />
+This manual selection does not consider the similarity between the teacher and student features, which risks forcing an incorrect intermediate processs to the student.<br />
+Also the link selection limits fully utilizing the whole knowledge of the teacher by choosing a few of all possible linkns.</p>
+
+<p>Feature link selection: Jang et al 2019.<br />
+New feature linking method proposed based on the attention mechanism.</p>
+
+<h3 id="core-takeaways-2">Core Takeaways</h3>
+<ol>
+  <li>Link features using an attention mechanism</li>
+</ol>
+
+<hr />
+
+<h2 id="online-knowledge-distillation-via-collaborative-learning">Online Knowledge Distillation via Collaborative Learning</h2>
+<p><a href="https://openaccess.thecvf.com/content_CVPR_2020/papers/Guo_Online_Knowledge_Distillation_via_Collaborative_Learning_CVPR_2020_paper.pdf">Srouce</a></p>
+
+<h3 id="abstract-3">Abstract</h3>
+<p>Knowledge Distillation via Collaberative Learning: KDCL</p>
+<ul>
+  <li>Treats all models as students and collaboratively trains them.</li>
+</ul>
+
+<h3 id="introduction-2">Introduction</h3>
+<ul>
+  <li>Students directly learn from the prediction of other students in Deep Mutual Learning
+    <ul>
+      <li>Output of students could conflict with each other and does harm to model with high performance.</li>
+    </ul>
+  </li>
+  <li>ONE: multi-branch network while establishing teacher on the fly.
+    <ul>
+      <li>Knowledge transfer only accurs at the upper layers; inflexible</li>
+      <li>Gate module is the soft target; which is not a guarantee</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="core-takeaways-3">Core Takeaways</h3>
+<ol>
+  <li>Student pool training</li>
+</ol>

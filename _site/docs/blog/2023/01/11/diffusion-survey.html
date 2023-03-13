@@ -1,0 +1,318 @@
+
+<p>Tags: Computer Vision, Deep Learning, Diffusion, Generative Model, Multimodal, Survey</p>
+
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h1 id="diffusion-survey">Diffusion Survey</h1>
+
+<h2 id="1-diffusion-introduction">1. Diffusion Introduction</h2>
+<p><img src="https://www.assemblyai.com/blog/content/images/2022/05/image-10.png" alt="Diffusion" /><br />
+Process that can generate images from noise (<a href="https://arxiv.org/pdf/2006.11239.pdf">source</a>).</p>
+
+<p><img src="https://www.assemblyai.com/blog/content/images/size/w1000/2022/05/image-1.png" alt="Diffusion Process" /><br />
+Training involves the forward process \(q(x_{t}|x_{t-1})\) of adding noise to \(x_{0}\) and a backword process \(p_{\theta}(x_{t-1}|x_{t})\) to predict the noise from the previous step.</p>
+
+<h2 id="2-background">2. Background</h2>
+
+<h3 id="2-1-forward-process">2-1. Forward Process</h3>
+<p>Forward process \(q\) is a Markov Chain that continuously adds more noise to the original imgae \(x_{0}\).<br />
+\(q(x_{t}|x_{t-1}) = \mathcal{N}(x_{t};\sqrt{1-\beta_{t}}x_{t-1},\beta_{t}I)\)</p>
+
+<p>\(\beta_{t}\) is the variance schedule which continuosuly increases<br />
+\(0 &lt; \beta_{1} &lt; \beta_{2} &lt; ... &lt; \beta_{T} &lt; 1\)<br />
+Which results in \(x_{t}\) getting closer to mean 0 and deviation of 1 from mean \(x_{0}\) deviation 0</p>
+
+<p>So at each step an image can be drawn as:<br />
+\(x_{t} = \sqrt{1-\beta_{t}}x_{t-1} + \sqrt{\beta_{t}}\epsilon\)<br />
+Where \(\epsilon \sim \mathcal{N}(0,I)\)</p>
+
+<p>The variance schedule is not constant and can be set manually based on the domain distribution and there are further works on this topic.</p>
+
+<h3 id="2-2-parametrization">2-2. Parametrization</h3>
+<p>A neural network, \(p_{\theta}(x_{t-1}|x_{t})\) with
+\(\theta\) as the parameters is learned with gradient descent.</p>
+
+<p>\(p_{\theta}(x_{t-1}|x_{t}) = \mathcal{N}(x_{t-1};\mu_{\theta}(x_{t},t),\sum_{\theta}(x_{t},t))\)<br />
+Where mean and variance are respectively parametrized by \(\mu_{\theta}, and \sum_{\theta}\)</p>
+
+<h3 id="2-3-reparametrization-trick">2-3. Reparametrization Trick</h3>
+<p>Since the sum of Gaussians is also Gussian, \(q(x_{t}|x_{0})\) can be calculated as follows:<br />
+\(q(x_{t}|x_{0}) = \mathcal{N}(x_{t};\sqrt{\bar{a}_{t}}x_{0},(1-\bar{a}_{t})I)\)<br />
+and<br />
+\(x_{t} = \sqrt{\bar{a}_{t}}x_{0}+\sqrt{1-\bar{a}_{t}}\epsilon\)<br />
+Where \(a_{t} := 1-\beta_{t}\) and \(\bar{a}_{t} := \prod^{t}_{s=1}a_{s}\)</p>
+
+<p>So opposed to \(\beta_{t}\), \(a_{t}\) continously decreases in value:<br />
+\(1 &gt; a_{1} &gt; a_{2} &gt; ... &gt; a_{T} &gt; 0\)</p>
+
+<p>With the definition of \(x_{t}\) above, \(x_{0}\) can be represented as follows:<br />
+\(x_{0} = \frac{1}{\sqrt{\bar{a}_{t}}}(x_{t}-\sqrt{1-\bar{a}_{t}}\epsilon_{t})\)<br />
+and the mean function can be written as follows (<a href="https://lilianweng.github.io/posts/2021-07-11-diffusion-models/#nice:~:text=tx0-,Thanks,-to%20the%20nice">source</a>):<br />
+\(\mu_{\theta}(x_{t},t) = \frac{1}{\sqrt{a}_{t}}(x_{t}-\frac{\beta_{t}}{\sqrt{1-\bar{a}_{t}}}\epsilon_{\theta}(x_{t},t))\)</p>
+
+<h3 id="2-4-objective-function">2-4. Objective Function</h3>
+<p><strong>A. Variational Lower Bound (ELBO)</strong><br />
+\(L_{CE} = -log p_{\theta}(x_{0}) \leq \mathbb{E}_{q}[log\frac{q(x_{1:T}|x_{0})}{p_{\theta}(x_{0:T})}] = L_{VLB}\) (<a href="https://lilianweng.github.io/posts/2021-07-11-diffusion-models/#nice:~:text=x0)-,It,-is%20also%20straightforward">Explanation</a>)<br />
+Which is equivalent to the KL divergence between \(q(x_{1:T}|x_{0})\) and \(p_{\theta}(x_{0:T})\)</p>
+<blockquote>
+  <p>The KL divergence between two Gaussian distributions can be expressed as the <strong>L2-loss between their means</strong><br />
+\(D_{KL}(p || q) = log\frac{\sigma_{2}}{\sigma_{1}} + \frac{\sigma^{2}_{1}+(\mu_{1}-\mu_{2})^{2}}{2\sigma^{2}_2} - \frac{1}{2}\)</p>
+</blockquote>
+
+<p>Thus the model can be optimized with \(L_{VLB}\) instead of \(L_{CE}\)</p>
+
+<h4 id="b-complete-objective-function">B. Complete Objective Function</h4>
+<p>The objective can be further rewritten with several terms:<br />
+\(L_{VLB}\)<br />
+\(= L_{T} + L_{T-1} + ... + L_{0}\)<br />
+\(= L_{T} + L_{t} + L_{0}\)<br />
+where<br />
+\(L_{T} = D_{KL}(q(x_{T}|x_{0})||p_{\theta}(x_{T}))\)<br />
+\(L_{t} = D_{KL}(q(x_{t}|x_{t+1},x_{0})||p_{\theta}(x_{t}|x_{t+1}))\) for \(1 \leq t \leq T -1\)<br />
+\(L_{0} = -log p_{\theta}(x_{0}|x_{1})\)</p>
+
+<p>KL Divergences between two Gaussian distributions can be computed in closed form as mentioned above. And \(L_{T}\) can be ignored during training since q has no learnable prameters and \(x_{T}\) is a Gaussian noise.</p>
+
+<h4 id="c-final-objective-function-l_t">C. Final Objective Function \(L_{t}\)</h4>
+<p>To bring back some important functions (the reverse diffusion process \(p_{\theta}\), x_t, and the mean function \(\mu_{\theta}\))<br />
+\(p_{\theta}(x_{t-1}|x_{t}) = \mathcal{N}(x_{t-1};\mu_{\theta}(x_{t},t),\sum_{\theta}(x_{t},t))\)<br />
+\(x_{t} = \sqrt{\bar{a}_{t}}x_{0}+\sqrt{1-\bar{a}_{t}}\epsilon\)   <br />
+\(\mu_{\theta}\) predicts \(\bar{\mu}_{t} = \frac{1}{\sqrt{a}_{t}}(x_{t}-\frac{\beta_{t}}{\sqrt{1-\bar{a}_{t}}}\epsilon_{t})\)<br />
+Since \(x_{t}\) is available during training time, function can be reparametrized to predict \(\epsilon_{t}\)<br />
+\(\mu_{\theta}(x_{t},t) = \frac{1}{\sqrt{a}_{t}}(x_{t}-\frac{\beta_{t}}{\sqrt{1-\bar{a}_{t}}}\epsilon_{\theta}(x_{t},t))\)<br />
+\(L_{t}\) is parameterized to minimize the difference from \(\bar{\mu}\):<br />
+\(L_{simple}\) <br />
+\(= \mathbb{E}_{t,x_{0},\epsilon_{t}}[\left\lVert \epsilon_{t} - \epsilon_{\theta}(x_{t},t) \right\rVert^2]\)</p>
+
+<p>In essence, the model optimizes to predict Gaussian noise \(\epsilon_{t}\) and the loss function can be simply viewed as:<br />
+\(\left\lVert \epsilon_{t} - \epsilon_{\theta}(x_{t},t) \right\rVert^2\)</p>
+
+<p>The model can be trained as follows:<br />
+<img src="/assets/posts/blog/2.diffusion_survey/training.png" alt="Diffusion Training" title="Training" /></p>
+
+<p>Markov Chain
+ELBO
+Reparametrization Trick
+Langevin Dynamics<br />
+Variational Autoencoder<br />
+Variational Lower bound
+U-Net<br />
+Gaussian Distribution, KL-Divergence and Mean Squared Loss</p>
+
+<h2 id="3-survey">3. Survey</h2>
+<h3 id="3-1-summary-of-papers">3-1. Summary of Papers</h3>
+<h4 id="1-denoising-diffusion-probabilistic-models">1. <a href="https://arxiv.org/abs/2006.11239">Denoising Diffusion Probabilistic Models</a></h4>
+<ul>
+  <li>UC Berkeley, NeurIPS 2020, Jun 19 2020</li>
+</ul>
+
+<ol>
+  <li>Proposed diffusion models, parameterized Markov chain trained using variational inference to produce samples matching the data.</li>
+  <li>First to demonstrate that diffusion models are cabaple of generating high quality samples.</li>
+  <li>Implementation Details
+    <ul>
+      <li>Process variances \(\beta_{t}\) could be learnable parameters but are fixed to constants, thus posterior \(q\) has no learnable parameters so \(L_{T}\) is ignored</li>
+      <li>During the reverse process \(p_{\theta}\) deviation is set to \(\sum_{\theta}(x_{t},t) = \sigma^{2}_{t}I\) where \(\sigma_{t}^{2} = \beta_{t}\)</li>
+      <li>\(L_{t-1}\) can be written as the l2 loss of the predicted mean</li>
+    </ul>
+  </li>
+  <li>Experiments
+    <ul>
+      <li>T = 1000, forward process variances are set to constants \(\beta_{1}=10^{-4}\) to \(\beta_{T}=0.02\)</li>
+      <li>Used U-Net backbone with group normalization. Parameteres are shared across time. Positional encoding and self-attention are used.</li>
+      <li>FID score of 3.17, better sample quality than most models in the literature</li>
+    </ul>
+  </li>
+</ol>
+
+<h4 id="2-improved-denoising-diffusion-probabilistic-models">2. <a href="https://arxiv.org/abs/2102.09672">Improved Denoising Diffusion Probabilistic Models</a></h4>
+<ul>
+  <li>OpenAI, ICLR 2021 Reject , Feb 18 2021</li>
+</ul>
+
+<ol>
+  <li>Core Contributions
+    <ul>
+      <li>Noise cosine schedule</li>
+      <li>Learning sigma (variance), reduces the number of diffusion steps required for training</li>
+    </ul>
+  </li>
+  <li>Weaknesses
+    <ul>
+      <li>Similar FIDs as other approaches</li>
+      <li>log-likelihood is not paramount for generative tasks</li>
+    </ul>
+  </li>
+  <li>Results
+    <ul>
+      <li>On CIFAR-10, improved negative log-likelihood from 3.99 (Basedline DDPM) to 2.94</li>
+    </ul>
+  </li>
+  <li>Details
+    <ul>
+      <li>Hybrid objective outperforms in log-likelihood than optimizing for log-likelihood directly</li>
+      <li>Learn variance
+        <blockquote>
+\[\sum_{\theta}(x_{t},t)=exp(\upsilon log \beta_{t}+(1-\upsilon)log \tilde{\beta}_{t})\]
+        </blockquote>
+      </li>
+      <li>Hybrid loss to incorporate \(\sum_{\theta}\)
+        <blockquote>
+\[L_{hypbrid} = L_{simple} + \lambda L_{vlb}\]
+        </blockquote>
+      </li>
+      <li>Noise schedule (cosine)
+        <blockquote>
+          <p>\(\bar{\alpha}_{t} = \frac{f(t)}{f(0)}, f(t) = cos(\frac{t/T+s}{1+s} \cdot \frac{\pi}{2})^{2}\)<br />
+ <img src="/assets/posts/blog/2.diffusion_survey/2-noise_schedule.png" alt="Cosine Noise Schedule" title="Cosine Noise Schedule" /><br />
+ For reference \(\beta_{t} = 1 - \frac{\bar{\alpha}_{t}}{\bar{\alpha}_{t-1}}\)</p>
+        </blockquote>
+      </li>
+      <li>Importance of log-likelihood
+        <ul>
+          <li>Generally believed that optimizing log-likelihood forces generative models to capture all of the modes the data distribution</li>
+          <li>Small improvements in log-likelihood can have a dramatic impact on sample quality and learnt feature representations.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Opinion
+    <ul>
+      <li>Importance of optimizing for log-likelihood?</li>
+    </ul>
+  </li>
+</ol>
+
+<h4 id="3-variational-diffusion-models">3. <a href="https://arxiv.org/abs/2107.00630">Variational Diffusion Models</a></h4>
+<ul>
+  <li>Google Research, NeurIPS 2021, Jul 1 2021</li>
+</ul>
+
+<ol>
+  <li>Contributions
+    <ul>
+      <li>Introduces a family of diffusion based generative models with SOTA performance</li>
+      <li>Optimizes for noise schedule</li>
+      <li>VLB simplified in terms of the signal-to-noise ratio.</li>
+      <li>State-of-the-art likelihoods on image density estimation benchmarks with often significantly faster optimization</li>
+      <li>Equivalence between models in the literature</li>
+      <li>Continuous-time VLB is invariant to the noise schedule, except for the signal-to-noise ratio at its endpoints</li>
+      <li>This enables the model to learn a noise schedule that minimizes the variance of the resulting VLB estimator, leading to faster optimization</li>
+    </ul>
+  </li>
+</ol>
+
+<h4 id="4-denoising-diffusion-implicit-models">4. <a href="https://arxiv.org/abs/2010.02502">Denoising Diffusion Implicit Models</a></h4>
+<ul>
+  <li>Stanford University, ICLR 2021, Oct 6 2020</li>
+</ul>
+
+<ol>
+  <li>Contributions
+    <ul>
+      <li>New forward process (Non-Markovian)</li>
+      <li>Increases speed of reverse process (Objective is the same)</li>
+      <li>10x, 50x faster to produce high quality samples</li>
+    </ul>
+  </li>
+</ol>
+
+<h4 id="5-high-resolution-image-synthesis-with-latent-diffusion-models">5. <a href="https://arxiv.org/abs/2112.10752">High-Resolution Image Synthesis with Latent Diffusion Models</a></h4>
+<ul>
+  <li>Runway ML, CVPR 2022, Dec 20 2021</li>
+</ul>
+
+<ol>
+  <li>Contributions
+    <ul>
+      <li>Faster high-resolution image synthesis with diffusion models by using the latent space instead of the pixel space.</li>
+      <li>Trains an autoencoder in the latent space, which is perceptually equivalent to the image space. It is trained with perceptual loss and patch-based adversarial objecgtive which enforces local realism.</li>
+      <li>The encoder downsamples the image by the factor f, and use regularization techniques (KL) on the latent space.</li>
+      <li>This learned latent space can be used for other downstream tasks.</li>
+      <li>The 2 dimensional latent space can focus on the semantically important parts of the data more efficiently.</li>
+    </ul>
+  </li>
+</ol>
+
+<h4 id="6-ilvr-conditioning-method-for-denoising-diffusion-probabilistic-models">6. <a href="https://arxiv.org/abs/2108.02938">ILVR: Conditioning Method for Denoising Diffusion Probabilistic Models</a></h4>
+<ul>
+  <li>SNU, Samsung, ICCV 2021 Oral, Aug 6 2021</li>
+</ul>
+
+<ol>
+  <li>Contributions
+    <ul>
+      <li>Propose Iterative Latent Variable Refinement (ILVR) to guide the generative process in DDPM.</li>
+      <li>Sample images from conditional distribution \(p_{\theta}(x_{0:T} \mid c) = p(x_{T})\Pi^{T}_{t=1}p_{\theta}(x_{t-1} \mid x_{t}, c)\) where c is the condition</li>
+      <li>\(\phi_{N}(\cdot)\) denotes a low-pass filtering operation, a sequence of downsampling and upsampling. Condition c ensures that the donwampled image \(\phi_{N}(x_{0})\) equals to \(\phi_{N}(y)\)</li>
+    </ul>
+  </li>
+</ol>
+
+<h4 id="7-semantic-image-synthesis-via-diffusion-models">7. <a href="https://arxiv.org/abs/2207.00050">Semantic Image Synthesis via Diffusion Models</a></h4>
+<ul>
+  <li>Microsoft, Jun 30, 2022</li>
+</ul>
+
+<ol>
+  <li>Contributions
+    <ul>
+      <li>First to attempt diffusion modeles for semantic image synthesis.</li>
+      <li>The noisy image is fed into the encoder of the denoising network.</li>
+      <li>The semantic layout is embedded into the the decoder of the denoising network by multi-layer spatially-adaptive normalization operators.</li>
+      <li>This highly improves the quality and semantic correlation of generated images.</li>
+      <li>Model is fine-tuned by randomly removing the semantic mask input.</li>
+      <li>Sampled based on both with and without the semantic mask.</li>
+      <li>With interpolation between the two, the model achieves higher fidelity and stronger correlation with the semantic mask input.</li>
+    </ul>
+  </li>
+</ol>
+
+<h4 id="8-mcvd-masked-conditional-video-diffusion-for-prediction-generation-and-interpolation">8. <a href="https://arxiv.org/abs/2205.09853">MCVD: Masked Conditional Video Diffusion for Prediction, Generation, and Interpolation</a></h4>
+<ul>
+  <li>Mila, NeurIPS 2022, May 19, 2022</li>
+</ul>
+
+<ol>
+  <li>Contributions
+    <ul>
+      <li>Model is trained by randonly and independenly masking all of the past or future frames.</li>
+    </ul>
+  </li>
+</ol>
+
+<h4 id="9-diffusion-models-beat-gans-on-image-synthesis">9. <a href="https://arxiv.org/abs/2105.05233">Diffusion Models Beat GANs on Image Synthesis</a></h4>
+
+<h4 id="10-diffused-heads-diffusion-models-beat-gans-on-talking-face-generation">10. <a href="https://arxiv.org/abs/2301.03396">Diffused Heads: Diffusion Models Beat GANs on Talking-Face Generation</a></h4>
+
+<h4 id="11-cold-diffusion-inverting-arbitrary-imagetransforms-without-noise">11. <a href="https://arxiv.org/abs/2208.09392">Cold Diffusion: Inverting Arbitrary ImageTransforms Without Noise</a></h4>
+
+<h4 id="12-understanding-diffusion-models-a-unified-perspective">12. <a href="https://arxiv.org/abs/2208.11970">Understanding Diffusion Models: A Unified Perspective</a></h4>
+
+<h4 id="13-difftalk-crafting-diffusion-models-for-generalized-talking-head-synthesis">13. <a href="">DiffTalk: Crafting Diffusion Models for Generalized Talking Head Synthesis</a></h4>
+
+<h4 id="14-speech-driven-video-editing-via-an-audio-conditioned-diffusion-model">14. <a href="">Speech Driven Video Editing via an Audio-Conditioned Diffusion Model</a></h4>
+
+<h3 id="3-2-insights">3-2. Insights</h3>
+<ul>
+  <li>Common features</li>
+  <li>Direction</li>
+  <li>Flaws, potential improvements</li>
+</ul>
+
+<h2 id="open-source">Open Source</h2>
+
+<h2 id="demos">Demos</h2>
+
+<h2 id="code">Code</h2>
+<p>Colab Notebook (PyTorch)</p>
+
+<h2 id="research-agendas">Research Agendas</h2>
+
+<h2 id="references">References</h2>
+<ol>
+  <li><a href="https://www.assemblyai.com/blog/diffusion-models-for-machine-learning-introduction/">AssemplyAI</a></li>
+  <li><a href="https://huggingface.co/blog/annotated-diffusion">Annotated Diffusion (HuggingFace)</a></li>
+  <li><a href="https://lilianweng.github.io/posts/2021-07-11-diffusion-models/">Lilian Weng</a></li>
+</ol>
+

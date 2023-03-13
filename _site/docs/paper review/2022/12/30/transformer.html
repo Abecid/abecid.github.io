@@ -1,0 +1,98 @@
+
+<p>Tags: Deep Learning, NLP, Transformer</p>
+
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<h1 id="attention-is-all-you-need-transformer">Attention Is All You Need: Transformer</h1>
+<p><a href="https://arxiv.org/abs/1706.03762">Source Paper</a><br />
+12 Jun 2017<br />
+NeurIPS 2017</p>
+
+<p><img src="/assets/posts/paper_review/16.transformer/title.png" alt="Title" title="Title" /></p>
+
+<h1 id="1-core-contributions">1. Core Contributions</h1>
+<p><img src="/assets/posts/paper_review/16.transformer/1.transformer.webp" alt="Transformer" title="Transformer" />
+Transformer Architecture Using Self-Attention for Sequence to Sequence Tasks (Machine Translation).</p>
+
+<p>Self-Attention<br />
+Scaled Dot-Product Attention Scoring Function<br />
+\(softmax(\dfrac{QK^{T}}{\sqrt{d_{k}}})V\)</p>
+
+<p>Strengths</p>
+<ul>
+  <li>Dispensing RNNs</li>
+  <li>Parallel Training</li>
+  <li>Solve long term memory problem and gradient vanishing</li>
+</ul>
+
+<h1 id="2-background">2. Background</h1>
+<p>Attention mechanism was envisioned as an enhancement for encoder-decoder models (Bahdanau et al., 2014).</p>
+
+<p>Instead of the decoder focusing on the information sequentially it should focus on the information with respect to its relevance. As a result, the input is transformed into a weighted sum.</p>
+
+<p>query q operates on key value pairs (k,v) .</p>
+
+<p>Attention is weighing the input based on relevance<br />
+\(Attention(q, D) = \sum_{i=1} \alpha(q,k_{i})v_{i}\).<br />
+Where D is the dataset and \(\alpha\) is the attention function.</p>
+
+<p>Common practice to softmax the weights and cover with exponent to prevent the weights from being negative<br />
+\(\alpha(q,k_{i}) = \dfrac{exp(\alpha(q,k_{i}))}{\sum_{j} exp(\alpha(q,k_{j}))}\)</p>
+
+<h1 id="3-introduction">3. Introduction</h1>
+<p>RNNs, LSTMs have been used previously for sequence modeling.<br />
+Sequential computation remained a problem.<br />
+Previous models have used the attention mechanism in conjunction with RNN encoder-decoder models.<br />
+Transformer architecture is proposed using self-attention while completely dispensing RNNs, drawing global dependencies between input and output.<br />
+Also great at parallelization and can reach SOTA in translation as quickly as twelve hours on eight P100 GPUs.</p>
+
+<p>New SOTA in translation tasks.<br />
+English-French model training took 3.5 days with 8 GPUs.</p>
+
+<h1 id="4-related-works">4. Related Works</h1>
+<p>Previously CNNs were used to compute hidden representations in parallel to reduce sequential computation.<br />
+However the number of operations required to learn signals from input and output positions grew.<br />
+In the Transformer this is reduced to constant operations.<br />
+And to make up for the reduced effectiveness, Multi-head Attention is proposed.</p>
+
+<h1 id="5-transformer">5. Transformer</h1>
+<h2 id="5-1-encoder-decoder-architecture">5-1. Encoder decoder architecture.</h2>
+<p><img src="/assets/posts/paper_review/16.transformer/1.transformer.webp" alt="Transformer" title="Transformer" /><br />
+6 identical layers (attention heads)<br />
+Residual connection around the attention mechanism and the feedforward network, resulting in an addition then layer normalization.<br />
+Output dimension of the encoder is 512. (d=512)</p>
+
+<h2 id="5-2-attention-mechanism">5-2. Attention Mechanism</h2>
+<p><img src="/assets/posts/paper_review/16.transformer/2.scaled dot_product attention.png" alt="Dot Product Attention" title="Dot Product Attention" /><br />
+\(softmax(\dfrac{QK^{T}}{\sqrt{d_{k}}})V\)<br />
+\(d_{k}\) division is to ensure the variance of the dot product is one.<br />
+\(Q \in \mathcal{R}^k\)<br />
+\(K \in \mathcal{R}^k\)<br />
+\(d_{k} = k\)</p>
+
+<p><img src="/assets/posts/paper_review/16.transformer/3.multihead_attention.png" alt="Multihead Attention" title="Multihead Attention" /><br />
+Each independent attention outputs are concatenated</p>
+
+<h2 id="5-2-other-techniques">5-2. Other Techniques</h2>
+<ol>
+  <li>Position-wise Feed-forward Network</li>
+  <li>Positional Encoding</li>
+</ol>
+
+<h2 id="6-model-proceedings">6. Model Proceedings</h2>
+<p>One token at a time.</p>
+
+<h2 id="7-training">7. Training</h2>
+<p>Training Techniques<br />
+Loss functions</p>
+
+<h2 id="8-training-in-action">8. Training in Action</h2>
+<p>Fine-tuning<br />
+Pre-training</p>
+
+<h2 id="9-sample-code">9. Sample Code</h2>
+<p><a href="https://github.com/Abecid/Deep-Learning-Implementations/tree/main/papers/transformer">PyTorch Implementation</a></p>
+
+<h2 id="references">References</h2>
+<p><a href="https://jalammar.github.io/illustrated-transformer/">Illustrated Transformer</a> . 
+<a href="https://kikaben.com/transformers-encoder-decoder/">Transformer’s Encoder-Decoder: Let’s Understand The Model Architecture</a> .</p>
