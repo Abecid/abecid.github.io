@@ -104,11 +104,11 @@ permalink: /
 
   <a href="{{ href }}" class="post-cat"><h4>{{ cat[0] }}</h4></a>
   <ul>
+    <!-- 
     {% assign base_max_posts = 3 %}
     {% assign base_minus_one = base_max_posts | minus:1 %}
     {% assign max_posts = base_max_posts %}
     {% assign complete_post_counter = 0 %}
-
     {% for post in cat[1] limit:max_posts %}
       {% if post.tags contains "Hidden" %}
         {% assign max_posts = max_posts | plus:1 %}
@@ -119,7 +119,17 @@ permalink: /
         {% assign complete_post_counter = complete_post_counter | plus:1 %}
       {% endif %}
     {% endfor %}
+    -->
 
+    {% assign base_max_posts = 3 %}
+    {% assign max_posts = base_max_posts %}
+    {% for post in cat[1] limit:max_posts %}
+      {% if post.tags contains "Hidden" %}
+        {% assign max_posts = max_posts | plus:1 %}
+      {% endif %}
+    {% endfor %}
+
+    <!-- {% assign base_max_posts = 3 %} -->
     {% for post in cat[1] limit:max_posts %}
       {% if post.tags contains "Hidden" %}
         {% assign max_posts = max_posts | plus:1 %}
