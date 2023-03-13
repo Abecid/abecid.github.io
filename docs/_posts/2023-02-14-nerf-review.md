@@ -41,6 +41,11 @@ Novel View Synthesis
   - If the ray intersects with a surface, the color of the surface is calculated, and if it intersects with a volume, the color and opacity of the volume are calculated.
   - Ray marching is typically slower than ray casting or ray tracing, but it allows for the rendering of very complex shapes that cannot be represented by simple geometry.
 
+### 1-3. Marching Cubes  
+![Demo](/assets/posts/blog/5.nerf/MarchingCubesCases.png "Demo") 
+- Creates a triangle mesh from an implicit function
+-  Iterates ("marches") over a uniform grid of cubes superimposed over a region of the function
+
 ### 1-2. DeepSDF
 ![Demo](/assets/posts/blog/5.nerf/deepsdf.png "Demo")  
 - Use a feedforward neural network to project SDF from (x,y,z)
@@ -130,7 +135,7 @@ Novel View Synthesis
     $$ F_{\Theta} = F_{\Theta}' \circ \gamma $$  
     $$ F_{\Theta}$$ is learned while $$\gamma$$ projects the input from $$\mathbb{R}$$ to $$\mathbb{R}^{2L}$$  
     $$ F_{\Theta}' $$ is a MLP  
-    $$ \gamma(p) = (sin(2^{0}\pi p), cos(2^{0}\pi p), sin(2^{L-1}\pi p), cos(2^{L-1}\pi p))  $$
+    $$ \gamma(p) = (sin(2^{0}\pi p), cos(2^{0}\pi p), ... ,sin(2^{L-1}\pi p), cos(2^{L-1}\pi p))  $$
 
 2. Hierarchical Volume Sampling
     1. Properties
