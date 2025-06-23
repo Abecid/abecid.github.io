@@ -28,6 +28,8 @@ jobs:
         jupyter nbconvert --to notebook --execute talkmap.ipynb --output talkmap_out.ipynb
 
     - name: Commit changes
+      env:
+        GH_PAT: ${{ secrets.GH_PAT }}
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
