@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/projects/";
           },
-        },{id: "post-a-post-with-plotly-js",
+        },{id: "post-recent-flow-map-distillation-methods",
+        
+          title: "Recent Flow-Map Distillation Methods",
+        
+        description: "Recent developments of diffusion distillation techniques",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/distillation/";
+          
+        },
+      },{id: "post-a-post-with-plotly-js",
         
           title: "a post with plotly.js",
         
