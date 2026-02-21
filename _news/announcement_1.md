@@ -5,4 +5,4 @@ inline: true
 related_posts: false
 ---
 
-I came back to Berkeley
+Came back to Berkeley
