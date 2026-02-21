@@ -25,7 +25,7 @@ latest_posts:
   limit: 3 # leave blank to include all the blog posts
 ---
 
-I am interested in embodied simulations. 
+I am interested in embodied generative simulations. 
 
 The intersection of 3D representations and distribution matching generative models boils my beans.
 
