@@ -12,7 +12,7 @@ Meta FlowMap
 # Flow Matching to Flow Maps to Distillation: A Deep Dive
 (MeanFlow, Flow Map Self-Distillation, Stochastic/Meta Flow Maps, TMD, TVM)
 
-## Table of Content
+# Table of Content
 1. [Foundations: Flow Matching and Flow Maps](#1-foundations-flow-matching-vs-flow-maps)
 2. [MeanFlow](#2-meanflow)
 3. [FreeFlowMap](#3-freeflowmap)
@@ -20,10 +20,10 @@ Meta FlowMap
 5. [Transition Matching Distillation](#5-transition-matching-distillation)
 6. [Terminal Velocity Matching](#6-terminal-velocity-matching)
 
-## Overview
+# Overview
 Recent generative modeling utilize and develop upon flow maps and jvp based distillation techniques to reduce the number of function evaluations during inference. 
 
-## Summary
+# Summary
 
 The modern progression is:
 
@@ -37,29 +37,38 @@ The modern progression is:
 
 ---
 
-## 1) Foundations: Flow Matching and Flow Maps
-### 1.1 Flow Matching (instantaneous field)
+# 1. Foundations: Flow Matching and Flow Maps
+### 1.1 Flow Matching
+![Flow Matching](/assets/img/blogs/1_distillation/flowmatching.png)
+
+*Figure 1. Flow Matching. from Sabour, Fidler, and Kreis (2025),* Align Your Flow: Scaling Continuous-Time Flow Map Distillation *(arXiv:2506.14603).*  
+
 Generative models learn to transport probability ditribution from prior, $p_{0}$, to a data distribution, $p_{1}$. 
 
 Classic flow matching learns a vector field
 $$
 u(x,t)
 $$
-that defines an ODE trajectory. Sampling is ODE integration from noise to data.
+that acts as an instantaneous velocity at timestep $t$, which collectively defines an ODE trajectory. Sampling involves ODE integration from noise to data.
 
-There are several bottlenecks to this approach: if the learned trajectory is curved, a decent solver (Euler, Heun) is required and many NFEs.
+There are several bottlenecks to this approach: if the learned trajectory is curved, a decent solver (Euler, Heun) is required and many number of function evaluations (NFEs) to integrate over the ODE trajectory.
 
-The flow map perspective directly targets:
+### 1.2 Flow Map
+![Flow Map](/assets/img/blogs/1_distillation/flowmap.png)
+
+*Figure 2. Flow Map. from Sabour, Fidler, and Kreis (2025),* Align Your Flow: Scaling Continuous-Time Flow Map Distillation *(arXiv:2506.14603).*  
+
+Flow map formulation directly targets:
 $$
 \phi_u(x_t, t, s)
 $$
-which maps a state at time \(t\) to time \(s\), instead of learning only the local tangent.
+which maps a state at time \(t\) to time \(s\), instead of learning only the local instantaneous tangent.
 
 Recent methods have emerged developing upon this flow map formulation for fewer step, student-teacher, data-free distillation families.
 
 ---
 
-## 2) MeanFlow
+# 2. MeanFlow
 ### 2.1 Average velocity instead of instantaneous velocity
 
 MeanFlow defines an **average velocity**
@@ -150,7 +159,7 @@ That’s the whole point: replace time integration with a learned displacement.
 
 ---
 
-## 3) FreeFlowMap
+# 3. FreeFlowMap
 
 Flow Map Distillation Without Data
 
@@ -241,7 +250,7 @@ That is a nice bidirectional correction mechanism.
 
 ---
 
-## 4) Meta Flow Maps
+# 4. Meta Flow Maps
 
 Meta flow maps correspond to a **stochastic flow map**, which is important because deterministic flow maps are too rigid.
 
@@ -317,7 +326,7 @@ This is exactly the kind of conceptual bridge diffusion researchers should care 
 
 ---
 
-## 5) Transition Matching Distillation
+# 5. Transition Matching Distillation
 
 Transition Matching Distillation (TMD) bridges engineering and theory based adaptation of MeanFlow to **video distillation**.
 
@@ -377,7 +386,7 @@ This is a strong template for hard domains (video, 3D, multimodal) where pure on
 
 ---
 
-## 6) Terminal Velocity Matching
+# 6. Terminal Velocity Matching
 
 Terminal Velocity Matching (TVM): A More Principled Objective for One/Few-Step Models
 
@@ -440,7 +449,7 @@ That matters a lot if you care about scaling this family to modern DiT/transform
 
 ---
 
-## 7) Unifying View: The Field’s Progression in One Picture
+# 7. Unifying View: The Field’s Progression in One Picture
 
 Almost every method in this area can be seen as:
 
@@ -455,7 +464,7 @@ This “diagonal + propagation” lens is the best mental model for the literatu
 
 ---
 
-## 8) Practical Research Takeaways (for top-lab diffusion folks)
+# 8. Practical Research Takeaways (for top-lab diffusion folks)
 
 ### 8.1 If you’re doing one-step/few-step image generation
 Start by deciding which failure mode you care about:
@@ -478,7 +487,7 @@ The stochastic flow-map lens is probably the most future-proof:
 
 ---
 
-## 9) A compact “theory stack” to remember
+# 9. A compact “theory stack” to remember
 
 The whole area can be compressed into this stack:
 
@@ -493,7 +502,7 @@ That’s the real progression.
 
 ---
 
-## 10) Where the field is likely going next
+# 10. Where the field is likely going next
 
 The next wave is probably a merge of these threads:
 
