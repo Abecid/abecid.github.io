@@ -52,9 +52,9 @@ ninja.data = [{
             window.location.href = "/blog/2026/spatial-video/";
           
         },
-      },{id: "post-recent-flow-map-distillation-methods",
+      },{id: "post-modern-diffusion-distillation-overview",
         
-          title: "Recent Flow-Map Distillation Methods",
+          title: "Modern Diffusion Distillation Overview",
         
         description: "Recent developments of diffusion distillation techniques",
         section: "Posts",
@@ -114,6 +114,13 @@ ninja.data = [{
         section: 'Socials',
         handler: () => {
           window.open("https://twitter.com/abecidadam", "_blank");
+        },
+      },{
+        id: 'social-scholar',
+        title: 'Google Scholar',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://scholar.google.com/citations?user=uVYIIp0AAAAJ", "_blank");
         },
       },{
       id: 'light-theme',
