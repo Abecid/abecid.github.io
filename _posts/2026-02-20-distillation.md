@@ -9,44 +9,55 @@ categories: research-survey
 
 # Flow Matching to Flow Maps to Distillation: A Deep Dive
 
-# Table of Content
-1. [Foundations](#1-foundations-flow-matching-vs-flow-maps)
-    1. Diffusion
-    2. Flow Matching
-    3. Rectified Flow
-    4. FlowMap
-    5. Consistency Model
-2. [MeanFlow Family](#2-meanflow)
-    1. MeanFlow
-    2. iMeanFlow
-    3. AlphaFlow
-    4. Improved MeanFlow
-    5. Decoupled MeanFlow
-3. [Flow Map](#3-freeflowmap)
-    1. Data Free: FreeFlowMap
-    2. Meta FlowMap
-    3. TVM
-4. [Score Distillation]()
-    1. Variational Score Distillation (VSD)
-    2. Distribution Matching Distillation (DMD)
-    3. Score Identity Distillation (SiD)
-5. [Adversarial Distillation]()
-    1. Adversarial Diffusion Distillation
-    2. LADD
-    1. DiffRatio
-    2. APT
-6. [Video Generation]()
-    1. CausVid
-    2. Self-forcing
-    3. TMD
-7. [New Domains]()
-    1. Drifting
-    2. JIT
-    3. PixelFlow
-    4. LatentForcing
-8. [Manifold]()
-    1. Riemmian Manifold
-    2. Optimal Transport
+# Table of Contents
+1. [Foundations](#1-foundations)
+    1. [Diffusion](#11-diffusion)
+    2. [Flow Matching](#12-flow-matching)
+    3. [Rectified Flow](#13-rectified-flow)
+    4. [Flow Map](#14-flow-map)
+    5. [Consistency Models](#15-consistency-models)
+
+2. [MeanFlow Family](#2-meanflow-family)
+    1. [MeanFlow](#21-meanflow)
+    2. [Improved MeanFlow (iMF)](#22-improved-meanflow-imf)
+    3. [AlphaFlow](#23-alphaflow)
+    4. [Accelerating and Improving MeanFlow](#24-accelerating-and-improving-meanflow)
+    5. [Decoupled MeanFlow](#25-decoupled-meanflow)
+
+3. [FlowMap](#3-flowmap)
+    1. [Free FlowMap](#31-free-flowmap)
+    2. [Meta Flow Maps](#32-meta-flow-maps)
+    3. [Terminal Velocity Matching (TVM)](#33-terminal-velocity-matching-tvm)
+
+4. [Score Distillation](#4-score-distillation)
+    1. [Variational Score Distillation (VSD)](#41-variational-score-distillation-vsd)
+    2. [Distribution Matching Distillation (DMD)](#42-dmd-distribution-matching-distillation)
+    3. [Score Identity Distillation (SiD)](#43-score-identity-distillation-sid)
+
+5. [Adversarial Distillation](#5-adversarial-distillation)
+    1. [Adversarial Diffusion Distillation (ADD)](#51-adversarial-diffusion-distillation-add)
+    2. [LADD](#52-ladd-latent-adversarial-diffusion-distillation)
+    3. [DiffRatio](#53-diffratio)
+    4. [APT (and AAPT)](#54-apt-and-the-modern-aapt-extension)
+    5. [Comparisons](#55-comparisons)
+
+6. [Video Generation](#6-video-generation)
+    1. [CausVid](#61-causvid)
+    2. [Self-Forcing](#62-self-forcing)
+    3. [Transition Matching Distillation (TMD)](#63-transition-matching-distillation)
+
+7. [New Domains](#7-new-domains)
+    1. [JiT](#71-jit-just-image-transformers)
+    2. [Drifting](#72-drifting)
+    3. [Pixel MeanFlow (pMF)](#73-pixel-meanflow-pmf)
+    4. [REPA](#74-repa-representation-alignment-for-generation)
+    5. [Latent Forcing](#75-latent-forcing)
+    6. [Unified Latents (UL)](#76-unified-latents-ul)
+    7. [Unifying Pattern](#77-unifying-pattern-across-these-new-domain-methods)
+
+8. [Manifold](#8-manifold)
+    1. [Riemannian Manifold](#81-riemannian-manifold)
+    2. [Optimal Transport](#82-optimal-transport)
 
 # Overview
 Recent generative modeling utilize and develop upon flow maps and jvp based distillation techniques to reduce the number of function evaluations during inference. We focus on the Meanflow family, score distillation methods, and its applications in video generation. 
