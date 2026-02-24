@@ -30,7 +30,29 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/projects/";
           },
-        },{id: "post-recent-methods-utilizing-diffusion-in-graphics",
+        },{id: "post-flow-maps-and-distillation",
+        
+          title: "Flow Maps and Distillation",
+        
+        description: "Recent developments of flow map distillation techniques",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/flowmap/";
+          
+        },
+      },{id: "post-modern-diffusion-distillation-overview",
+        
+          title: "Modern Diffusion Distillation Overview",
+        
+        description: "Recent developments of diffusion distillation techniques",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/diffusion/";
+          
+        },
+      },{id: "post-recent-methods-utilizing-diffusion-in-graphics",
         
           title: "Recent Methods Utilizing Diffusion in Graphics",
         
@@ -50,17 +72,6 @@ ninja.data = [{
         handler: () => {
           
             window.location.href = "/blog/2026/spatial-video/";
-          
-        },
-      },{id: "post-modern-diffusion-distillation-overview",
-        
-          title: "Modern Diffusion Distillation Overview",
-        
-        description: "Recent developments of diffusion distillation techniques",
-        section: "Posts",
-        handler: () => {
-          
-            window.location.href = "/blog/2026/distillation/";
           
         },
       },{id: "post-google-gemini-updates-flash-1-5-gemma-2-and-project-astra",
