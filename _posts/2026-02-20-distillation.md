@@ -1,44 +1,59 @@
 ---
 layout: post
-title: Recent Flow-Map Distillation Methods
+title: Modern Diffusion Distillation Overview
 date: 2026-02-20 01:24:00
 description: Recent developments of diffusion distillation techniques
 tags: diffusion survey
 categories: research-survey
 ---
 
-Meta FlowMap
-
 # Flow Matching to Flow Maps to Distillation: A Deep Dive
-(MeanFlow, Flow Map Self-Distillation, Stochastic/Meta Flow Maps, TMD, TVM)
 
 # Table of Content
-1. [Foundations: Flow Matching and Flow Maps](#1-foundations-flow-matching-vs-flow-maps)
-2. [MeanFlow](#2-meanflow)
-3. [FreeFlowMap](#3-freeflowmap)
-4. [Meta FlowMap](#4-meta-flow-map)
-5. [Transition Matching Distillation](#5-transition-matching-distillation)
-6. [Terminal Velocity Matching](#6-terminal-velocity-matching)
+1. [Foundations](#1-foundations-flow-matching-vs-flow-maps)
+  1-1. Diffusion
+  1-2. Flow Matching
+  1-3. Rectified Flow
+  1-4. FlowMap
+  1-5. Consistency Model
+2. [MeanFlow Family](#2-meanflow)
+  2-1. MeanFlow
+  2-2. iMeanFlow
+  2-3. AlphaFlow
+  2-4. Improved MeanFlow
+  2-5. Decoupled MeanFlow
+3. [Flow Map](#3-freeflowmap)
+  3-1. Data Free: FreeFlowMap
+  3-2. Meta FlowMap
+  3-3. TVM
+4. [Score Distillation]()
+  4-1. VSD
+  4-2. DMD
+  4-3. Adaptive Matching Distillation
+5. [Adversarial ]()
+  5-1. DiffRatio
+  5-2. APT
+6. [Video Generation]()
+  6-1. CausVid
+  6-2. Self-forcing
+  6-3. TMD
+7. [New Domains]()
+  7-1. Drifting
+  7-2. JIT
+  7-3. PixelFlow
+  7-4. LatentForcing
+8. [Manifold]()
+  8-1. Riemmian Manifold
+  8-2. Optimal Transport
 
 # Overview
-Recent generative modeling utilize and develop upon flow maps and jvp based distillation techniques to reduce the number of function evaluations during inference. 
-
-# Summary
-
-The modern progression is:
-
-1. **Flow Matching (FM)** learns the **instantaneous velocity field**.
-2. **Flow-map methods** learn **time-to-time transport maps** (or average velocities), which are much more compatible with **1-step / few-step generation**.
-3. **MeanFlow** gives a clean, derivation-first way to train a two-time flow-map model via a **JVP-based identity** (no extra consistency axiom).
-4. **Flow Map Distillation without Data / self-distillation** (the “FreeFlowMap / How to build a consistency model” line) points out **teacher-data mismatch** and replaces data-dependent distillation with **prior-only self-generated supervision**, then adds a **correction objective** to fix distribution drift.
-5. **Stochastic Flow Maps / Meta Flow Maps** generalize flow maps to **stochastic transitions** and derive **diagonal + consistency** objectives from conditional posterior structure; this is the right lens when deterministic flow maps are too restrictive.
-6. **TMD** ports MeanFlow-style ideas into **video distillation**, using a **transition-matching MeanFlow pretraining stage** + a second-stage distributional distillation objective.
-7. **TVM** shifts the target from “match initial/local velocity” to **match terminal velocity**, and gives a more principled guarantee (explicit **2-Wasserstein upper bound**), while also exposing a key practical systems issue: **JVP through transformer attention**.
+Recent generative modeling utilize and develop upon flow maps and jvp based distillation techniques to reduce the number of function evaluations during inference. We focus on the Meanflow family, score distillation methods, and its applications in video generation. 
 
 ---
 
-# 1. Foundations: Flow Matching and Flow Maps
-### 1.1 Flow Matching
+# 1. Foundations
+## 1.1 Diffusion
+## 1.2 Flow Matching
 ![Flow Matching](/assets/img/blogs/1_distillation/flowmatching.png)
 
 *Figure 1. Flow Matching. from Sabour, Fidler, and Kreis (2025),* Align Your Flow: Scaling Continuous-Time Flow Map Distillation *(arXiv:2506.14603).*  
@@ -53,7 +68,9 @@ that acts as an instantaneous velocity at timestep $t$, which collectively defin
 
 There are several bottlenecks to this approach: if the learned trajectory is curved, a decent solver (Euler, Heun) is required and many number of function evaluations (NFEs) to integrate over the ODE trajectory.
 
-### 1.2 Flow Map
+## 1.3 Rectified Flow
+
+## 1.4 Flow Map
 ![Flow Map](/assets/img/blogs/1_distillation/flowmap.png)
 
 *Figure 2. Flow Map. from Sabour, Fidler, and Kreis (2025),* Align Your Flow: Scaling Continuous-Time Flow Map Distillation *(arXiv:2506.14603).*  
@@ -66,9 +83,14 @@ which maps a state at time \(t\) to time \(s\), instead of learning only the loc
 
 Recent methods have emerged developing upon this flow map formulation for fewer step, student-teacher, data-free distillation families.
 
+## 1.4 Consistency Models
+sCM
+rCM
+
 ---
 
-# 2. MeanFlow
+# 2. MeanFlow Family
+## 2-1. MeanFlow
 #### 2.1 Average velocity instead of instantaneous velocity
 ![Mean Flow](/assets/img/blogs/1_distillation/meanflow.png)
 
@@ -155,9 +177,82 @@ $$
 
 ---
 
-# 3. FreeFlowMap
+## 2.2 Improved MeanFlow (iMF)
 
-Flow Map Distillation Without Data
+iMF addresses two practical issues in MeanFlow:
+1. the self-referential target,
+2. fixed-CFG training (bad for inference-time flexibility).
+
+#### 2.2.1 MeanFlow as a v-loss
+
+iMF rewrites the MeanFlow identity into a **velocity regression form**:
+
+$$
+v(z_t)
+=
+u(z_t,r,t) + (t-r)\frac{d}{dt}u(z_t,r,t).
+$$
+
+Then parameterize the RHS with $u_\theta$:
+
+$$
+V_\theta
+=
+u_\theta(z_t,r,t) + (t-r)\,\mathrm{JVP}_{\mathrm{sg}}(u_\theta; v_\theta),
+$$
+
+and train with a Flow-Matching-like loss
+
+$$
+\mathcal{L}_{\mathrm{iMF}}
+=
+\mathbb{E}\left[\left\|V_\theta - (\epsilon-x)\right\|_2^2\right].
+$$
+
+This is cleaner because the regression target is now the standard FM target $(\epsilon-x)$ rather than an apparent target constructed from $u_\theta$.
+
+### 2.2.2 Flexible CFG as conditioning
+
+Original MeanFlow supports CFG in 1-NFE, but with a **fixed guidance scale** chosen at training time.
+
+iMF fixes this by making the guidance scale part of the conditioning:
+- guidance scale $\omega$ becomes an input condition,
+- the same model can be sampled with different CFG scales at inference.
+
+That is a big deal because the optimal CFG scale shifts with model size, training progress, and NFE.
+
+### 2.2.3 In-context conditioning
+
+iMF also upgrades conditioning architecture:
+- conditions include $(r,t)$, class label $c$, and guidance-related variables $\Omega$,
+- each condition is represented with multiple learnable tokens,
+- all condition tokens are concatenated with image latent tokens and processed by the Transformer.
+
+This allows:
+- support richer heterogeneous conditioning more naturally,
+- remove **adaLN-zero**,
+- cut params significantly (they report about **1/3 reduction** in a base model setting).
+
+#### 2.2.4 Practical takeaways
+
+iMF is not just “another MeanFlow variant.”
+It is a **systems-and-objective cleanup** of MeanFlow:
+- better training target,
+- flexible guidance at inference,
+- cleaner conditioning interface.
+
+This makes MeanFlow-style models much easier to scale and deploy.
+
+## 2.3 AlphaFlow
+
+## 2.4 Accelerating and MeanFlow
+## 2.5 Decoupled MeanFlow
+
+---
+
+# 3. FlowMap
+
+Flow Map Distillation Without Data bias
 
 ## 3.1 Teacher-data mismatch (the hidden bug in many distillation pipelines)
 
