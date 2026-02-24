@@ -30,7 +30,7 @@ categories: research-survey
   4-1. VSD
   4-2. DMD
   4-3. Adaptive Matching Distillation
-5. [Adversarial ]()
+5. [Adversarial]()
   5-1. DiffRatio
   5-2. APT
 6. [Video Generation]()
@@ -53,39 +53,363 @@ Recent generative modeling utilize and develop upon flow maps and jvp based dist
 
 # 1. Foundations
 ## 1.1 Diffusion
+Diffusion models define a **forward noising process** that gradually corrupts data into noise, and a **reverse process** that learns to reconstruct data from noise. The main reason diffusion models became dominant is that they are stable and high-quality, but the tradeoff is **slow iterative sampling**.
+
+### 1.1.1 Forward process (discrete DDPM view)
+
+In DDPM, the forward process is a Markov chain:
+$$
+q(x_t \mid x_{t-1}) = \mathcal{N}\!\left(\sqrt{1-\beta_t}\,x_{t-1}, \beta_t I\right),
+$$
+where $\beta_t \in (0,1)$ is a variance schedule.
+
+A key closed form is:
+$$
+q(x_t \mid x_0) = \mathcal{N}\!\left(\sqrt{\bar\alpha_t}\,x_0,\,(1-\bar\alpha_t)I\right),
+$$
+with
+$$
+\alpha_t = 1-\beta_t,\qquad \bar\alpha_t=\prod_{s=1}^t \alpha_s.
+$$
+
+So we can sample $x_t$ directly as:
+$$
+x_t = \sqrt{\bar\alpha_t}\,x_0 + \sqrt{1-\bar\alpha_t}\,\epsilon,\qquad \epsilon \sim \mathcal{N}(0,I).
+$$
+
+This is the standard “data + Gaussian noise” interpolation used in many diffusion derivations.
+
+### 1.1.2 Reverse process and denoising objective
+
+The generative model learns the reverse transitions
+$$
+p_\theta(x_{t-1}\mid x_t),
+$$
+which are parameterized via a neural network (predicting noise, $x_0$, or velocity depending on parameterization).
+
+The most common training objective is noise prediction:
+$$
+\mathcal{L}_{\text{simple}}(\theta)
+=
+\mathbb{E}_{t,x_0,\epsilon}
+\left[
+\left\|\epsilon - \epsilon_\theta(x_t,t)\right\|^2
+\right].
+$$
+
+This objective is simple and works extremely well, but inference still requires many reverse denoising steps.
+
+### 1.1.3 Continuous-time diffusion (SDE view)
+
+A continuous-time diffusion can be written as an SDE:
+$$
+dx = f(x,t)\,dt + g(t)\,dW_t,
+$$
+where $f$ is drift, $g$ is diffusion scale, and $W_t$ is a Wiener process.
+
+The reverse-time generative dynamics also form an SDE involving the score:
+$$
+\nabla_x \log p_t(x).
+$$
+
+This is the bridge to **score-based generative modeling** and continuous-time transport formulations.
+
+### 1.1.4 Probability flow ODE (deterministic counterpart)
+
+Every diffusion SDE has an associated deterministic **probability flow ODE** that shares the same marginals $p_t$:
+$$
+\frac{dx}{dt}
+=
+f(x,t)
+-
+\frac{1}{2}g(t)^2 \nabla_x \log p_t(x).
+$$
+
+This is huge conceptually because it turns diffusion sampling into solving an ODE, which directly connects to:
+
+- continuous normalizing flows,
+- flow matching,
+- rectified flow,
+- and later flow-map distillation methods.
+
+So diffusion is not just “denoising noise,” it is also a **continuous transport process** in disguise.
+
+### 1.1.5 Why diffusion motivates distillation
+
+Diffusion teachers are strong but slow because generation requires many function evaluations (NFEs). Distillation methods aim to compress this long trajectory into:
+
+- **few-step samplers** (e.g. 2–8 steps),
+- or even **one-step generators**,
+
+while preserving the teacher’s learned transport geometry.
+
+This is exactly why Chapter 1 naturally progresses from **Diffusion $\to$ Flow Matching $\to$ Flow Maps / Consistency / Distillation**.
+
 ## 1.2 Flow Matching
 ![Flow Matching](/assets/img/blogs/1_distillation/flowmatching.png)
 
 *Figure 1. Flow Matching. from Sabour, Fidler, and Kreis (2025),* Align Your Flow: Scaling Continuous-Time Flow Map Distillation *(arXiv:2506.14603).*  
 
-Generative models learn to transport probability ditribution from prior, $p_{0}$, to a data distribution, $p_{1}$. 
+Flow Matching (FM) reframes generative modeling as directly learning a **time-dependent velocity field** that transports a simple source distribution (usually Gaussian noise) to the data distribution.
 
-Classic flow matching learns a vector field
-$$
-u(x,t)
-$$
-that acts as an instantaneous velocity at timestep $t$, which collectively defines an ODE trajectory. Sampling involves ODE integration from noise to data.
+### 1.2.1 Core idea: learn the instantaneous velocity
 
-There are several bottlenecks to this approach: if the learned trajectory is curved, a decent solver (Euler, Heun) is required and many number of function evaluations (NFEs) to integrate over the ODE trajectory.
+Instead of learning reverse denoising conditionals, FM learns a vector field
+
+$$
+u_\theta(x,t)
+$$
+
+such that samples evolve via the ODE
+
+$$
+\frac{dx}{dt} = u_\theta(x,t),\qquad t\in[0,1].
+$$
+
+If this ODE is integrated from source noise at $t=0$ to $t=1$, the final samples should follow the data distribution.
+
+### 1.2.2 Conditional path and target velocity
+
+FM is usually trained by defining a conditional interpolation path between paired endpoints $(x_0,x_1)$:
+
+$$
+x_t = \psi_t(x_0,x_1).
+$$
+
+For simple linear interpolation:
+
+$$
+x_t = (1-t)x_0 + tx_1.
+$$
+
+The target velocity along this path is:
+
+$$
+\dot{x}_t = \frac{d}{dt}\psi_t(x_0,x_1).
+$$
+
+For the linear path, this becomes:
+
+$$
+\dot{x}_t = x_1 - x_0.
+$$
+
+The model is trained to match this conditional velocity in expectation:
+
+$$
+\mathcal{L}_{\text{FM}}(\theta)
+=
+\mathbb{E}_{t,x_0,x_1}
+\left[
+\left\|u_\theta(x_t,t)-\dot{x}_t\right\|^2
+\right].
+$$
+
+So FM is “supervised vector field learning” on a chosen path family.
+
+### 1.2.3 Why FM is attractive
+
+Compared to score/diffusion training, FM gives a very clean ODE-learning objective and avoids explicit score estimation. It is especially natural when you want to reason about:
+
+- transport geometry,
+- ODE trajectories,
+- and later finite-time maps (flow maps).
+
+### 1.2.4 Limitation: local field, expensive sampling
+
+FM learns a **local tangent** $u_\theta(x,t)$, not a finite-time jump. That means sampling still requires numerical integration:
+
+$$
+x_{t+\Delta t} \approx x_t + \Delta t\,u_\theta(x_t,t)
+$$
+
+(or higher-order solvers like Heun).
+
+If trajectories are curved, discretization error accumulates, so many NFEs are needed. This is the main bottleneck that motivates:
+
+- Rectified Flow (straighter trajectories),
+- Flow Maps (direct time-to-time transport),
+- and distillation methods (few-step or one-step generation).
 
 ## 1.3 Rectified Flow
+
+Rectified Flow (RF) keeps the ODE/transport framing of FM, but explicitly pushes the learned trajectories to become **straighter**, which makes them much easier to sample with few steps.
+
+### 1.3.1 Motivation: straight trajectories are cheap
+
+If a trajectory is highly curved, Euler updates need many small steps. If a trajectory is nearly straight, even a coarse solver can track it accurately.
+
+So RF is basically a geometry-aware fix to the FM sampling bottleneck.
+
+### 1.3.2 Linear interpolation path and velocity target
+
+A standard RF path is the same linear interpolation:
+
+$$
+x_t = (1-t)x_0 + tx_1,
+$$
+
+with instantaneous derivative
+
+$$
+\frac{dx_t}{dt} = x_1 - x_0.
+$$
+
+RF trains a velocity field to match this transport direction along the path:
+
+$$
+v_\theta(x_t,t) \approx x_1 - x_0.
+$$
+
+A common training objective is:
+
+$$
+\mathcal{L}_{\text{RF}}(\theta)
+=
+\mathbb{E}_{t,x_0,x_1}
+\left[
+\left\|v_\theta(x_t,t)-(x_1-x_0)\right\|^2
+\right].
+$$
+
+This looks similar to FM, but the interpretation is sharper: RF cares about learning a transport field whose induced trajectories are easy to discretize.
+
+### 1.3.3 Reflow (iterative rectification)
+
+A major practical idea in RF is **reflow**:
+
+1. Train an initial transport field.
+2. Sample trajectories from the model.
+3. Use those trajectories (or endpoint couplings) to retrain a straighter field.
+4. Repeat.
+
+Each round reduces curvature and improves few-step generation. This is why RF is often viewed as a bridge between classical diffusion/FM and modern one-step distillation.
+
+### 1.3.4 Why RF matters for the rest of this blog
+
+RF is the clean conceptual bridge to flow-map methods because it shifts the focus from “match local field” to “shape trajectories for fast transport.” Once you think this way, the next obvious step is:
+
+> Why learn only the local tangent at all?  
+> Why not learn the **finite-time map** directly?
+
+That is exactly the flow-map perspective.
 
 ## 1.4 Flow Map
 ![Flow Map](/assets/img/blogs/1_distillation/flowmap.png)
 
 *Figure 2. Flow Map. from Sabour, Fidler, and Kreis (2025),* Align Your Flow: Scaling Continuous-Time Flow Map Distillation *(arXiv:2506.14603).*  
 
-Flow map formulation directly targets:
-$$
-\phi_u(x_t, t, s)
-$$
-which maps a state at time \(t\) to time \(s\), instead of learning only the local instantaneous tangent.
+Flow-map methods move beyond local vector fields and directly learn a **time-to-time transport operator**.
 
-Recent methods have emerged developing upon this flow map formulation for fewer step, student-teacher, data-free distillation families.
+### 1.4.1 From vector field to finite-time map
 
-## 1.4 Consistency Models
-sCM
-rCM
+Given a velocity field $u(x,t)$ and its ODE
+
+$$
+\frac{dx}{dt}=u(x,t),
+$$
+
+the associated flow map $\phi_u$ sends a state from time $t$ to time $s$:
+
+$$
+\phi_u(x_t,t,s)=x_s.
+$$
+
+So instead of learning only the local tangent $u(x,t)$, we learn the finite-time update:
+
+$$
+x_s \approx \phi_\theta(x_t,t,s).
+$$
+
+This is much more aligned with few-step sampling, because a single model evaluation can move across a large time interval.
+
+### 1.4.2 Why flow maps help distillation
+
+A flow field gives infinitesimal updates; a flow map gives finite jumps.
+
+That means flow maps are naturally suited for:
+
+- **few-step sampling** (large $t\to s$ jumps),
+- **teacher-student distillation** (student imitates teacher transitions),
+- **self-distillation** (model supervises its own multistep consistency),
+- and **data-free distillation** variants (matching dynamics without original data).
+
+This is the key conceptual move behind MeanFlow-family and FreeFlowMap-family methods.
+
+### 1.4.3 Semigroup / composition structure
+
+Exact flow maps satisfy a composition rule (semigroup property):
+
+$$
+\phi(x_t,t,r)
+=
+\phi\!\left(\phi(x_t,t,s),\,s,\,r\right)
+\qquad \text{for } t \le s \le r.
+$$
+
+This property is incredibly important because it gives a built-in consistency constraint across time triples. Many modern distillation methods exploit some version of this:
+
+- explicit composition matching,
+- consistency losses,
+- JVP-based local constraints that imply finite-time consistency.
+
+### 1.4.4 Relation to FM and RF
+
+- **FM** learns $u(x,t)$ (local instantaneous velocity)
+- **RF** improves trajectory geometry (straighter ODE paths)
+- **Flow Map** learns $\phi(x_t,t,s)$ (finite-time transport)
+
+So flow maps are not a totally different universe; they are the natural next abstraction after FM/RF if your goal is **fast generation**.
+
+
+## 1.5 Consistency Models
+Consistency Models (CMs) attack the same bottleneck from another angle: instead of learning a vector field or even an explicit flow map, they learn a **cross-time consistent predictor** that maps noisy states to a shared target representation (often an estimate of clean data).
+
+This makes them one of the foundational one-step / few-step distillation paradigms.
+
+### 1.5.1 Core consistency idea
+
+Suppose $x_t$ and $x_s$ lie on the same teacher trajectory (or same underlying denoising path). A consistency model $f_\theta$ is trained so that:
+$$
+f_\theta(x_t,t) \approx f_\theta(x_s,s),
+$$
+after the appropriate scaling/parameterization.
+
+In words: different noise levels along the same trajectory should produce the same final prediction.
+
+This is a **cross-time agreement constraint**, not just a local derivative-matching objective.
+
+### 1.5.2 Why this enables one-step generation
+
+Because the model is trained to collapse trajectory points to a common target, we can often sample by evaluating the model once (or very few times) from a noisy input.
+
+This directly targets inference speed, unlike standard diffusion training which optimizes denoising accuracy at every step but does not inherently optimize for low-NFE sampling.
+
+### 1.5.3 Teacher-student consistency distillation
+
+A common setup is:
+
+1. Start with a strong diffusion/score teacher.
+2. Generate paired states $(x_t, x_s)$ on teacher trajectories.
+3. Train the student consistency model to agree across those states.
+
+This makes consistency models a very important predecessor to later:
+
+- flow-map distillation,
+- self-distillation,
+- and JVP-based transport-map objectives.
+
+### 1.5.4 Conceptual relation to flow maps
+
+Consistency models and flow-map methods are closely related in spirit:
+
+- **Flow map view:** learn explicit transport $\phi(x_t,t,s)$
+- **Consistency view:** learn a representation/prediction that is invariant (or aligned) across times on the same trajectory
+
+Both replace purely local supervision with **cross-time structure**, which is exactly what you need for few-step and one-step generation.
+
+### 1.5.5 sCM
+### 1.5.6 rCM
 
 ---
 
@@ -233,30 +557,103 @@ This allows:
 - remove **adaLN-zero**,
 - cut params significantly (they report about **1/3 reduction** in a base model setting).
 
-#### 2.2.4 Practical takeaways
-
-iMF is not just “another MeanFlow variant.”
-It is a **systems-and-objective cleanup** of MeanFlow:
-- better training target,
-- flexible guidance at inference,
-- cleaner conditioning interface.
-
-This makes MeanFlow-style models much easier to scale and deploy.
-
 ## 2.3 AlphaFlow
 
+AlphaFlow is the paper that gives the most useful conceptual interpretation of MeanFlow training.
+
+#### 2.3.1 Core insight: MeanFlow decomposes into two losses
+
+AlphaFlow shows the MeanFlow objective can be algebraically decomposed into:
+1. **Trajectory Flow Matching (TFM)**
+2. **Trajectory Consistency (TC)**
+
+The decomposition (up to a constant) is:
+
+$$
+\mathcal{L}_{\mathrm{MF}}
+=
+\underbrace{\mathbb{E}\left[\|u_\theta(z_t,r,t)-v_t\|_2^2\right]}_{\mathcal{L}_{\mathrm{TFM}}}
++
+\underbrace{\mathbb{E}\left[2(t-r)\,u_\theta^\top \frac{d u_\theta^-}{dt}\right]}_{\mathcal{L}_{\mathrm{TC}}}
++ C.
+$$
+
+Interpretation:
+- **TFM** says “fit the trajectory-local velocity target.”
+- **TC** says “be self-consistent along the trajectory.”
+- MeanFlow is effectively a **consistency-like model with extra trajectory FM supervision**.
+
+#### 2.3.2 Why MeanFlow often needs lots of border-case FM samples
+
+AlphaFlow also explains a weird empirical fact from MeanFlow:
+- MeanFlow works best when many samples use the border case $r=t$ (which looks like vanilla FM).
+
+Their analysis shows this is not just a hack:
+- the gradients of TFM and trajectory consistency are often **negatively correlated**,
+- so the extra FM-style supervision helps stabilize and speed up training.
+
+#### 2.3.3 α-Flow loss: one objective that unifies TFM, Shortcut, MeanFlow
+
+AlphaFlow defines a family of losses parameterized by $\alpha$:
+
+$$
+\mathcal{L}_\alpha(\theta)
+=
+\mathbb{E}_{t,r,z_t}
+\left[
+\alpha^{-1}
+\left\|
+u_\theta(z_t,r,t)
+-
+\left(\alpha \,\tilde v_{s,t} + (1-\alpha)\,u_{\theta^-}(z_s,r,s)\right)
+\right\|_2^2
+\right],
+$$
+
+where
+
+$$
+s = \alpha r + (1-\alpha)t
+$$
+
+is an intermediate time.
+
+This unifies several training objectives:
+- $\alpha=1$ gives **trajectory flow matching** (with suitable $\tilde v_{s,t}$),
+- $\alpha=\tfrac{1}{2}$ recovers a **Shortcut-style** objective,
+- $\alpha \to 0$ recovers the **MeanFlow gradient**.
+
+That is the key conceptual win: AlphaFlow puts FM, Shortcut, and MeanFlow on one continuum.
+
+#### 2.3.4 Curriculum
+
+Because TFM and TC conflict early in training, AlphaFlow uses a curriculum:
+- start more FM-like (larger $\alpha$),
+- gradually anneal toward MeanFlow-like behavior (smaller $\alpha$).
+
+This disentangles optimization and improves convergence.
+
+#### 2.3.5 Practical takeaway
+
+AlphaFlow is best understood as:
+- a **theory paper for MeanFlow optimization** (decomposition + gradient conflict),
+- plus a **practical training recipe** (curriculum over $\alpha$) that improves one-step/few-step quality.
+
 ## 2.4 Accelerating and MeanFlow
+
 ## 2.5 Decoupled MeanFlow
 
 ---
 
 # 3. FlowMap
 
+## 3.1 Free FlowMap
+
 Flow Map Distillation Without Data bias
 
-## 3.1 Teacher-data mismatch (the hidden bug in many distillation pipelines)
+#### 3.1.1 Teacher-data mismatch (the hidden bug in many distillation pipelines)
 
-Traditional flow-map distillation often samples intermediate states \(x_t\) from an **external dataset distribution** and supervises the student using teacher velocities at those states.
+Traditional flow-map distillation often samples intermediate states $x_t$ from an **external dataset distribution** and supervises the student using teacher velocities at those states.
 
 But the student is supposed to reproduce the teacher’s **sampling process**, i.e. the trajectory distribution induced by the teacher from the prior.
 
@@ -267,11 +664,12 @@ Supervision states coming from a mismatched distribution results in a **teacher-
 
 This is a deep point because it says the standard “distill on data” recipe is fundamentally misaligned with the actual objective (imitate the teacher sampler).
 
-## 3.2 Prior-only / self-generated flow-map objective
+#### 3.1.2 Prior-only / self-generated flow-map objective
 
 Supervise entirely from the prior and the student’s own generated states.
 
 They derive a sufficient optimality condition leading to a loss of the form
+
 $$
 \mathcal{L}_{\text{pred}}
 =
@@ -282,6 +680,7 @@ $$
 $$
 
 with
+
 $$
 u_{\text{target}}
 =
@@ -289,9 +688,10 @@ u(f_\theta(z,\delta),1-\delta) - \delta \,\partial_\delta F_\theta(z,\delta)
 $$
 
 The key interpretation:
-- \(f_\theta(z,\delta)\) defines the student’s current trajectory,
-- \(\partial_\delta f_\theta\) is the **student’s generating velocity**,
+- $f_\theta(z,\delta)$ defines the student’s current trajectory,
+- $\partial_\delta f_\theta$ is the **student’s generating velocity**,
 - the loss is equivalent to aligning the student generating velocity with the teacher field:
+
 $$
 \partial_\delta f_\theta \approx u(f_\theta(z,\delta),1-\delta)
 $$
@@ -300,23 +700,26 @@ So the student learns to **ride the teacher vector field along its own generated
 
 This is the right fix for teacher-data mismatch.
 
-## 3.3 Gradient view
+#### 3.1.3 Gradient view
 
 They explicitly write the optimization gradient in terms of a velocity mismatch
+
 $$
 \Delta v_{G,u} = v_G - u
 $$
+
 which is great because it makes gradient weighting / normalization tricks easier to reason about.
 
 This is one of those “small” presentation choices that actually matters in practice.
 
-## 3.4 Correction objective (fixing distribution drift, not just local velocity)
+#### 3.1.4 Correction objective (fixing distribution drift, not just local velocity)
 
 Here’s the catch: aligning generating velocity locally is necessary, but in finite-capacity/discrete training the generated distribution can still drift.
 
 So they add a **correction objective** motivated from minimizing a KL term over intermediate marginals and then translating score mismatch into **velocity mismatch** (via the score–velocity equivalence for linear interpolants).
 
 This yields a gradient proportional to
+
 $$
 \nabla_\theta \;
 \mathbb{E}_{z,n,r}
@@ -329,9 +732,9 @@ v_N(I_r(f_\theta(z,1),n),r) - u(I_r(f_\theta(z,1),n),r)
 $$
 
 where:
-- \(u\) is the teacher marginal velocity,
-- \(v_N\) is the student-induced **noising** marginal velocity,
-- \(I_r(\cdot,\cdot)\) is the interpolation to intermediate time \(r\).
+- $u$ is the teacher marginal velocity,
+- $v_N$ is the student-induced **noising** marginal velocity,
+- $I_r(\cdot,\cdot)$ is the interpolation to intermediate time $r$.
 
 Intuition:
 - the prediction loss aligns the **student’s forward/generating flow**
@@ -341,13 +744,14 @@ That is a nice bidirectional correction mechanism.
 
 ---
 
-# 4. Meta Flow Maps
+# 3.2 Meta Flow Maps
 
 Meta flow maps correspond to a **stochastic flow map**, which is important because deterministic flow maps are too rigid.
 
-### 4.1 Why stochastic flow maps?
+#### 3.2.1 Why stochastic flow maps?
 
 Deterministic flow-map learning works if the transport map is the right object. But for many diffusion-like processes, especially when you want richer uncertainty handling, a **stochastic transition kernel**
+
 $$
 \kappa_{t,s}(z_t, z_s)
 $$
@@ -356,27 +760,29 @@ is the right object.
 The paper frames this using:
 - **marginal consistency**
 - **conditional consistency**
-- a family of posterior conditionals \(p_{1|t}\)
+- a family of posterior conditionals $p_{1|t}$
 - and a diagonal supervision view
 
 The important conceptual upgrade is:
 - instead of only learning deterministic trajectories,
 - learn a transition operator consistent with the stochastic process structure.
 
-### 4.2 The diagonal condition (same role as FM diagonal supervision)
+#### 3.2.2 The diagonal condition (same role as FM diagonal supervision)
 
 They derive that on the diagonal:
+
 $$
 \kappa_{t,t}(z_t, z_1) = p_{1|t}(z_1 \mid z_t)
 $$
 
-This is the stochastic analogue of “when \(r=t\), your two-time object must match the one-time target.”
+This is the stochastic analogue of “when $r=t$, your two-time object must match the one-time target.”
 
 So the diagonal again plays the role of anchor supervision.
 
-### 4.3 Pathwise/consistency relation for stochastic flow maps
+#### 3.2.3 Pathwise/consistency relation for stochastic flow maps
 
 They also derive a consistency/composition condition (their Eq. 23 in the snippet):
+
 $$
 \kappa_{t,s}(z_t,z_s)
 =
@@ -385,17 +791,19 @@ $$
 \kappa_{u,s}(z_u,z_s)
 \big]
 $$
-(with the appropriate latent dependence through \(z_1\)/paths)
+
+(with the appropriate latent dependence through $z_1$/paths)
 
 The exact notation is heavier, but the key idea is the same as flow-map composition:
 - **two-time transitions must compose correctly through intermediate times**, but now in distributional form.
 
-### 4.4 Their training objective (MFM loss)
+#### 3.2.4 Their training objective (MFM loss)
 
 They build:
 1. a **diagonal supervision loss** (fit the posterior on diagonal time pairs),
 2. a **consistency loss** (enforce off-diagonal composition consistency),
 3. and combine them into an MFM objective:
+
 $$
 \mathcal{L}_{\text{MFM}}
 =
@@ -406,7 +814,7 @@ This is the stochastic counterpart of the deterministic progression:
 - diagonal target = “FM-like” anchor
 - off-diagonal consistency = “flow-map-like” propagation
 
-### 4.5 Why this matters for the broader field
+#### 3.2.5 Takeaways
 
 This paper gives a more general lens:
 - MeanFlow / deterministic flow maps are one branch
@@ -417,11 +825,11 @@ This is exactly the kind of conceptual bridge diffusion researchers should care 
 
 ---
 
-# 5. Transition Matching Distillation
+# 3.3 Transition Matching Distillation
 
 Transition Matching Distillation (TMD) bridges engineering and theory based adaptation of MeanFlow to **video distillation**.
 
-### 5.1 Core problem setup
+#### 3.3.1 Core problem setup
 
 They want to distill a pretrained video diffusion teacher into a faster student. Direct one-stage distillation is hard in video because:
 - the space is huge,
@@ -430,28 +838,30 @@ They want to distill a pretrained video diffusion teacher into a faster student.
 
 So TMD uses **two stages**.
 
-### 5.2 Stage 1: Transition Matching MeanFlow (TM-MF)
+#### 3.3.2 Stage 1: Transition Matching MeanFlow (TM-MF)
 
 This is the key new idea.
 
 Instead of applying MeanFlow directly in the original latent/data space, they define an **inner transition** problem and parameterize a conditional inner flow map via average velocity:
+
 $$
 f_\theta(y_s,s,r;m) = y_s + (s-r)u_\theta(y_s,s,r;m)
 $$
 
-where \(m\) is a feature extracted from the main backbone.
+where $m$ is a feature extracted from the main backbone.
 
 Then they use a MeanFlow-style objective to train this transition head.
 
 A very practical (and nontrivial) design choice:
 - they **reparameterize** the average velocity to stay aligned with the teacher head:
+
 $$
 u_\theta(y_s,s,r;m) = y_1 - \text{head}_\theta(y_s,s,r;m)
 $$
 
 This is not cosmetic. It keeps the new head close to teacher semantics, which improves stability.
 
-### 5.3 JVP issue and finite-difference approximation
+#### 3.3.3 JVP issue and finite-difference approximation
 
 This paper is very realistic about systems constraints:
 - exact JVP is annoying with large-scale video transformer stacks (FlashAttention, FSDP, context parallelism),
@@ -461,9 +871,10 @@ That’s a practical compromise:
 - theoretically less clean than exact JVP,
 - but massively easier to integrate into production-grade training code.
 
-### 5.4 Stage 2: Distributional distillation objective
+#### 3.3.4 Stage 2: Distributional distillation objective
 
 After TM-MF pretraining, they switch to a stronger distillation stage using a VSD/discriminator-style objective (their simplified algorithm shows):
+
 $$
 \mathcal{L} = \text{VSD}(\hat{x}) + \lambda \cdot \text{Discriminator}(\hat{x})
 $$
