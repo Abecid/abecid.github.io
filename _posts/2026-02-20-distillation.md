@@ -427,8 +427,8 @@ Both replace purely local supervision with **cross-time structure**, which is ex
 ---
 
 # 2. MeanFlow Family
-## 2-1. MeanFlow
-#### 2.1 Average velocity instead of instantaneous velocity
+## 2.1 MeanFlow
+#### 2.1.1 Average velocity instead of instantaneous velocity
 ![Mean Flow](/assets/img/blogs/1_distillation/meanflow.png)
 
 *Figure 3. Mean Flow, with different target timestep $t$. from Geng et al. (2025),* Mean Flows for One-step Generative Modeling *(arXiv:2505.13447).*  
@@ -445,7 +445,7 @@ $$
 (t-r)u(z_t,r,t).
 $$
 
-#### 2.2 The MeanFlow Identity (the central derivation)
+#### 2.1.2 The MeanFlow Identity (the central derivation)
 
 Start from the definition:
 
@@ -465,7 +465,7 @@ $$
 u(z_t,r,t) = v(z_t,t) - (t-r)\frac{d}{dt}u(z_t,r,t)
 $$
 
-#### 2.3 Main Points
+#### 2.1.3 Main Points
 
 - The authors rewrite an intractable target (the average velocity integral) into a trainable target:
   - By first taking the derivative of both sides.
@@ -474,7 +474,7 @@ $$
 - No explicit consistency regularizer is imposed.
 - The consistency-like structure falls out from the definition of average velocity.
 
-#### 2.4 MeanFlow loss
+#### 2.1.4 MeanFlow loss
 
 Parameterize $u_\theta(z_t,r,t)$, and regress to the identity-induced target:
 
@@ -498,7 +498,7 @@ $$
 
 where the total derivative is implemented through a JVP along tangent $(v_t, 0, 1)$.
 
-#### 2.5 Sampling
+#### 2.1.5 Sampling
 
 Once you learn the average velocity, sampling is:
 
@@ -646,15 +646,153 @@ Because TFM and TC conflict early in training, AlphaFlow uses a curriculum:
 
 This disentangles optimization and improves convergence.
 
-#### 2.3.5 Practical takeaway
+#### 2.3.5 Takeaways
 
 AlphaFlow is best understood as:
 - a **theory paper for MeanFlow optimization** (decomposition + gradient conflict),
 - plus a **practical training recipe** (curriculum over $\alpha$) that improves one-step/few-step quality.
 
-## 2.4 Accelerating and MeanFlow
+## 2.4 Accelerating and Improving MeanFlow
+
+Understanding and Improving Mean Flow’s (UAIMF) main point is simple and very practical: MeanFlow training is bottlenecked by **slow velocity formation** and **bad temporal-gap scheduling**, so they speed up both. They propose two complementary components:  
+1. accelerate the velocity-learning part with standard diffusion training tricks (they use **MinSNR** or **DTD**), and  
+2. add a **progressive weighting** over the MeanFlow loss so the model learns small-gap average velocities first, then gradually expands to larger gaps. 
+
+### 2.4.1 Why MeanFlow trains slowly
+
+UAIMF analyzes MeanFlow training through two coupled subproblems:
+
+- learning instantaneous velocity (the easier FM-like part),
+- learning average velocity over larger timestep gaps (the harder MeanFlow part).
+
+Their empirical claim is that **rapid velocity formation helps MeanFlow converge much faster**, and that the temporal gap matters a lot: large-gap average-velocity learning is harder and should be delayed. This is why they combine velocity acceleration + progressive gap weighting. 
+
+### 2.4.2 Component 1: Accelerate the velocity part (MinSNR / DTD)
+
+UAIMF tests one method from each category:
+
+- **MinSNR** as a loss-weighting acceleration method
+- **DTD** as a timestep-sampling acceleration method
+
+and plugs them into MeanFlow training. They report both help, but emphasize that **DTD is more robust across model scales** because it changes the sampling distribution instead of interfering with MeanFlow’s own adaptive loss normalization. 
+
+### 2.4.3 Component 2: Progressive weighting on the MeanFlow loss
+
+UAIMF progressively reweights the MeanFlow term so training starts by emphasizing **small temporal gaps** (easy) and gradually transitions to **uniform weighting** (full MeanFlow objective). Their weighting is:
+
+$$
+\beta(\Delta t, s) = 1 - s + \lambda s (1 - \Delta t)
+$$
+
+where:
+
+- $$\Delta t$$ is the temporal gap,
+- $$s \in [0,1]$$ is training progress,
+- $$\lambda$$ normalizes the expectation at initialization.
+
+At initialization, the weighting prioritizes small gaps; by the end, it becomes uniform. They use a linear schedule by default:
+
+$$
+s = 1 - \frac{i}{T}
+$$
+
+and also discuss the generalized schedule:
+
+$$
+s = 1 - \left(\frac{i}{T}\right)^k
+$$
+
+with $$k=1$$ (linear) working best in their ablations. 
+
+### 2.4.4 Why the two components work together
+
+Their ablation is clean:
+
+- velocity acceleration alone improves MeanFlow,
+- progressive $$L_u$$ weighting alone improves MeanFlow,
+- combining both works best.
+
+They explicitly interpret this as:
+
+- acceleration methods quickly establish the **instantaneous velocity foundation**
+- progressive weighting improves **average velocity learning** over time
+
+which is exactly the right mental model for MeanFlow optimization. 
 
 ## 2.5 Decoupled MeanFlow
+
+Decoupled MeanFlow is the strongest architectural update in this line. The core idea is: **the encoder should care about the current timestep, and the decoder should care about the target timestep**. They decouple timestep conditioning and turn a pretrained flow model into a flow-map model with almost no architectural surgery. 
+
+### 2.5.1 Core architectural idea: decouple encoder vs decoder conditioning
+
+They reinterpret a flow model as:
+
+$$
+v_\theta = g_\theta \circ f_\theta
+$$
+
+with an encoder $$f_\theta$$ and decoder $$g_\theta$$. Then they argue the standard MeanFlow design is redundant because it feeds the next timestep $$r$$ everywhere. Their fix:
+
+- encoder gets current timestep $$t$$
+- decoder gets next timestep $$r$$
+
+and the flow map becomes:
+
+$$
+u_\theta(x_t, t, r) = g_\theta(f_\theta(x_t, t), r)
+$$
+
+This is the defining DMF equation.
+
+### 2.5.2 Why this matters: pretrained flow models already contain flow-map structure
+
+DMF shows that a pretrained flow model can be **converted into a flow map without fine-tuning**, just by choosing an encoder/decoder split and decoding the representation with $$r$$. They report the converted DMF can even outperform the original flow model in some settings, which supports the claim that good flow-model representations are already enough for flow-map prediction. 
+
+This is a major conceptual shift: instead of training flow maps from scratch, you can **reuse pretrained flow-model representations** and repurpose the decoder.
+
+### 2.5.3 Representation-first view
+
+DMF explicitly argues that **representation quality matters** for flow maps. They show:
+
+- stronger pretrained encoders transfer better to flow-map fine-tuning
+- freezing encoder + tuning decoder already gives a large speed/quality gain
+- but true 1-step performance needs joint optimization (encoder cannot stay frozen forever)
+
+This gives a practical recipe: pretrain a strong flow model first, then convert/fine-tune as DMF. 
+
+### 2.5.4 Training recipe: FM warm-up + MF fine-tuning
+
+DMF also proposes a better training pipeline:
+
+1. train a flow model with FM loss
+2. convert to DMF
+3. fine-tune with MeanFlow loss
+
+They justify this on compute grounds (MF/JVP is expensive) and show it scales better than training a flow map from scratch. This is one of the most important practical contributions in the paper.
+
+### 2.5.5 Enhanced training techniques
+
+#### (a) Adaptive weighted Cauchy loss
+
+They note MF loss has high variance, then replace the raw MSE-style MF loss with a **Cauchy (Lorentzian) robust loss** and an adaptive weighting term over timestep pairs. Their DMF objective is written as an adaptive weighted Cauchy form over the MeanFlow residual. 
+
+#### (b) Time proposal tailored to flow maps
+
+They adapt timestep-pair sampling for flow maps (since you need ordered pairs with $$t>r$$). They sample two logit-normal values and sort them, and then bias the proposal toward larger gaps / smaller $$r$$ for better 1-step behavior, because converted DMF models are already strong near the diagonal $$r \approx t$$. 
+
+#### (c) Model Guidance (MG)
+
+They use **Model Guidance (MG)** to avoid the full compute cost of CFG during training, and note MG is especially effective for training high-quality few-step flow maps. This is part of why their 1-step/4-step results are strong. 
+
+### 2.5.6 Takeaways
+
+DMF is not just another MeanFlow variant. It reframes the problem:
+
+- **MeanFlow** gives the right objective (average velocity via JVP)
+- **UAIMF / AlphaFlow** improve optimization dynamics
+- **DMF** improves the **architecture + training pipeline**, and shows pretrained flow models are the best starting point
+
+They report SOTA-level few-step results and show 1-step / 4-step generation approaching much more expensive flow-model sampling with large inference-speed gains. 
 
 ---
 
@@ -757,7 +895,7 @@ That is a nice bidirectional correction mechanism.
 
 ---
 
-# 3.2 Meta Flow Maps
+## 3.2 Meta Flow Maps
 
 Meta flow maps correspond to a **stochastic flow map**, which is important because deterministic flow maps are too rigid.
 
@@ -838,7 +976,7 @@ This is exactly the kind of conceptual bridge diffusion researchers should care 
 
 ---
 
-# 3.3 Transition Matching Distillation
+## 3.3 Transition Matching Distillation
 
 Transition Matching Distillation (TMD) bridges engineering and theory based adaptation of MeanFlow to **video distillation**.
 
