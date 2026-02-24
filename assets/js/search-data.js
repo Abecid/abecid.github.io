@@ -41,17 +41,6 @@ ninja.data = [{
             window.location.href = "/blog/2026/flowmap/";
           
         },
-      },{id: "post-modern-diffusion-distillation-overview",
-        
-          title: "Modern Diffusion Distillation Overview",
-        
-        description: "Recent developments of diffusion distillation techniques",
-        section: "Posts",
-        handler: () => {
-          
-            window.location.href = "/blog/2026/diffusion/";
-          
-        },
       },{id: "post-recent-methods-utilizing-diffusion-in-graphics",
         
           title: "Recent Methods Utilizing Diffusion in Graphics",
