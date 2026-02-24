@@ -30,7 +30,29 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/projects/";
           },
-        },{id: "post-recent-flow-map-distillation-methods",
+        },{id: "post-recent-methods-utilizing-diffusion-in-graphics",
+        
+          title: "Recent Methods Utilizing Diffusion in Graphics",
+        
+        description: "Recent developments of diffusion in graphics methods",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/graphics-diffusion/";
+          
+        },
+      },{id: "post-spatial-memory-in-video-diffusion-survey",
+        
+          title: "Spatial Memory in Video Diffusion Survey",
+        
+        description: "Recent developments of using spatial memory in video diffusion models",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/spatial-video/";
+          
+        },
+      },{id: "post-recent-flow-map-distillation-methods",
         
           title: "Recent Flow-Map Distillation Methods",
         
