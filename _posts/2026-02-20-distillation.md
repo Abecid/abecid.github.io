@@ -29,7 +29,8 @@ categories: research-survey
 4. [Score Distillation]()
     1. VSD
     2. DMD
-    3. Adaptive Matching Distillation
+    3. SiD
+    4. Adaptive Matching Distillation
 5. [Adversarial]()
     1. DiffRatio
     2. APT
@@ -1038,12 +1039,375 @@ So the conceptual split is:
 This is a strong template for hard domains (video, 3D, multimodal) where pure one-shot distillation is brittle.
 
 ---
+# 4. Score Distillation
+## 4.1 Variational Score Distillation (VSD)
 
-# 6. Terminal Velocity Matching
+### 4.1.1 Score Distillation Sampling (SDS)
+
+VSD explicitly frames **SDS** as the starting point for text-to-3D optimization.  
+Given a differentiable renderer
+
+$$
+g(\theta, c)
+$$
+
+and a pretrained text-to-image diffusion model, SDS optimizes a **single 3D parameter** $\theta$ by minimizing a KL objective over noisy rendered images:
+
+$$
+L_{\mathrm{SDS}}(\theta)
+:=
+\mathbb{E}_{t,c}
+\left[
+\frac{\sigma_t}{\alpha_t}\,\omega(t)\,
+D_{\mathrm{KL}}
+\big(q_t^\theta(x_t \mid c)\,\|\,p_t(x_t \mid y_c)\big)
+\right].
+$$
+
+The practical gradient (the one everyone uses) is approximated as:
+
+$$
+\nabla_\theta L_{\mathrm{SDS}}(\theta)
+\approx
+\mathbb{E}_{t,\epsilon,c}
+\left[
+\omega(t)\big(\epsilon_{\mathrm{pretrain}}(x_t,t,y_c)-\epsilon\big)
+\frac{\partial g(\theta,c)}{\partial \theta}
+\right],
+$$
+
+with
+
+$$
+x_t = \alpha_t g(\theta,c) + \sigma_t \epsilon.
+$$
+
+#### 4.1.2 Why SDS is limited
+
+SDS uses a **single parameter** $\theta$ and directly optimizes it, which makes it a **mode-seeking** procedure in practice.  
+VSD points out this is one reason SDS often gives over-smoothed / over-saturated / artifacted 3D results (especially in low-density regions of image space).
+
+---
+
+### 4.1.3 VSD: move from optimizing one 3D sample to learning a distribution over 3D parameters
+
+The key VSD move is to define a **distribution over 3D parameters**
+
+$$
+\mu(\theta \mid y)
+$$
+
+instead of optimizing one fixed $\theta$.
+
+Then VSD evolves particles by a **Wasserstein gradient flow / particle ODE**. The ODE uses a score difference between:
+
+1. the score of noisy real images (from the pretrained diffusion model), and  
+2. the score of noisy rendered images (estimated by a learnable network).
+
+The VSD particle dynamics are:
+
+$$
+\frac{d\theta_\tau}{d\tau}
+=
+-\mathbb{E}_{t,\epsilon,c}
+\left[
+\omega(t)
+\left(
+-\sigma_t \nabla_{x_t}\log p_t(x_t \mid y_c)
+-
+\big(-\sigma_t \nabla_{x_t}\log q_t^{\mu_\tau}(x_t \mid c,y)\big)
+\right)
+\frac{\partial g(\theta_\tau,c)}{\partial \theta_\tau}
+\right].
+$$
+
+This is the conceptual heart of VSD:
+
+- **teacher score** pulls rendered images toward the text-conditioned image manifold,
+- **rendered-image score** corrects for the current particle distribution,
+- the difference gives a much better update than raw SDS.
+
+---
+
+### 4.1.4 The VSD score function estimator (this is the diffusion-distillation part)
+
+VSD introduces a second noise predictor
+
+$$
+\epsilon_\phi(x_t,t,c,y)
+$$
+
+to estimate the score of noisy rendered images. It is trained with the **standard diffusion noise-prediction objective** on rendered images from the current particles:
+
+$$
+\min_\phi
+\sum_{i=1}^n
+\mathbb{E}_{t,\epsilon,c}
+\left[
+\left\|
+\epsilon_\phi\big(\alpha_t g(\theta^{(i)},c)+\sigma_t\epsilon,\ t,\ c,\ y\big)-\epsilon
+\right\|_2^2
+\right].
+$$
+
+This is the crucial diffusion-distillation component in VSD:
+- VSD **distills a score model for the rendered-image distribution** (not just the teacher),
+- then uses the **difference of two scores** for particle updates.
+
+In practice, VSD parameterizes $\epsilon_\phi$ as either:
+- a small U-Net, or
+- a **LoRA** adaptation of the pretrained diffusion model (usually better fidelity).
+
+---
+
+### 4.1.5 VSD gradient used for updating the 3D particles
+
+Once $\epsilon_\phi$ is trained, the per-particle VSD gradient becomes:
+
+$$
+\nabla_\theta L_{\mathrm{VSD}}(\theta)
+=
+\mathbb{E}_{t,\epsilon,c}
+\left[
+\omega(t)\,
+\big(
+\epsilon_{\mathrm{pretrain}}(x_t,t,y_c)
+-
+\epsilon_\phi(x_t,t,c,y)
+\big)\,
+\frac{\partial g(\theta,c)}{\partial \theta}
+\right],
+$$
+
+with
+
+$$
+x_t = \alpha_t g(\theta,c)+\sigma_t\epsilon.
+$$
+
+This is the clean algorithmic form:
+- **SDS** uses $\epsilon_{\mathrm{pretrain}} - \epsilon$
+- **VSD** uses $\epsilon_{\mathrm{pretrain}} - \epsilon_\phi$
+
+That replacement is the whole game.
+
+---
+
+### 4.1.6 VSD vs SDS
+
+VSD shows SDS is a **special case**:
+
+- if you approximate the parameter distribution $\mu(\theta \mid y)$ by a single empirical point mass (one particle),
+- then the rendered-image score term degenerates to the sampled noise $\epsilon$,
+- and you recover vanilla SDS / SJC.
+
+So the practical interpretation is:
+
+- **SDS** = single-point / no-generalization approximation
+- **VSD** = distributional score-distillation with a learned rendered-image score model
+
+That is why VSD usually gives better diversity and better fidelity in text-to-3D than plain SDS.
+
+---
+
+## 4.2 DMD (Distribution Matching Distillation)
+
+### 4.2.1 Core idea
+
+DMD trains a **one-step generator** by taking a **distribution-matching gradient** (KL-driven, score-difference style). The distribution-matching improves realism and fixes pure regression collapse.
+
+---
+
+### 4.2.2 Distribution matching gradient
+
+DMD computes a gradient by comparing two denoisers on the same noisy fake sample:
+
+- $\mu_{\text{real}}$: pretrained denoiser trained on real data
+- $\mu_{\text{fake}}$: denoiser trained on fake/generated data
+
+For a fake image $x = G_\theta(z)$:
+
+1. add random diffusion noise to get $x_t$  
+2. denoise with both networks  
+3. use the difference as the realism direction
+
+The implementation-level gradient proxy is essentially:
+
+$$
+\mathrm{grad}
+\propto
+\frac{
+\mu_{\text{fake}}(x_t,t)-\mu_{\text{real}}(x_t,t)
+}{
+\text{weighting\_factor}
+}
+$$
+
+and they realize this as a stop-grad MSE objective on $x$ (so autograd yields the desired gradient direction).
+
+This is the key DMD trick:
+- avoid backprop through a long teacher trajectory,
+- still get a **distribution-level** correction signal.
+
+#### 4.2.3 Practical read on DMD
+
+DMD is strong because it is **not just teacher regression**:
+- the KL / distribution-matching gradient gives a realism signal beyond memorizing teacher trajectories,
+- the regression term keeps training stable.
+
+That combo is why DMD was a big step for one-step image generation.
+
+---
+
+## 4.3 SiD (Score identity Distillation)
+
+### 4.3.1 Core framing: explicit score matching on fake-data diffusion
+
+SiD reframes one-step diffusion distillation as minimizing a **score-difference loss** on the diffused fake-data distribution.
+
+Define the score difference:
+
+$$
+\delta_{\phi,\theta}(x_t)
+:=
+S_\phi(x_t) - \nabla_{x_t}\log p_\theta(x_t),
+$$
+
+where:
+- $S_\phi(x_t)$ is the pretrained teacher score,
+- $p_\theta(x_t)$ is the diffused generator distribution.
+
+Then SiD defines the theoretical objective (MESM / Fisher divergence):
+
+$$
+L_\theta
+=
+\mathbb{E}_{x_t \sim p_\theta(x_t)}
+\left[
+\|\delta_{\phi,\theta}(x_t)\|_2^2
+\right].
+$$
+
+This is the cleanest formulation in this chapter conceptually:
+- make the **fake-data score** match the **teacher score**.
+
+---
+
+### 4.3.2 Why SiD needs an auxiliary score network
+
+The hard part is the generator score
+
+$$
+\nabla_{x_t}\log p_\theta(x_t),
+$$
+
+which is intractable directly.
+
+SiD introduces a second network
+
+$$
+f_\psi(x_t,t)
+$$
+
+to approximate the conditional denoising mean / score-related quantity:
+
+$$
+f_{\psi^*(\theta)}(x_t,t)
+=
+\mathbb{E}[x_g \mid x_t]
+=
+x_t + \sigma_t^2 \nabla_{x_t}\log p_\theta(x_t).
+$$
+
+This gives a score-difference estimator:
+
+$$
+\delta_{\phi,\psi^*(\theta)}(x_t)
+=
+\sigma_t^{-2}\big(f_\phi(x_t,t)-f_{\psi^*(\theta)}(x_t,t)\big).
+$$
+
+So SiD turns score estimation into a diffusion-style denoising regression problem for $f_\psi$.
+
+---
+
+### 4.3.3 The naive approximation fails (important)
+
+A very natural idea is to replace $\psi^*(\theta)$ with the current $\psi$ and use
+
+$$
+\delta_{\phi,\psi}(x_t)
+=
+\sigma_t^{-2}\big(f_\phi(x_t,t)-f_\psi(x_t,t)\big),
+$$
+
+then optimize the naive approximated loss
+
+$$
+L_\theta^{(1)}
+=
+\mathbb{E}\left[\|\delta_{\phi,\psi}(x_t)\|_2^2\right].
+$$
+
+SiD explicitly shows this can fail badly because:
+- the approximation error in $f_\psi$ enters the objective in a destabilizing way,
+- the loss depends on both score-estimation error and the true score difference.
+
+This is the main reason SiD is not just “DMD but with a different notation.”
+
+---
+
+### 4.3.4 Projected score matching (SiD’s key fix)
+
+SiD derives an alternative MESM form (Projected Score Matching) and then approximates it to get a much more stable objective:
+
+$$
+L_\theta^{(2)}
+=
+\mathbb{E}
+\left[
+\sigma_t^{-2}\,
+\delta_{\phi,\psi}(x_t)^\top
+\big(f_\phi(x_t,t)-x_g\big)
+\right].
+$$
+
+This version is much more stable because it depends on the denoising residual
+
+$$
+f_\phi(x_t,t)-x_g
+$$
+
+instead of directly squaring the noisy score-difference estimate.
+
+That is the algorithmic insight behind SiD:
+- use score identities to derive a loss that still targets MESM,
+- but behaves better under imperfect generator-score estimation.
+
+---
+
+### 4.3.5 Fused loss and alternating updates (the actual algorithm)
+
+SiD trains with **alternating updates**:
+
+1. **Update** $f_\psi$ (the generator-score estimator) with a diffusion / denoising loss.
+2. **Update** $G_\theta$ using the SiD generator loss (built from the projected score-matching approximation / fused loss).
+
+It also uses score gradients (backprop through both score networks), which distinguishes it from methods like Diff-Instruct and DMD.
+
+In practice this is more memory/computation heavy, but it is a major reason SiD gets very strong one-step results.
+
+---
+
+# 5. Adversarial Distillation
+
+# 6. Video Generation
+
+## 6.3 Terminal Velocity Matching
 
 Terminal Velocity Matching (TVM): A More Principled Objective for One/Few-Step Models
 
-### 6.1 What it changes
+### 6.3.1 What it changes
 
 Prior methods (FM/MeanFlow/FMM-style) mostly match local or initial-time velocity constraints.
 
@@ -1053,7 +1417,7 @@ That sounds minor, but it changes the theory:
 - they derive an explicit **2-Wasserstein upper bound**
 - and motivate a more stable training target for one/few-step generation
 
-### 6.2 Core theorem and loss structure
+### 6.3.2 Core theorem and loss structure
 
 TVM introduces a terminal velocity target
 $$
@@ -1078,7 +1442,7 @@ they show this objective upper-bounds the 2-Wasserstein distance (up to constant
 
 That gives TVM a stronger distributional interpretation than “just match a derivative identity.”
 
-### 6.3 Significance
+### 6.3.3 Significance
 
 This is the first really clean signal that the field is maturing beyond:
 - local consistency heuristics,
@@ -1090,7 +1454,7 @@ into:
 - explicit control over terminal behavior
 - better theory-practice alignment
 
-### 6.4 The systems contribution
+### 6.3.4 The systems contribution
 
 TVM also points out a major implementation pain:
 - JVP of scaled dot-product attention is poorly supported / inefficient in standard autograd stacks.
@@ -1101,6 +1465,10 @@ They propose a FlashAttention kernel that fuses JVP with forward pass and suppor
 That matters a lot if you care about scaling this family to modern DiT/transformer stacks.
 
 ---
+
+# 7. New Domains
+
+# 8. Manifold
 
 # 7. Unifying View: The Field’s Progression in One Picture
 
