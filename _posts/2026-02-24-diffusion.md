@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Modern Diffusion Distillation Overview
-date: 2026-02-20 01:24:00
+date: 2026-02-24 03:24:00
 description: Recent developments of diffusion distillation techniques
 tags: diffusion survey
 categories: research-survey
@@ -433,9 +433,6 @@ Consistency models and flow-map methods are closely related in spirit:
 - **Consistency view:** learn a representation/prediction that is invariant (or aligned) across times on the same trajectory
 
 Both replace purely local supervision with **cross-time structure**, which is exactly what you need for few-step and one-step generation.
-
-### 1.5.5 sCM
-### 1.5.6 rCM
 
 ---
 
@@ -2710,9 +2707,3 @@ That gives a unified view:
 - Distillation compresses that path into fast inference.
 
 That is basically the right conceptual stack for generative modeling on structured domains (rotations, spheres, articulated states, meshes, trajectories, etc.).
-
----
-
-# 10. Where the field is likely going next
-
-The next wave is probably a merge of these threads:
