@@ -58,21 +58,27 @@ Diffusion models define a **forward noising process** that gradually corrupts da
 ### 1.1.1 Forward process (discrete DDPM view)
 
 In DDPM, the forward process is a Markov chain:
+
 $$
 q(x_t \mid x_{t-1}) = \mathcal{N}\!\left(\sqrt{1-\beta_t}\,x_{t-1}, \beta_t I\right),
 $$
+
 where $\beta_t \in (0,1)$ is a variance schedule.
 
 A key closed form is:
+
 $$
 q(x_t \mid x_0) = \mathcal{N}\!\left(\sqrt{\bar\alpha_t}\,x_0,\,(1-\bar\alpha_t)I\right),
 $$
+
 with
+
 $$
 \alpha_t = 1-\beta_t,\qquad \bar\alpha_t=\prod_{s=1}^t \alpha_s.
 $$
 
 So we can sample $x_t$ directly as:
+
 $$
 x_t = \sqrt{\bar\alpha_t}\,x_0 + \sqrt{1-\bar\alpha_t}\,\epsilon,\qquad \epsilon \sim \mathcal{N}(0,I).
 $$
@@ -82,12 +88,15 @@ This is the standard “data + Gaussian noise” interpolation used in many diff
 ### 1.1.2 Reverse process and denoising objective
 
 The generative model learns the reverse transitions
+
 $$
 p_\theta(x_{t-1}\mid x_t),
 $$
+
 which are parameterized via a neural network (predicting noise, $x_0$, or velocity depending on parameterization).
 
 The most common training objective is noise prediction:
+
 $$
 \mathcal{L}_{\text{simple}}(\theta)
 =
@@ -102,12 +111,15 @@ This objective is simple and works extremely well, but inference still requires 
 ### 1.1.3 Continuous-time diffusion (SDE view)
 
 A continuous-time diffusion can be written as an SDE:
+
 $$
 dx = f(x,t)\,dt + g(t)\,dW_t,
 $$
+
 where $f$ is drift, $g$ is diffusion scale, and $W_t$ is a Wiener process.
 
 The reverse-time generative dynamics also form an SDE involving the score:
+
 $$
 \nabla_x \log p_t(x).
 $$
@@ -117,6 +129,7 @@ This is the bridge to **score-based generative modeling** and continuous-time tr
 ### 1.1.4 Probability flow ODE (deterministic counterpart)
 
 Every diffusion SDE has an associated deterministic **probability flow ODE** that shares the same marginals $p_t$:
+
 $$
 \frac{dx}{dt}
 =
