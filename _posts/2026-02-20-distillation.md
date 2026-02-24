@@ -69,47 +69,56 @@ Recent methods have emerged developing upon this flow map formulation for fewer 
 ---
 
 # 2. MeanFlow
-### 2.1 Average velocity instead of instantaneous velocity
+#### 2.1 Average velocity instead of instantaneous velocity
+![Mean Flow](/assets/img/blogs/1_distillation/meanflow.png)
+
+*Figure 3. Mean Flow, with different target timestep $t$. from Geng et al. (2025),* Mean Flows for One-step Generative Modeling *(arXiv:2505.13447).*  
 
 MeanFlow defines an **average velocity**
+
 $$
 u(z_t, r, t)
 $$
-over the interval \([r,t]\), so that the displacement is
+
+over the interval $[r,t]$, so the displacement is:
+
 $$
 (t-r)u(z_t,r,t).
 $$
 
-### 2.2 The MeanFlow Identity (the central derivation)
+#### 2.2 The MeanFlow Identity (the central derivation)
 
 Start from the definition:
+
 $$
 (t-r)u(z_t,r,t) = \int_r^t v(z_\tau,\tau)\, d\tau
 $$
 
 Differentiate both sides with respect to \(t\) (holding \(r\) fixed). By product rule + FTC:
+
 $$
 u(z_t,r,t) + (t-r)\frac{d}{dt}u(z_t,r,t) = v(z_t,t)
 $$
 
-Rearrange:
+Rearranging leads to the **MeanFlow Identity**:
+
 $$
 u(z_t,r,t) = v(z_t,t) - (t-r)\frac{d}{dt}u(z_t,r,t)
 $$
 
-This is the **MeanFlow Identity**.
+#### 2.3 Main Points
 
-### 2.3 Why this matters
-
-- It rewrites an intractable target (the average velocity integral) into a trainable target using:
-  - instantaneous velocity $v$ (available from FM-style interpolation),
-  - a total derivative term computed via **JVP**.
-- No explicit consistency regularizer is imposed by fiat.
+- The authors rewrite an intractable target (the average velocity integral) into a trainable target:
+  - By first taking the derivative of both sides.
+  - Instantaneous velocity $v$ is available from FM-style interpolation.
+  - Total derivative term computed via **JVP**.
+- No explicit consistency regularizer is imposed.
 - The consistency-like structure falls out from the definition of average velocity.
 
-### 2.4 MeanFlow loss (core training objective)
+#### 2.4 MeanFlow loss
 
 Parameterize $u_\theta(z_t,r,t)$, and regress to the identity-induced target:
+
 $$
 \mathcal{L}_{\text{MeanFlow}}(\theta)
 =
@@ -121,41 +130,28 @@ u_\theta(z_t,r,t) - \operatorname{sg}(u_{\text{tgt}})
 $$
 
 with
+
 $$
 u_{\text{tgt}}
 =
 v_t - (t-r)\left(v_t \,\partial_z u_\theta + \partial_t u_\theta\right)
 $$
 
-where the total derivative is implemented through a JVP along tangent \((v_t, 0, 1)\).
+where the total derivative is implemented through a JVP along tangent $(v_t, 0, 1)$.
 
-The stop-gradient is not just a random hack:
-- it avoids double backprop through the JVP term,
-- but zero loss still implies the identity is satisfied.
+#### 2.5 Sampling
 
-### 2.5 Reduction to standard FM
+Once you learn the average velocity, sampling is:
 
-If you set \(r=t\), the correction term vanishes:
-$$
-u_{\text{tgt}} = v_t
-$$
-so MeanFlow collapses to standard FM. This is the cleanest way to think about MeanFlow:
-- **FM = the degenerate diagonal case**
-- **MeanFlow = FM + propagation off the diagonal in two-time space**
-
-### 2.6 Sampling
-
-Once you learn the average velocity, sampling is just:
 $$
 z_r = z_t - (t-r)u(z_t,r,t)
 $$
 
 For 1-step:
+
 $$
 z_0 = z_1 - u(z_1,0,1),\quad z_1 \sim p_{\text{prior}}
 $$
-
-That’s the whole point: replace time integration with a learned displacement.
 
 ---
 
