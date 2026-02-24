@@ -2393,59 +2393,315 @@ That’s the real story of diffusion distillation in new domains: not just “fe
 
 # 8. Manifold
 
+## 8.1 Riemannian Manifold
+
+### 8.1.1 Why manifold-aware distillation is different
+
+In Euclidean flow matching / flow-map distillation, we can interpolate with linear paths and add vectors freely.
+On a manifold $\mathcal{M}$, both assumptions break:
+
+- the state must stay on $\mathcal{M}$,
+- velocities must live in the correct tangent space $T_x\mathcal{M}$,
+- distances / residuals should be measured with the Riemannian metric $g$ (or geodesic distance).
+
+So the whole distillation stack (interpolant, velocity parameterization, self-distillation loss) has to be geometry-aware.
 
 ---
 
-# 9. Practical Research Takeaways (for top-lab diffusion folks)
+### 8.1.2 Riemannian flow + geodesic interpolant (the core setup)
 
-### 8.1 If you’re doing one-step/few-step image generation
-Start by deciding which failure mode you care about:
-- **trajectory geometry / displacement quality** → MeanFlow-style
-- **distributional mismatch under self-generated rollouts** → add FreeFlowMap-style correction
-- **theory / Wasserstein control** → TVM-style objective
+The probability flow ODE / continuity equation becomes the Riemannian version:
 
-### 8.2 If you’re doing video / transformers
-The math is not the main bottleneck; **JVP implementation is**.
-TMD and TVM both basically scream this:
-- attention kernels + JVP + distributed training are the real constraint
-- finite-difference JVP is often the “actually trains” solution
-- custom kernels become a differentiator
+$$
+\partial_t x_t = v_t(x_t), \qquad
+\partial_t \rho_t(x) = -\operatorname{div}_g\!\big(\rho_t(x)\, v_t(x)\big).
+$$
 
-### 8.3 If you’re doing 3D / world models / stochastic simulators
-The stochastic flow-map lens is probably the most future-proof:
-- deterministic flow maps are great for one-step generation
-- but world models usually need stochastic transitions
-- the **diagonal posterior + consistency** formulation is much closer to what you actually want
+The key change is the interpolant.
+Instead of a linear interpolant, use the geodesic interpolant:
+
+$$
+I_t(x_0,x_1) = \exp_{x_0}\!\big(\alpha_t \log_{x_0}(x_1)\big),
+\qquad \alpha_0=0,\; \alpha_1=1.
+$$
+
+This keeps the path on the manifold by construction.
 
 ---
 
-# 9. A compact “theory stack” to remember
+### 8.1.3 Generalized Flow Map (GFM) parameterization
 
-The whole area can be compressed into this stack:
+The generalized flow map is a time-to-time map on the manifold:
 
-1. **FM**: learn local tangent
-2. **MeanFlow/FMM**: convert local tangent into a trainable two-time displacement rule (via differential identity/JVP)
-3. **Self-distilled flow maps**: train on the student’s own rollout distribution (fix teacher-data mismatch)
-4. **Correction terms**: explicitly align marginals / noising velocities
-5. **Stochastic flow maps**: move from deterministic maps to transition kernels (posterior-diagonal + consistency)
-6. **TVM**: choose a target (terminal velocity) that gives stronger distributional guarantees
+$$
+X^\theta_{s,t} : \mathcal{M} \to \mathcal{M},
+\qquad
+X^\theta_{s,t}(x_s) \approx x_t.
+$$
 
-That’s the real progression.
+To make the learned vector field valid on a manifold, the model output is projected onto the tangent space:
+
+$$
+v^\theta_{s,t}(p) = \operatorname{proj}_{T_p\mathcal{M}} \, f_\theta(s,t,p).
+$$
+
+This is the important implementation detail.
+Without tangent projection, the model can produce off-manifold directions and the losses become geometrically invalid.
+
+---
+
+### 8.1.4 The manifold distillation objective (algorithmic form)
+
+The GFM paper defines a combined objective:
+
+$$
+\mathcal{L}(\theta) = \mathcal{L}_{\mathrm{RFM}}(\theta) + \mathcal{L}_{\mathrm{GFM\text{-}SD}}(\theta).
+$$
+
+- $\mathcal{L}_{\mathrm{RFM}}$: the Riemannian flow-matching term (diagonal / teacher-like velocity supervision)
+- $\mathcal{L}_{\mathrm{GFM\text{-}SD}}$: a self-distillation term that teaches the off-diagonal flow map behavior (few-step jump structure)
+
+This is exactly the same high-level recipe as Euclidean flow-map training, but all operators are ported to manifold geometry.
+
+---
+
+### 8.1.5 Three manifold self-distillation losses (the actual algorithm targets)
+
+#### (A) G-LSD: Generalized Lagrangian Self-Distillation
+
+This enforces consistency between the time derivative of the learned flow map and the learned diagonal velocity, measured in the Riemannian norm:
+
+$$
+\mathcal{L}_{\mathrm{G\text{-}LSD}}(\theta)
+=
+\mathbb{E}\Big[
+\big\|
+\partial_t X^\theta_{s,t}(I_s) - v^\theta_{t,t}\!\big(X^\theta_{s,t}(I_s)\big)
+\big\|_g^2
+\Big].
+$$
+
+This is the cleanest manifold analogue of the Euclidean Lagrangian self-distillation loss.
+
+---
+
+#### (B) G-ESD: Generalized Eulerian Self-Distillation
+
+This is the manifold version of the Eulerian PDE residual, using the differential (Jacobian pushforward) of the flow map:
+
+$$
+\mathcal{L}_{\mathrm{G\text{-}ESD}}(\theta)
+=
+\mathbb{E}\Big[
+\big\|
+\partial_s X^\theta_{s,t}(x_s)
++
+d(X^\theta_{s,t})_{I_s}\!\left[v^\theta_{s,s}(I_s)\right]
+\big\|_g^2
+\Big].
+$$
+
+This is more PDE-like and elegant, but in practice it can be trickier numerically (more derivative structure).
+
+---
+
+#### (C) G-PSD: Generalized Progressive Self-Distillation
+
+This enforces the semigroup property directly using geodesic distance:
+
+$$
+\mathcal{L}_{\mathrm{G\text{-}PSD}}(\theta)
+=
+\mathbb{E}\Big[
+d_g^2\!\big(
+X^\theta_{s,t}(I_s),
+X^\theta_{u,t}(X^\theta_{s,u}(I_s))
+\big)
+\Big].
+$$
+
+This one is derivative-free (no time derivative or spatial Jacobian of the model in the loss), which makes it the simplest to implement.
+
+---
+
+### 8.1.6 Manifold GFM training algorithm (practical loop)
+
+**Training loop (same structure as your earlier chapters, but manifold-aware):**
+
+1. Sample a batch of:
+   - times $t_i \sim \mathcal{T}$,
+   - earlier times $s_i \sim \mathcal{S}\mid t_i$,
+   - endpoint pairs $(x_0^i, x_1^i) \sim \rho$ (a coupling).
+2. Build manifold interpolant points:
+   $$
+   x_s^i = I(x_0^i, x_1^i, s_i)
+   $$
+   and interpolant tangent targets:
+   $$
+   u_s^i = \partial_s I(x_0^i, x_1^i, s_i).
+   $$
+3. Compute the Riemannian flow-matching loss $\widehat{\mathcal{L}}_{\mathrm{RFM}}$.
+4. Compute one self-distillation term $\widehat{\mathcal{L}}_{\mathrm{GFM\text{-}SD}}$:
+   - G-LSD, or
+   - G-ESD, or
+   - G-PSD.
+5. Optimize:
+   $$
+   \widehat{\mathcal{L}}_{\mathrm{RFM}} + \widehat{\mathcal{L}}_{\mathrm{GFM\text{-}SD}}.
+   $$
+6. Repeat until convergence.
+
+Output is the learned flow map $X^\theta_{s,t}$, which supports few-step (including 1-step) generation on the manifold.
+
+---
+
+### 8.1.7 Why this matters for distillation (the high-signal takeaway)
+
+This is the geometric version of the same big idea behind modern diffusion/flow distillation:
+
+- **Teacher-like local supervision** on the diagonal ($s=t$),
+- plus **self-distilled jump constraints** off-diagonal ($s\neq t$),
+- so you can do **few-step transport** instead of expensive ODE integration.
+
+The manifold paper shows this is not just a Euclidean trick: it works on tori, spheres, $SO(3)$, and hyperbolic geometry, with strong 1-NFE gains (especially G-LSD).
+
+---
+
+## 8.2 Optimal Transport
+
+### 8.2.1 Why OT belongs in a distillation chapter
+
+Optimal transport (OT) is the geometry-first version of distribution transport.
+It matters here because diffusion/flow distillation quality is heavily affected by the **interpolation path** and **coupling** between source and target samples.
+
+OT gives a principled way to choose both:
+- a coupling (who should be paired with whom),
+- and a path (how mass should move).
+
+That usually means straighter, lower-action transports, which is exactly what you want for few-step generation.
+
+---
+
+### 8.2.2 Dynamic OT (Benamou-Brenier) as a velocity-learning objective
+
+The dynamic OT formulation says the squared Wasserstein-2 distance is the minimum kinetic energy over all density/velocity paths connecting $\alpha_0$ and $\alpha_1$:
+
+$$
+W_2^2(\alpha_0,\alpha_1)
+=
+\inf_{(\alpha_t,v_t)}
+\int_0^1 \int_{\mathbb{R}^d} \|v_t(x)\|^2 \, d\alpha_t(x)\, dt
+$$
+
+subject to the continuity equation
+
+$$
+\partial_t \alpha_t + \operatorname{div}(\alpha_t v_t)=0,
+\qquad
+\alpha_{t=0}=\alpha_0,\;\alpha_{t=1}=\alpha_1.
+$$
+
+This is the cleanest algorithmic bridge to flow models:
+it is literally a constrained velocity-learning problem.
+
+---
+
+### 8.2.3 The OT interpolation path (what changes vs standard FM)
+
+If $T$ is the optimal Monge map, the OT geodesic is
+
+$$
+\alpha_t = \big((1-t)\operatorname{Id}+tT\big)_\# \alpha_0,
+$$
+
+with particle motion along straight lines from $x$ to $T(x)$ and velocity
+
+$$
+v_t\big((1-t)x+tT(x)\big)=T(x)-x.
+$$
+
+This is *not* the same as standard flow-matching interpolation, which uses independent pairs $(X_0,X_1)\sim \alpha_0\otimes\alpha_1$.
+That distinction is huge:
+
+- **Flow matching**: couples independent endpoints (convolution-like path)
+- **OT**: couples each point to its optimal destination (geodesic path)
+
+For distillation, OT-style couplings tend to produce a cleaner transport target, which generally helps few-step / one-step objectives.
+
+---
+
+### 8.2.4 Flow Matching vs OT (the exact algorithmic difference)
+
+Standard FM solves an unconstrained least-squares regression for the velocity on a *prescribed* interpolation:
+
+$$
+\min_{(v_t)_t}
+\int_0^1
+\mathbb{E}\Big[
+\|v_t((1-t)X_0+tX_1)-(X_1-X_0)\|^2
+\Big]dt.
+$$
+
+OT instead optimizes over the path itself (and coupling), with a continuity constraint and kinetic-energy objective.
+
+That means:
+
+- FM is easier to train directly (plain regression),
+- OT gives better geometry (but harder optimization),
+- modern distillation methods often live in between by using OT-informed couplings/interpolants and FM-style regression.
+
+---
+
+### 8.2.5 OT-aware distillation recipe (practical synthesis)
+
+This is the useful way to think about OT in a distillation pipeline:
+
+#### Option A: OT-informed pairing + FM / flow-map distillation
+1. Build a better coupling $\rho(x_0,x_1)$ (ideally OT-like).
+2. Use that coupling in the interpolant / training pairs.
+3. Train your velocity or flow map with standard FM + self-distillation losses.
+
+This is already enough to make the distillation target easier.
+
+#### Option B: OT geodesic path as the teacher path
+1. Use OT geodesic interpolation (or an approximation to it).
+2. Train a velocity field on that path.
+3. Distill into a flow map / one-step map (Lagrangian / Eulerian / progressive style).
+
+This is conceptually the cleanest "OT + distillation" stack.
+
+---
+
+### 8.2.6 Why OT is especially relevant for one-step / few-step generation
+
+Few-step generation hates curved, high-variance trajectories.
+OT minimizes transport action, so it tends to produce shorter, more coherent paths.
+
+That directly helps distillation because self-distillation losses are trying to compress a continuous transport process into a small number of jumps.
+If the teacher path is already close to a geodesic, compression is easier.
+
+This is the same reason OT-inspired couplings keep showing up across modern diffusion/flow papers.
+
+---
+
+### 8.2.7 Manifold + OT (the next frontier)
+
+The strongest long-term direction is combining:
+
+- **manifold-aware geometry** (Riemannian metrics, geodesics, tangent constraints),
+- with **OT-aware couplings / geodesic transport**,
+- and **flow-map distillation** for few-step inference.
+
+That gives a unified view:
+
+- Geometry decides the valid space and metric.
+- OT decides the "best" transport path/coupling.
+- Distillation compresses that path into fast inference.
+
+That is basically the right conceptual stack for generative modeling on structured domains (rotations, spheres, articulated states, meshes, trajectories, etc.).
 
 ---
 
 # 10. Where the field is likely going next
 
 The next wave is probably a merge of these threads:
-
-- **TVM-style distributional guarantees**
-- **self-distilled prior-only training**
-- **stochastic transition operators**
-- **kernel-aware JVP training for transformers/video/world models**
-
-In other words:
-the future is not just “better one-step image generation,” it’s **learned transition operators** for high-dimensional structured dynamics (video, 3D, simulators, world models), with both:
-- strong numerical behavior (few NFEs)
-- and actual distributional control (Wasserstein/KL-style guarantees)
-
-That’s exactly where flow maps stop being a distillation trick and become a real modeling primitive.
