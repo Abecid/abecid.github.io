@@ -11,40 +11,40 @@ categories: research-survey
 
 # Table of Content
 1. [Foundations](#1-foundations-flow-matching-vs-flow-maps)
-  1-1. Diffusion
-  1-2. Flow Matching
-  1-3. Rectified Flow
-  1-4. FlowMap
-  1-5. Consistency Model
+    1. Diffusion
+    2. Flow Matching
+    3. Rectified Flow
+    4. FlowMap
+    5. Consistency Model
 2. [MeanFlow Family](#2-meanflow)
-  2-1. MeanFlow
-  2-2. iMeanFlow
-  2-3. AlphaFlow
-  2-4. Improved MeanFlow
-  2-5. Decoupled MeanFlow
+    1. MeanFlow
+    2. iMeanFlow
+    3. AlphaFlow
+    4. Improved MeanFlow
+    5. Decoupled MeanFlow
 3. [Flow Map](#3-freeflowmap)
-  3-1. Data Free: FreeFlowMap
-  3-2. Meta FlowMap
-  3-3. TVM
+    1. Data Free: FreeFlowMap
+    2. Meta FlowMap
+    3. TVM
 4. [Score Distillation]()
-  4-1. VSD
-  4-2. DMD
-  4-3. Adaptive Matching Distillation
+    1. VSD
+    2. DMD
+    3. Adaptive Matching Distillation
 5. [Adversarial]()
-  5-1. DiffRatio
-  5-2. APT
+    1. DiffRatio
+    2. APT
 6. [Video Generation]()
-  6-1. CausVid
-  6-2. Self-forcing
-  6-3. TMD
+    1. CausVid
+    2. Self-forcing
+    3. TMD
 7. [New Domains]()
-  7-1. Drifting
-  7-2. JIT
-  7-3. PixelFlow
-  7-4. LatentForcing
+    1. Drifting
+    2. JIT
+    3. PixelFlow
+    4. LatentForcing
 8. [Manifold]()
-  8-1. Riemmian Manifold
-  8-2. Optimal Transport
+    1. Riemmian Manifold
+    2. Optimal Transport
 
 # Overview
 Recent generative modeling utilize and develop upon flow maps and jvp based distillation techniques to reduce the number of function evaluations during inference. We focus on the Meanflow family, score distillation methods, and its applications in video generation. 
