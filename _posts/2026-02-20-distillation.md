@@ -1968,10 +1968,138 @@ adversarial methods moved from “make it sharper” to “fix the training dist
 ---
 
 # 6. Video Generation
+## 6.1 CausVid
+#### 6.1.1 Core idea (causal AR diffusion + distillation)
+CausVid converts a pretrained **bidirectional video diffusion/flow model** into a **causal autoregressive** generator and then distills it into a **few-step** AR model.
 
-## 6.1 Causvid
+The key practical recipe is:
 
-## 6.2 Self-forcing
+1. **ODE trajectory initialization** (teacher-generated supervision)
+2. **Asymmetric Distillation with DMD** (teacher is strong multi-step, student is causal few-step)
+
+This is the right framing because causal masking alone is not enough; you first need to preserve the teacher’s dynamics under causal attention, then compress inference.
+
+#### 6.1.2 Stage 0: ODE trajectory initialization (important)
+CausVid first constructs ODE solution pairs from the pretrained teacher and uses them to initialize the causal student. This is basically a **trajectory-preserving warm start** before adversarial/distribution matching distillation.
+
+Why this matters:
+- Directly jumping to DMD with a randomly causalized student is unstable.
+- ODE-pair initialization makes the student already “look like” the teacher’s denoising trajectory under causal constraints.
+
+#### 6.1.3 Asymmetric Distillation with DMD (main algorithmic part)
+CausVid uses **asymmetric distillation**:
+- **Teacher**: high-quality, many-step, bidirectional model
+- **Student**: causal, few-step AR model
+
+Then it applies a **DMD-style distribution matching objective** to train the student generator.
+
+A useful mental model:
+- The teacher provides a high-quality target distribution (and score-like signal / critic guidance).
+- The student is optimized to match that target with drastically fewer denoising steps.
+
+#### 6.1.4 CausVid training algorithm (high-level)
+**Algorithm sketch (CausVid-style):**
+
+1. **Initialize student** with causal attention masking.
+2. **Warm start** using ODE trajectory pairs sampled from the teacher.
+3. **Train with asymmetric DMD**:
+   - Sample prompts / conditions
+   - Generate teacher trajectories / target samples
+   - Generate student AR samples with few denoising steps
+   - Compute DMD-style generator loss (distribution matching)
+   - Update student (and discriminator / critic if using adversarial DMD variant)
+
+#### 6.1.5 Why CausVid matters in the progression
+CausVid is the clean bridge from:
+- “fast image distillation” ideas (DMD / consistency / one-step)
+- to **causal autoregressive video diffusion**
+
+But it still has a train-test mismatch issue if training rollouts are not aligned with the true inference distribution (this is exactly what Self Forcing attacks next).
+
+---
+
+## 6.2 Self-Forcing
+#### 6.2.1 Main idea: fix the train-test gap (the real problem)
+Self-Forcing’s central claim is dead-on:
+
+- **Teacher Forcing (TF)** and **Diffusion Forcing (DF)** train on context distributions that do **not** match the model’s actual inference-time autoregressive rollout.
+- So even if you use a strong distillation loss (DMD / SiD / GAN), you may be matching the **wrong generated distribution**.
+
+Self-Forcing fixes this by doing **autoregressive self-rollout during training** and applying a **holistic distribution matching loss** on the final generated video.
+
+#### 6.2.2 Holistic post-training objective (core formulation)
+Instead of local frame-wise supervision, Self-Forcing trains on full autoregressive rollouts.
+
+Conceptually, the model defines an autoregressive distribution over video chunks/frames:
+$$
+p_\theta(X) = \prod_i p_\theta(x_i \mid x_{<i})
+$$
+
+Then during training:
+1. Roll out the model autoregressively using its **own generated context**
+2. Get a full generated video $\hat{X}$
+3. Apply a **distribution matching loss** on $\hat{X}$ vs target/teacher distribution
+
+This is the key upgrade:
+- training process now mirrors inference
+- exposure bias is handled directly, not indirectly
+
+#### 6.2.3 Distribution matching losses used in Self-Forcing
+Self-Forcing is not tied to one distillation loss. It supports multiple post-training objectives:
+
+### (a) DMD-style loss
+A DMD objective can be applied to the **final self-rolled-out video**:
+- generator gets a score/critic-driven gradient to move toward target distribution
+- plus an auxiliary regression term for stability (same spirit as DMD2/DMD2-v style recipes)
+
+This gives a **data-free** route when using teacher-generated supervision/signals.
+
+### (b) SiD-style loss
+Self-Forcing can also use **Score identity Distillation (SiD)** style updates:
+- estimate/approximate the score mismatch
+- optimize the student rollout distribution accordingly
+
+Again, the important part is not the exact score estimator; it’s that the loss is computed on **true AR self-rollouts**.
+
+### (c) GAN loss (R3GAN-style in their implementation)
+They also instantiate Self-Forcing with a GAN objective (R3GAN variant):
+- discriminator sees real videos vs self-forced generated videos
+- generator learns to produce realistic rollouts
+
+This is actually very natural for Self-Forcing because GANs already train on samples from the generator’s own distribution.
+
+#### 6.2.4 Efficient training trick: stochastic gradient truncation
+Self-Forcing sounds expensive because training is sequential, but they make it tractable with **gradient truncation**:
+
+- Roll out multiple AR steps
+- Backprop only through the **last $k$ rollout steps** (or a truncated subset)
+- Treat earlier generated context as stop-gradient / detached
+
+This drastically cuts memory and compute while preserving the important signal:
+the model still trains on its own generated context distribution.
+
+This is the algorithmic reason Self-Forcing is practical.
+
+#### 6.2.5 Self-Forcing training algorithm (practical)
+**Algorithm sketch (Self-Forcing):**
+
+1. Start from a pretrained causal AR diffusion model (often CausVid-style initialization)
+2. For each training iteration:
+   - autoregressively roll out the model to generate a video/chunk sequence
+   - optionally use few-step denoising per chunk/frame
+   - apply **holistic** loss on final rollout (DMD / SiD / GAN)
+   - use **stochastic gradient truncation** for efficiency
+3. Update model
+4. (Optional) use rolling KV cache for efficient inference/extrapolation
+
+#### 6.2.6 Why Self-Forcing is important
+This is the first really strong “RL-like” move in video diffusion post-training:
+- **Pretrain in parallel**
+- **Post-train sequentially on your own rollout distribution**
+
+That shift is the main conceptual contribution, not just the specific loss choice.
+
+---
 
 ## 6.3 Transition Matching Distillation
 
@@ -2034,15 +2162,237 @@ So the conceptual split is:
 
 This is a strong template for hard domains (video, 3D, multimodal) where pure one-shot distillation is brittle.
 
+#### 6.3.5 Why TMD is strong
+TMD wins because it combines both worlds:
+- **trajectory-based structure** (TM-MF / flow-map adaptation)
+- **distribution-based distillation** (DMD2-v)
+
+And it does so with an architecture that respects the hierarchical structure of big video diffusion Transformers.
+
+That’s why it gets a better speed-quality tradeoff than plain one-step/few-step distillation baselines in video.
+
 ---
 
 # 7. New Domains
+## 7.1 JiT (Just image Transformers)
+#### 7.1.1 Core idea: x-prediction in pixel-space Transformers
+JiT’s key move is to make the Transformer directly predict the **denoised image** (an $x$-like target) instead of predicting noise/velocity in a high-dimensional noisy pixel patch space. The motivation is a **manifold hypothesis** argument: denoised images are lower-dimensional / easier targets for a ViT than noisy velocity fields. This is exactly the ingredient later reused by pMF. 
 
+#### 7.1.2 Algorithmic form (x-pred with v-loss)
+In the FM-style parameterization used in later papers when discussing JiT, the network outputs $x_\theta(z_t,t)$ and converts it to a velocity prediction:
+$$
+v_\theta(z_t,t)=\frac{1}{t}\big(z_t-x_\theta(z_t,t)\big)
+$$
+and training still uses the **velocity-space regression loss** (v-loss). This “prediction space vs loss space” decoupling is the important algorithmic pattern that keeps showing up in later distillation papers. 
 
+#### 7.1.3 Why this matters for distillation
+The high-signal point is not “pixel-space diffusion” by itself, but that JiT establishes a recipe:
+- choose an **easier output space** for the network (denoised/image-like),
+- keep a **stable/known loss space** (velocity/noise/FM target),
+- use a **conversion map** between them.
+
+That recipe is basically the blueprint for pMF and several later “decouple output-space from loss-space” methods. pMF explicitly cites JiT as the x-pred ingredient used to make one-step latent-free generation work. 
+
+#### 7.1.4 Practical note (loss/prediction mismatch)
+The JiT line also motivated later empirical work on **output-space vs loss-space mismatch**: x-pred can work best when paired with a velocity-style loss (or a reweighted variant), while naive direct x-loss can underperform. That design lesson reappears in pMF and MeanFlow-family variants. 
+
+---
+
+## 7.2 Drifting
+#### 7.2.1 Core idea: replace score/velocity field with a drifting field
+Drifting proposes a different one-step generative formulation: instead of learning a diffusion/flow velocity or score, it learns an **anti-symmetric kernelized field** (the “drifting field”) and then trains a generator to align with that field. The paper frames this as a new way to get one-step generation with strong quality while keeping a mathematically structured training target. 
+
+#### 7.2.2 Algorithmic object: empirical drifting field
+The method builds an empirical field from batch-level statistics (mean-field style / kernelized interactions). In the paper’s notation, the drifting field $V_{\mathrm{drf}}$ is formed from weighted source/target terms, with weights computed from a softmax over kernel similarities. This is the main algorithmic primitive replacing the usual score/velocity target. 
+
+#### 7.2.3 Training loop (distillation lens)
+From a diffusion-distillation perspective, the important interpretation is:
+- the model is trained to match a **teacher-like vector field target**,
+- but the target is **not** a diffusion teacher score/velocity,
+- it is a **kernelized drifting field** built from data/generator samples.
+
+So Drifting is part of the broader one-step trend, but it moves outside standard FM/score-distillation geometry and uses a different transport signal.
+
+---
+
+## 7.3 Pixel MeanFlow (pMF)
+#### 7.3.1 Why pMF is in this chapter
+pMF is a clean “new-domain” extension because it combines:
+- **one-step MeanFlow-style distillation logic** (JVP / MeanFlow identity),
+- **JiT-style x-prediction**,
+- and does it in **raw pixel space** (latent-free).
+
+That makes it a direct example of diffusion/flow distillation ideas being adapted to a harder domain (high-dimensional pixel space).
+
+#### 7.3.2 Core conversion: from average velocity to image-like target
+pMF defines an image-like field
+$$
+x(z_t,r,t)\equiv z_t - t\,u(z_t,r,t),
+$$
+where $u(z_t,r,t)$ is the MeanFlow average velocity. This is the key trick: make the network output something denoised/image-like, but still train via MeanFlow’s velocity-space machinery.
+
+The paper explicitly motivates this with a generalized manifold argument:
+- $u$ looks noisy/high-dimensional,
+- $x$ looks denoised/lower-dimensional,
+- so $x$ is easier for the network to model.
+
+#### 7.3.3 The algorithm (this is the important part)
+pMF reparameterizes the network output as:
+$$
+u_\theta(z_t,r,t)=\frac{1}{t}\big(z_t-x_\theta(z_t,r,t)\big),
+$$
+then plugs that into the improved MeanFlow/iMF JVP compound target:
+$$
+V_\theta = u_\theta + (t-r)\cdot \mathrm{JVP}_{\mathrm{sg}},
+$$
+and trains with a standard velocity regression:
+$$
+\mathcal{L}_{\mathrm{pMF}}=\mathbb{E}\|V_\theta-v\|_2^2.
+$$
+So pMF is **x-prediction + MeanFlow JVP distillation + v-loss**. That’s the whole algorithmic identity.
+
+#### 7.3.4 Pseudocode structure (practical)
+The training pseudocode is very explicit:
+1. sample $(t,r)$ and noise,
+2. form $z_t=(1-t)x+t\epsilon$,
+3. compute $u$ from the x-pred network output,
+4. set instantaneous velocity via the $r=t$ case,
+5. run a JVP to get $\frac{d}{dt}u$,
+6. build $V=u+(t-r)\,\text{stopgrad}(du/dt)$,
+7. regress to $(\epsilon-x)$.
+
+This is basically iMF with the network living in image space instead of velocity space. 
+
+#### 7.3.5 Distillation takeaway
+pMF is one of the cleanest examples of the modern pattern:
+- **teacher target space** stays physically meaningful (velocity/FM),
+- **student output space** becomes easier (image-like/manifold-aligned),
+- a **conversion + JVP identity** bridges the two.
+
+That pattern is exactly what makes these one-step methods actually trainable at high resolution. 
+
+---
+
+## 7.4 REPA (Representation Alignment for Generation)
+#### 7.4.1 Core idea: distill semantics into DiT hidden states
+REPA is not a one-step sampler by itself. It is a **training-time acceleration / regularization** method for diffusion transformers: align early hidden states of the noisy-input diffusion model with representations from a strong pretrained encoder (e.g., DINO/SigLIP/MAE), so the diffusion model learns semantic structure faster. The paper reports substantially faster convergence and better FID. 
+
+#### 7.4.2 Algorithmic pattern (representation distillation)
+The method is basically:
+- run the diffusion transformer on noisy input,
+- take hidden states from an early block,
+- project them to a feature space,
+- align them to frozen pretrained visual representations of the clean image.
+
+This is a **teacher-student distillation signal in feature space**, not in score/velocity space. It complements the usual denoising loss rather than replacing it. 
+
+#### 7.4.3 Why it matters in a distillation chapter
+REPA expands “distillation” beyond sampling-step distillation:
+- classic diffusion distillation compresses **inference trajectories**,
+- REPA distills **representation priors** into the denoiser backbone.
+
+That’s a different axis of acceleration: faster training / better sample efficiency, not just fewer NFEs. It also composes well with other diffusion recipes, which is why it shows up as a practical building block. 
+
+---
+
+## 7.5 Latent Forcing
+#### 7.5.1 Core idea: distill a latent planner into a pixel refiner
+Latent Forcing is a two-stage autoregressive video generation setup that explicitly splits generation into:
+1. a **base latent diffusion** model (semantic / long-horizon structure),
+2. a **pixel-space refiner diffusion** model (visual details),
+
+with a distillation-like forcing mechanism that conditions the refiner on latent predictions. This is basically “semantic planning in latent space, rendering in pixel space.” 
+
+#### 7.5.2 Key algorithm trick: two-time conditioning
+The refiner needs to know **both**:
+- how noisy the current pixel sample is,
+- and how much to trust the latent prediction.
+
+So they add a **second time/noise embedding** (for latent-conditioning time) into the U-Net conditioning stack. This is the core algorithmic adaptation and is the reason the method works across different latent/pixel noise levels.
+
+#### 7.5.3 Training objective
+Training optimizes a weighted sum of:
+- the base latent diffusion loss,
+- the pixel refiner denoising loss.
+
+The paper writes this as a joint objective (Eq. 1), with a scalar weight balancing the base and refiner parts. This is the cleanest way to read it: **joint distillation/training across two domains (latent + pixel)**. 
+
+#### 7.5.4 Timestep schedule is the secret sauce
+They do not use identical timesteps for base and refiner. Instead, they derive/schedule a latent-conditioning timestep as a function of the global/pixel timestep (their Eq. 4-style schedule, with clipping / constraints in later equations). This prevents the refiner from being conditioned on latent predictions that are unrealistically clean/noisy relative to the current pixel denoising stage. 
+
+#### 7.5.5 Distillation takeaway
+Latent Forcing is a domain-transfer distillation recipe:
+- distill **global structure** into a compact latent process,
+- force a pixel model to consume that structure reliably,
+- synchronize the two with explicit noise-time coupling.
+
+This is exactly the kind of “new domain” extension diffusion distillation needed for long-horizon video.
+
+---
+
+## 7.6 Unified Latents (UL)
+#### 7.6.1 Core idea: train the latent space *for* diffusion, not before diffusion
+UL reframes latent learning as a **jointly trained system**:
+- encoder produces latents,
+- a diffusion prior regularizes/model these latents,
+- a diffusion decoder reconstructs the data.
+
+The punchline is that they explicitly link encoder noise to the prior’s minimum noise level, which gives a principled handle on latent information capacity (bitrate). This is a big deal because previous latent pipelines often tuned KL strength heuristically. 
+
+#### 7.6.2 Algorithm 1 (joint training)
+UL’s training algorithm is clean and practical:
+1. encode $x$ to a clean latent $z_{\text{clean}}$,
+2. add diffusion noise in latent space and train a **latent prior diffusion loss** $L_z$,
+3. sample a slightly noisy latent $z_0$ and noisy image $x_t$,
+4. train a **decoder diffusion loss** $L_x$ conditioned on $z_0$,
+5. optimize the combined objective $L = L_z + L_x$.
+
+This is not post-hoc distillation; it is **co-training** the latent representation and the diffusion models so the latent becomes diffusion-friendly by construction.
+
+#### 7.6.3 Sampling algorithm (factorized generation)
+Sampling is also explicitly two-stage:
+1. sample latent noise $z_1$,
+2. denoise to a latent $z_0$ with the latent prior,
+3. sample image noise $x_1$,
+4. denoise with the decoder conditioned on $z_0$.
+
+This factorization is the deployment-side analog of the training split above. 
+
+#### 7.6.4 Why UL belongs in “distillation/new domains”
+UL is a latent-learning framework, but it matters for diffusion distillation because it changes the upstream problem:
+- if the latent is easier to model, **few-step / distilled samplers become easier downstream**;
+- UL gives a principled way to control this via latent noise/bitrate rather than ad hoc KL tuning.
+
+So UL is not trajectory distillation, but it is absolutely part of the modern diffusion efficiency stack.
+
+---
+
+## 7.7 Unifying pattern across these “new-domain” methods
+The common pattern across JiT, pMF, Latent Forcing, REPA, and UL is:
+
+1. **Choose an easier target/domain**
+   - image-like target (JiT, pMF),
+   - latent structure target (Latent Forcing, UL),
+   - pretrained semantic features (REPA).
+
+2. **Keep a stable training signal**
+   - velocity/FM loss (JiT, pMF),
+   - standard denoising losses (Latent Forcing, UL),
+   - feature alignment regularization (REPA).
+
+3. **Bridge them with an explicit conversion/conditioning mechanism**
+   - $x \to v$ (JiT),
+   - $x \to u \to V$ + JVP (pMF),
+   - coupled latent/pixel timesteps (Latent Forcing),
+   - projection heads for feature alignment (REPA),
+   - encoder-noise/prior-noise linkage (UL).
+
+That’s the real story of diffusion distillation in new domains: not just “fewer NFEs,” but **engineering the target space so distillation/training is actually learnable**.
 
 ---
 
 # 8. Manifold
+
 
 ---
 
