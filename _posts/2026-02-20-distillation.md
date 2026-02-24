@@ -27,11 +27,12 @@ categories: research-survey
     2. Meta FlowMap
     3. TVM
 4. [Score Distillation]()
-    1. VSD
-    2. DMD
-    3. SiD
-    4. Adaptive Matching Distillation
-5. [Adversarial]()
+    1. Variational Score Distillation (VSD)
+    2. Distribution Matching Distillation (DMD)
+    3. Score Identity Distillation (SiD)
+5. [Adversarial Distillation]()
+    1. Adversarial Diffusion Distillation
+    2. LADD
     1. DiffRatio
     2. APT
 6. [Video Generation]()
@@ -977,66 +978,278 @@ This is exactly the kind of conceptual bridge diffusion researchers should care 
 
 ---
 
-## 3.3 Transition Matching Distillation
+## 3.3 Terminal Velocity Matching (TVM)
 
-Transition Matching Distillation (TMD) bridges engineering and theory based adaptation of MeanFlow to **video distillation**.
+#### 3.3.1 Core idea: match the **terminal** velocity of a learned flow map
 
-#### 3.3.1 Core problem setup
+TVM parameterizes a **two-time displacement map** (flow map increment) directly, instead of only learning the instantaneous velocity field.
 
-They want to distill a pretrained video diffusion teacher into a faster student. Direct one-stage distillation is hard in video because:
-- the space is huge,
-- temporal consistency matters,
-- transformer-based video models make JVP painful (esp. attention kernels/FSDP/context parallelism).
-
-So TMD uses **two stages**.
-
-#### 3.3.2 Stage 1: Transition Matching MeanFlow (TM-MF)
-
-This is the key new idea.
-
-Instead of applying MeanFlow directly in the original latent/data space, they define an **inner transition** problem and parameterize a conditional inner flow map via average velocity:
-
+Let the ground-truth displacement from time $t$ to $s$ be
 $$
-f_\theta(y_s,s,r;m) = y_s + (s-r)u_\theta(y_s,s,r;m)
+f(x_t,t,s) := \psi(x_t,t,s) - x_t.
 $$
 
-where $m$ is a feature extracted from the main backbone.
-
-Then they use a MeanFlow-style objective to train this transition head.
-
-A very practical (and nontrivial) design choice:
-- they **reparameterize** the average velocity to stay aligned with the teacher head:
-
+TVM uses a model
 $$
-u_\theta(y_s,s,r;m) = y_1 - \text{head}_\theta(y_s,s,r;m)
+f_\theta(x_t,t,s) = (s-t)F_\theta(x_t,t,s),
 $$
-
-This is not cosmetic. It keeps the new head close to teacher semantics, which improves stability.
-
-#### 3.3.3 JVP issue and finite-difference approximation
-
-This paper is very realistic about systems constraints:
-- exact JVP is annoying with large-scale video transformer stacks (FlashAttention, FSDP, context parallelism),
-- so they use a **finite-difference approximation** of the JVP.
-
-That’s a practical compromise:
-- theoretically less clean than exact JVP,
-- but massively easier to integrate into production-grade training code.
-
-#### 3.3.4 Stage 2: Distributional distillation objective
-
-After TM-MF pretraining, they switch to a stronger distillation stage using a VSD/discriminator-style objective (their simplified algorithm shows):
-
+and defines the model’s instantaneous velocity as the boundary derivative
 $$
-\mathcal{L} = \text{VSD}(\hat{x}) + \lambda \cdot \text{Discriminator}(\hat{x})
+u_\theta(x_t,t)
+:=
+\left.\frac{d}{ds}f_\theta(x_t,t,s)\right|_{s=t}
+=
+F_\theta(x_t,t,t).
 $$
 
-So the conceptual split is:
+This is the key unification:
+- the **same network** learns both
+  1. a large-step displacement map $f_\theta$, and
+  2. an infinitesimal velocity field $u_\theta$.
 
-- **Stage 1 (TM-MF):** learn a good transition-aware student parameterization, bootstrap geometry/dynamics
-- **Stage 2:** sharpen sample quality and distribution match
+#### 3.3.2 Why “terminal” velocity?
 
-This is a strong template for hard domains (video, 3D, multimodal) where pure one-shot distillation is brittle.
+The ground-truth displacement satisfies
+$$
+f(x_t,t,s)=\int_t^s u(x_r,r)\,dr.
+$$
+
+Differentiate w.r.t. the **terminal time** $s$:
+$$
+\frac{d}{ds}f(x_t,t,s)=u(\psi(x_t,t,s),s).
+$$
+
+This is the terminal velocity condition.
+
+The nice part is: if the terminal-velocity condition is satisfied along the trajectory, then the displacement map error is controlled (TVM shows an upper bound of displacement error by integrated terminal-velocity error). So instead of directly supervising the full ODE integral, TVM supervises the **derivative at the terminal endpoint**.
+
+This is the conceptual contrast with MeanFlow:
+- **MeanFlow** differentiates w.r.t. the **start time** $t$,
+- **TVM** differentiates w.r.t. the **end time** $s$.
+
+#### 3.3.3 Proxy trick (how they make it trainable)
+
+The terminal condition depends on unknown ground-truth objects:
+- $\psi(x_t,t,s)$ (true flow map)
+- $u(\cdot,s)$ (true velocity field)
+
+TVM replaces them with model proxies:
+$$
+u(\psi(x_t,t,s),s)
+\;\approx\;
+u_\theta\big(x_t + f_\theta(x_t,t,s),\, s\big).
+$$
+
+So the model predicts a displacement to a new point
+$$
+x_s^{(\theta)} = x_t + f_\theta(x_t,t,s),
+$$
+then evaluates its own velocity field at that terminal point.
+
+This makes the loss **self-consistent** and trainable in one stage.
+
+#### 3.3.4 TVM objective (the actual loss)
+
+TVM jointly optimizes:
+
+1. **Terminal-velocity matching term** (general $t \ge s$)
+2. **Flow Matching boundary term** (special case / anchor)
+
+Per-time objective:
+$$
+\mathcal{L}_{\mathrm{TVM}}^{t,s}(\theta)
+=
+\mathbb{E}
+\Big[
+\underbrace{
+\left\|
+\frac{d}{ds}f_\theta(x_t,t,s)
+-
+u_\theta\big(x_t + f_\theta(x_t,t,s), s\big)
+\right\|_2^2
+}_{\text{terminal velocity matching}}
++
+\underbrace{
+\|u_\theta(x_s,s)-v_s\|_2^2
+}_{\text{Flow Matching anchor}}
+\Big].
+$$
+
+Where:
+- $x_s$ is sampled from the interpolation path (as in Flow Matching),
+- $v_s$ is the standard FM target velocity (e.g. for linear interpolation, $v_s = x_1 - x_0$).
+
+Then the practical training objective is just expectation over sampled time pairs:
+$$
+\mathcal{L}_{\mathrm{TVM}}(\theta)
+=
+\mathbb{E}_{t,s}\left[\mathcal{L}_{\mathrm{TVM}}^{t,s}(\theta)\right].
+$$
+
+#### 3.3.5 EMA + stop-gradient version (important in practice)
+
+Like consistency/distillation-style methods, TVM stabilizes training using:
+- **EMA target network**
+- **stop-gradient** on proxy paths
+
+The practical version uses:
+- stop-grad copy for displacement branch,
+- stop-grad EMA copy for terminal velocity target.
+
+Conceptually:
+$$
+u_\theta\big(x_t + f_\theta(x_t,t,s),s\big)
+\;\to\;
+u_{\theta_{\text{EMA}}}^{\text{sg}}
+\Big(x_t + f_{\theta}^{\text{sg}}(x_t,t,s), s\Big).
+$$
+
+This avoids collapse / target chasing and makes the proxy supervision much more stable.
+
+#### 3.3.6 Why TVM is strong theoretically (the important claim)
+
+TVM proves a **distribution-level guarantee**:
+
+Under a Lipschitz assumption on $u_\theta(\cdot,s)$, a weighted time integral of the TVM objective upper-bounds the squared Wasserstein-2 distance between:
+- the model pushforward distribution (via the learned map), and
+- the true data distribution.
+
+In spirit:
+$$
+W_2^2(\text{model pushforward}, p_0)
+\;\lesssim\;
+\int_0^t \lambda(s)\,\mathcal{L}_{\mathrm{TVM}}^{t,s}(\theta)\,ds
++ C.
+$$
+
+This is a big deal because many one/few-step distillation methods work well empirically but do **not** cleanly tie their loss to a distribution divergence.
+
+#### 3.3.7 Classifier-Free Guidance (CFG) version
+
+TVM extends naturally to conditional generation with CFG.
+
+They define a CFG-conditioned displacement map
+$$
+f_\theta(x_t,t,s,c,w),
+$$
+where:
+- $c$ = class condition
+- $w$ = guidance scale
+
+The practical CFG objective adds two important ideas:
+
+1. **Condition on $w$ directly**
+   - The network sees the guidance scale at training time.
+   - This lets one model support multiple CFG scales.
+
+2. **Use a $1/w^2$ weighting**
+   - Because target velocity magnitude scales roughly linearly with $w$,
+   - the loss can explode for large $w$ without correction.
+
+So the conditional TVM loss is roughly:
+$$
+\frac{1}{w^2}
+\left\|
+\frac{d}{ds}f_\theta(\cdot,c,w)
+-
+u_{\theta_{\text{EMA}}}^{\text{sg}}(\cdot,c,w)
+\right\|_2^2
++
+\mathcal{L}_{\mathrm{FM}}^{\text{CFG}}.
+$$
+
+This is one of the most practical contributions in the paper because it supports **stable training under varying CFG**.
+
+#### 3.3.8 Sampling algorithm
+
+Once trained, sampling is dead simple and supports both 1-step and few-step generation **without retraining**.
+
+For a sequence of times
+$$
+1=t_0 > t_1 > \cdots > t_n=0,
+$$
+iterate:
+$$
+x_{t_{k+1}}
+=
+x_{t_k}
++
+f_\theta(x_{t_k}, t_k, t_{k+1})
+=
+x_{t_k}
++
+(t_{k+1}-t_k)F_\theta(x_{t_k}, t_k, t_{k+1}).
+$$
+
+So:
+- **1-NFE**: one direct jump $t=1 \to 0$
+- **few-NFE**: chain multiple learned jumps
+- no ODE solver needed (the network itself is the integrator)
+
+This is exactly why flow-map-style methods are so appealing for distillation and fast sampling.
+
+#### 3.3.9 JVP term and implementation detail (important for “algorithm” understanding)
+
+Because
+$$
+f_\theta(x_t,t,s)=(s-t)F_\theta(x_t,t,s),
+$$
+the terminal derivative expands as
+$$
+\frac{d}{ds}f_\theta(x_t,t,s)
+=
+F_\theta(x_t,t,s)
++
+(s-t)\,\partial_s F_\theta(x_t,t,s).
+$$
+
+That second term is a **Jacobian-vector product (JVP)** through the network.
+
+TVM’s practical novelty is not just using JVP, but supporting:
+- **JVP through FlashAttention**
+- **backprop through the JVP result**
+
+That matters a lot for DiT-scale transformers, because naive PyTorch attention + JVP is too slow / memory-heavy.
+
+#### 3.3.10 Practical tricks that actually matter (from the paper)
+
+TVM adds several engineering choices that are unusually important:
+
+1. **Semi-Lipschitz control in DiT**
+   - The theory needs Lipschitzness-ish behavior.
+   - Vanilla DiT components (LayerNorm/SDPA) are problematic.
+   - They replace key normalizations with RMSNorm-style variants and normalize AdaLN modulation terms.
+
+2. **AdamW $\beta_2 = 0.95$**
+   - Higher-order gradients from JVP make training noisy.
+   - Lower $\beta_2$ stabilizes second-moment tracking.
+
+3. **Scaled parameterization for CFG**
+   - Make the model output scale with $w$ by construction:
+   $$
+   f_\theta(x_t,t,s,c,w)=(s-t)\,w\,F_\theta(x_t,t,s,c,w).
+   $$
+   - This improves optimization under large guidance.
+
+4. **Time sampling matters**
+   - They ablate multiple $(t,s)$ sampling schemes.
+   - Biasing toward larger jumps (larger $t$, smaller $s$) helps, but too aggressive hurts.
+   - They also find using a separate time distribution for the FM anchor term can help.
+
+#### 3.3.11 TVM vs MeanFlow (the clean comparison)
+
+**MeanFlow**
+- matches a derivative condition w.r.t. **start time** $t$
+- propagates $u(x_t,t)$ through the JVP path
+- more sensitive to random CFG because the velocity magnitude directly enters the JVP branch
+
+**TVM**
+- matches a derivative condition w.r.t. **terminal time** $s$
+- JVP is w.r.t. $s$ (cleaner and more stable under random CFG)
+- has a clearer Wasserstein-style distribution guarantee
+- naturally supports one-step and few-step jumps with the same network
+
+This is why TVM is a strong “algorithmic” evolution of flow-map distillation rather than just another loss tweak.
 
 ---
 # 4. Score Distillation
@@ -1400,92 +1613,440 @@ In practice this is more memory/computation heavy, but it is a major reason SiD 
 ---
 
 # 5. Adversarial Distillation
+## 5.1 Adversarial Diffusion Distillation (ADD)
+
+ADD is the clean “diffusion-distill + GAN refine” recipe for turning a pre-trained diffusion teacher into a fast student (often 1-step or few-step), while explicitly preserving the teacher’s denoising behavior.
+
+### 5.1.1 Core idea: combine adversarial learning with diffusion distillation
+
+The student is trained with two losses:
+1. **Adversarial loss** for photorealistic high-frequency detail
+2. **Diffusion distillation loss** to stay aligned with the teacher’s denoising trajectory
+
+The total generator objective is:
+
+$$
+\mathcal{L}_G
+=
+\lambda_{\mathrm{adv}}\mathcal{L}_{\mathrm{adv}}
++
+\lambda_{\mathrm{distill}}\mathcal{L}_{\mathrm{distill}}
+$$
+
+This is the key point: ADD is not “just a GAN on top of diffusion outputs.”
+It is explicitly a **teacher-constrained adversarial distillation** method.
+
+### 5.1.2 Adversarial part (generator + discriminator)
+
+ADD uses a DINOv2-feature-based discriminator setup (projected / feature-space discrimination style), which is more stable and semantically informed than a plain pixel discriminator.
+
+Generator adversarial loss (hinge-form style, on discriminator outputs) is:
+
+$$
+\mathcal{L}_{\mathrm{adv}}
+=
+\mathbb{E}_{x_t, t, c}\left[D_\phi(\hat{x}_{\theta,t}, t, c)\right]
+$$
+
+The discriminator is trained with a real/fake hinge objective plus regularization:
+
+$$
+\mathcal{L}_D
+=
+\mathbb{E}_{x_t, t, c}\left[\max(0, 1 - D_\phi(\hat{x}_{\psi,t}, t, c))\right]
++
+\mathbb{E}_{x_t, t, c}\left[\max(0, 1 + D_\phi(\hat{x}_{\theta,t}, t, c))\right]
++
+\lambda_{R1}\mathcal{L}_{R1}
+$$
+
+where:
+- $\hat{x}_{\psi,t}$ is the **teacher-predicted denoised image**
+- $\hat{x}_{\theta,t}$ is the **student-predicted denoised image**
+- the discriminator sees timestep and conditioning too, so the adversarial game is timestep-aware
+
+### 5.1.3 Diffusion distillation part (the important anchor)
+
+The distillation target is the teacher’s denoised estimate.
+ADD uses an SDS-style weighted regression to the teacher prediction:
+
+$$
+\mathcal{L}_{\mathrm{distill}}
+=
+\mathbb{E}_{x_t,t,c}\left[
+\omega(\lambda(t))
+\left\|
+\hat{x}_{\theta,t} - \hat{x}_{\psi,t}
+\right\|_2^2
+\right]
+$$
+
+This is the “don’t drift too far from the teacher” term.
+Without it, pure adversarial training tends to hallucinate detail but break semantic / structural fidelity.
+
+### 5.1.4 Why ADD matters
+
+ADD became a strong template because it fixes the classic one-step problem:
+- pure distillation gives blurry or over-smoothed outputs
+- pure GAN gives sharp but unstable / off-manifold outputs
+
+ADD gets both:
+- **teacher alignment** from diffusion distillation
+- **sharpness and realism** from adversarial training
+
+### 5.1.5 Practical algorithm (high-level)
+
+1. Sample $(x,c)$ and a timestep $t$
+2. Corrupt to get $x_t$
+3. Get teacher denoised prediction $\hat{x}_{\psi,t}$
+4. Get student denoised prediction $\hat{x}_{\theta,t}$
+5. Update discriminator with real = teacher prediction, fake = student prediction
+6. Update student with:
+   - adversarial loss against discriminator
+   - weighted distillation loss to teacher prediction
+
+---
+
+## 5.2 LADD (Latent Adversarial Diffusion Distillation)
+
+LADD is the latent-video extension of the adversarial distillation idea.
+The big shift is: **do the adversarial game in latent/video space and train for long-horizon generation without requiring paired long targets**.
+
+### 5.2.1 Motivation: one-step video gets killed by exposure error
+
+Teacher-forced diffusion distillation works okay for short clips, but for long autoregressive rollout:
+- errors accumulate
+- small distortions compound
+- teacher-forced supervision mismatches inference-time behavior
+
+LADD’s fix is to lean harder into adversarial training and use the discriminator as the long-horizon supervision signal.
+
+### 5.2.2 Key move: adversarial supervision replaces explicit per-step paired targets
+
+Instead of requiring exact paired long-video targets (which are scarce and awkward),
+LADD trains the generator so each generated segment looks real to a discriminator.
+
+That is the crucial algorithmic advantage:
+- **supervised distillation** needs paired targets and usually short clips
+- **adversarial training** only needs “real vs generated” segments
+
+So LADD can train long-video generators from ordinary video data, even when very long continuous shots are rare.
+
+### 5.2.3 Training pipeline structure (same spirit as APT/AAPT, but latent-video focused)
+
+LADD-style training is best viewed as a staged pipeline:
+
+1. **Initialize from a pre-trained diffusion model**
+   - keeps strong prior / semantics / motion prior
+
+2. **(Optional but common) distillation or adaptation warm-start**
+   - stabilize the student before adversarial training
+   - preserve diffusion behavior early
+
+3. **Adversarial post-training in latent space**
+   - discriminator distinguishes real vs generated latent video segments
+   - generator is trained autoregressively
+   - generated outputs are recycled as future inputs (student-forcing behavior)
+
+4. **Long-video segment training**
+   - generate long sequences
+   - split into shorter overlapping segments for discriminator evaluation
+   - accumulate gradients segment-wise
+
+This is the same deep idea that appears in modern real-time video papers:
+the discriminator gives a scalable supervision signal for long-horizon rollout.
+
+### 5.2.4 Why latent adversarial training is stronger than pixel GAN in this setting
+
+Doing the adversarial game in latent/video representation space helps because:
+- lower dimensionality → cheaper and more stable
+- closer to the model’s native generation space
+- easier to enforce temporal consistency than purely pixel GAN losses
+
+In practice, this makes LADD-style methods much more compatible with:
+- one-step or few-step video generators
+- autoregressive rollout
+- KV-cache causal transformers
+
+### 5.2.5 Main algorithmic takeaway
+
+LADD is not just “ADD but for video.”
+It is the transition from:
+- **paired denoising distillation**
+to
+- **distribution-level adversarial alignment for long-horizon latent rollout**
+
+That shift is what makes minute-long streaming generation feasible.
+
+---
+
+## 5.3 DiffRatio
+
+DiffRatio is one of the most interesting adversarial/distillation hybrids because it gives a **theory-backed correction** to standard diffusion distillation.
+
+### 5.3.1 Problem: teacher-forced distillation has a distribution mismatch
+
+In teacher-forced distillation, the student is trained on teacher trajectories / noise states.
+But at inference, the student rolls out its **own** states.
+
+So the student is optimized under the wrong state distribution.
+
+This is the exact same failure mode as exposure bias in autoregressive models.
+
+### 5.3.2 Density-ratio view (the core contribution)
+
+DiffRatio frames this mismatch as a **density ratio correction** problem.
+
+They derive a correction factor that reweights the distillation objective by a ratio between:
+- the student-induced trajectory distribution
+- the teacher/reference trajectory distribution
+
+Conceptually:
+
+$$
+\text{corrected objective}
+\;\sim\;
+\mathbb{E}_{\text{reference}}
+\left[
+\frac{p_{\text{student}}}{p_{\text{reference}}}
+\cdot
+(\text{distillation error})
+\right]
+$$
+
+This is the main idea.
+The student should not just minimize teacher-forced error; it should minimize error under its own rollout distribution.
+
+### 5.3.3 How they estimate the ratio (the adversarial/classifier trick)
+
+The ratio is not known directly, so DiffRatio estimates it with a classifier (discriminator-like network).
+
+Train a binary classifier to distinguish samples from:
+- teacher/reference distribution
+- student rollout distribution
+
+Then convert the classifier logits into a density-ratio estimate.
+This is the same classic trick behind density-ratio estimation / f-GAN style estimation.
+
+So the adversarial component is not only for realism here.
+It is used as a **distribution correction estimator**.
+
+### 5.3.4 Final training recipe (algorithmically)
+
+DiffRatio training has two coupled updates:
+
+#### (A) Ratio estimator / classifier update
+Train a classifier to separate:
+- reference (teacher) samples
+- student-generated samples
+
+#### (B) Student update
+Train the student with:
+- the original distillation loss
+- reweighted by the estimated density ratio
+
+This directly targets the rollout mismatch that breaks one-step/few-step distillation.
+
+### 5.3.5 Why this is important
+
+DiffRatio is a more principled answer to the “teacher-student mismatch” than just adding more heuristics.
+
+It says:
+- the issue is not only sharpness/blur
+- the issue is **wrong training distribution**
+- adversarial estimation can be used to **fix the measure** the student is trained under
+
+That’s a very strong conceptual bridge between:
+- diffusion distillation
+- adversarial learning
+- off-policy / covariate-shift correction ideas
+
+---
+
+## 5.4 APT (and the modern AAPT extension)
+
+APT (Adversarial Post-Training) is the core one-step video idea:
+start from a diffusion model, distill/adapt it, then use adversarial training to recover visual quality and speed.
+
+AAPT extends APT to **autoregressive real-time video generation** with causal attention + KV cache.
+
+### 5.4.1 The 3-stage training pipeline (the important part)
+
+The modern APT/AAPT recipe is:
+
+1. **Diffusion adaptation**
+2. **Consistency distillation**
+3. **Adversarial training**
+
+This staged design is the key engineering insight.
+You do not jump directly from diffusion weights to GAN training.
+
+#### Stage 1: Diffusion adaptation
+- Convert the pretrained video diffusion transformer into a causal/autoregressive architecture
+- Finetune with diffusion objective under teacher forcing
+- Preserve the diffusion prior while adapting architecture and inputs
+
+#### Stage 2: Consistency distillation
+- Use consistency distillation as initialization before adversarial training
+- Speeds convergence and stabilizes the later adversarial phase
+- In AAPT, this is explicitly described as following APT
+
+#### Stage 3: Adversarial post-training
+- Add a discriminator (initialized from diffusion weights in AAPT-style setups)
+- Train generator + discriminator adversarially
+- This improves frame quality and enables 1-step generation quality recovery
+
+### 5.4.2 Why adversarial post-training is necessary after distillation
+
+Consistency / diffusion distillation gets you speed, but often:
+- oversmooths details
+- weakens texture realism
+- accumulates errors in long rollout
+
+Adversarial post-training fixes exactly that:
+- sharper details
+- better perceptual realism
+- stronger long-horizon behavior (especially with student-forcing)
+
+This is why APT-style methods matter in practice:
+they are the bridge from “distilled but soft” to “distilled and actually usable.”
+
+### 5.4.3 AAPT’s autoregressive extension (the useful algorithm detail)
+
+AAPT extends APT in a way that is super relevant for streaming / interactive video:
+
+#### Causal generator + KV cache
+- autoregressive frame generation
+- one latent frame per forward pass (1NFE)
+- reuse KV cache for speed
+
+#### Student-forcing adversarial training
+During adversarial training:
+- only the first frame is ground truth
+- afterward, the model feeds back its **own generated frames**
+- training behavior matches inference behavior
+
+This is a big deal.
+It directly attacks exposure error instead of hiding it with teacher forcing.
+
+### 5.4.4 Discriminator design and loss in the APT/AAPT line
+
+AAPT uses:
+- a causal discriminator backbone (same family as the generator)
+- per-frame logits (not only clip-level), enabling parallel multi-duration discrimination
+- relativistic adversarial objective (R3GAN-style)
+- approximated R1/R2 regularization (following APT)
+
+This is a very modern discriminator setup:
+it is designed for stability and long-video training, not old-school image GAN heuristics.
+
+### 5.4.5 Long-video training trick (important)
+
+AAPT-style training solves the long-video data problem by:
+- generating long videos
+- splitting them into short overlapping segments for discriminator evaluation
+- training the discriminator on real vs generated segments
+
+This avoids needing rare long paired ground-truth targets and lets the generator learn long-horizon rollout behavior from ordinary video datasets.
+
+That is the killer feature of adversarial post-training in this context:
+the discriminator supplies supervision at the **distribution level**, which scales to long sequences.
+
+---
+
+## 5.5 Comparisons
+
+The adversarial line of diffusion distillation is not one thing; it has evolved through three distinct roles:
+
+1. **ADD:** adversarial loss as a perceptual sharpness booster on top of diffusion distillation  
+2. **APT / AAPT / LADD:** adversarial post-training as the main way to make 1-step generators actually work for video and long-horizon rollout  
+3. **DiffRatio:** adversarial classifier as a density-ratio estimator for correcting teacher-student distribution mismatch
+
+That progression is the real story:
+adversarial methods moved from “make it sharper” to “fix the training distribution and rollout behavior.”
+
+---
 
 # 6. Video Generation
 
-## 6.3 Terminal Velocity Matching
+## 6.1 Causvid
 
-Terminal Velocity Matching (TVM): A More Principled Objective for One/Few-Step Models
+## 6.2 Self-forcing
 
-### 6.3.1 What it changes
+## 6.3 Transition Matching Distillation
 
-Prior methods (FM/MeanFlow/FMM-style) mostly match local or initial-time velocity constraints.
+Transition Matching Distillation (TMD) bridges engineering and theory based adaptation of MeanFlow to **video distillation**.
 
-TVM says: match the **terminal velocity** of the flow trajectory instead.
+#### 6.3.1 Core problem setup
 
-That sounds minor, but it changes the theory:
-- they derive an explicit **2-Wasserstein upper bound**
-- and motivate a more stable training target for one/few-step generation
+They want to distill a pretrained video diffusion teacher into a faster student. Direct one-stage distillation is hard in video because:
+- the space is huge,
+- temporal consistency matters,
+- transformer-based video models make JVP painful (esp. attention kernels/FSDP/context parallelism).
 
-### 6.3.2 Core theorem and loss structure
+So TMD uses **two stages**.
 
-TVM introduces a terminal velocity target
+#### 6.3.2 Stage 1: Transition Matching MeanFlow (TM-MF)
+
+This is the key new idea.
+
+Instead of applying MeanFlow directly in the original latent/data space, they define an **inner transition** problem and parameterize a conditional inner flow map via average velocity:
+
 $$
-u^*(x_t,t,s) = \mathbb{E}[v_t \mid x_t]
-$$
-(at terminal pairing \(s\), with the paper’s precise conditioning)
-
-Then they define a target involving a time derivative of the learned map:
-$$
-u^*_\theta(x_t,t,s)
-=
-u^*(x_t,t,s) - (t-s)\partial_s F_\theta(x_t,t,s)
+f_\theta(y_s,s,r;m) = y_s + (s-r)u_\theta(y_s,s,r;m)
 $$
 
-and train with a matching loss of the form
+where $m$ is a feature extracted from the main backbone.
+
+Then they use a MeanFlow-style objective to train this transition head.
+
+A very practical (and nontrivial) design choice:
+- they **reparameterize** the average velocity to stay aligned with the teacher head:
+
 $$
-\mathbb{E}\|F_\theta - u^*_\theta\|^2
+u_\theta(y_s,s,r;m) = y_1 - \text{head}_\theta(y_s,s,r;m)
 $$
 
-The crucial thing is **not** just the formula; it’s the theorem:
-they show this objective upper-bounds the 2-Wasserstein distance (up to constants / residual terms in their theorem statement).
+This is not cosmetic. It keeps the new head close to teacher semantics, which improves stability.
 
-That gives TVM a stronger distributional interpretation than “just match a derivative identity.”
+#### 6.3.3 JVP issue and finite-difference approximation
 
-### 6.3.3 Significance
+This paper is very realistic about systems constraints:
+- exact JVP is annoying with large-scale video transformer stacks (FlashAttention, FSDP, context parallelism),
+- so they use a **finite-difference approximation** of the JVP.
 
-This is the first really clean signal that the field is maturing beyond:
-- local consistency heuristics,
-- empirical JVP identities,
-- “it works in 1 step”
+That’s a practical compromise:
+- theoretically less clean than exact JVP,
+- but massively easier to integrate into production-grade training code.
 
-into:
-- **distributional guarantees**
-- explicit control over terminal behavior
-- better theory-practice alignment
+#### 6.3.4 Stage 2: Distributional distillation objective
 
-### 6.3.4 The systems contribution
+After TM-MF pretraining, they switch to a stronger distillation stage using a VSD/discriminator-style objective (their simplified algorithm shows):
 
-TVM also points out a major implementation pain:
-- JVP of scaled dot-product attention is poorly supported / inefficient in standard autograd stacks.
-- Unlike prior works, TVM also propagates gradient through the JVP term (not just stop-grad around it), which is even harder.
+$$
+\mathcal{L} = \text{VSD}(\hat{x}) + \lambda \cdot \text{Discriminator}(\hat{x})
+$$
 
-They propose a FlashAttention kernel that fuses JVP with forward pass and supports backward through the JVP result.
+So the conceptual split is:
 
-That matters a lot if you care about scaling this family to modern DiT/transformer stacks.
+- **Stage 1 (TM-MF):** learn a good transition-aware student parameterization, bootstrap geometry/dynamics
+- **Stage 2:** sharpen sample quality and distribution match
+
+This is a strong template for hard domains (video, 3D, multimodal) where pure one-shot distillation is brittle.
 
 ---
 
 # 7. New Domains
 
-# 8. Manifold
 
-# 7. Unifying View: The Field’s Progression in One Picture
-
-Almost every method in this area can be seen as:
-
-1. **Diagonal anchor**
-   - when time-pair collapses, match a standard object (FM velocity / posterior / terminal target)
-2. **Off-diagonal propagation**
-   - via a differential identity (MeanFlow / FMM),
-   - or consistency/composition (stochastic/meta flow maps),
-   - or terminal-time control (TVM)
-
-This “diagonal + propagation” lens is the best mental model for the literature.
 
 ---
 
-# 8. Practical Research Takeaways (for top-lab diffusion folks)
+# 8. Manifold
+
+---
+
+# 9. Practical Research Takeaways (for top-lab diffusion folks)
 
 ### 8.1 If you’re doing one-step/few-step image generation
 Start by deciding which failure mode you care about:
