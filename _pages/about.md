@@ -29,6 +29,8 @@ I am interested in embodied generative simulations.
 
 The intersection of 3D representations and distribution matching generative models boils my beans.
 
+I am currently a student at Berkeley. Working on interaction simulation with video diffusion with [Dr. Jiahui Lei](https://jiahuilei.com/) from [Prof. Angjoo Kanazawa](https://people.eecs.berkeley.edu/~kanazawa/)'s group at [Berkeley Artificial Intelligence Research (BAIR)](https://bair.berkeley.edu/) and [Dr. Mutian Xu](https://mutianxu.github.io/) from [Prof. Ziwei Liu](https://liuziwei7.github.io/)'s group at [MMLab@NTU](https://www.mmlab-ntu.com/).
+
 <!-- Write your biography here. Tell the world about yourself. Link to your favorite [subreddit](https://www.reddit.com). You can put a picture in, too. The code is already in, just name your picture `prof_pic.jpg` and put it in the `img/` folder.
 
 Put your address / P.O. box / other info right below your picture. You can also disable any of these elements by editing `profile` property of the YAML header of your `_pages/about.md`. Edit `_bibliography/papers.bib` and Jekyll will render your [publications page](/al-folio/publications/) automatically.
