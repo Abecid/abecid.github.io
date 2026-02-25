@@ -7,3 +7,10 @@ tags: diffusion graphics survey
 categories: research-survey
 ---
 
+In a previous post, I covered 3D representations and spatial memory used in video diffusion models. This post is mostly addressed video generation tasks getting help from 3D inductive biases. Here we focus on the intersection of graphics (especially rendering) and diffusion models specifically utilizing diffusion models for graphics tasks.
+
+Lighting
+
+Rendering
+
+Video to Video Transfer
