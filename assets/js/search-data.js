@@ -41,28 +41,6 @@ ninja.data = [{
             window.location.href = "/blog/2026/flowmap/";
           
         },
-      },{id: "post-recent-methods-utilizing-diffusion-in-graphics",
-        
-          title: "Recent Methods Utilizing Diffusion in Graphics",
-        
-        description: "Recent developments of diffusion in graphics methods",
-        section: "Posts",
-        handler: () => {
-          
-            window.location.href = "/blog/2026/graphics-diffusion/";
-          
-        },
-      },{id: "post-spatial-memory-in-video-diffusion-survey",
-        
-          title: "Spatial Memory in Video Diffusion Survey",
-        
-        description: "Recent developments of using spatial memory in video diffusion models",
-        section: "Posts",
-        handler: () => {
-          
-            window.location.href = "/blog/2026/spatial-video/";
-          
-        },
       },{id: "post-google-gemini-updates-flash-1-5-gemma-2-and-project-astra",
         
           title: 'Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
@@ -93,11 +71,11 @@ ninja.data = [{
             },},{id: "news-came-back-to-berkeley",
           title: 'Came back to Berkeley',
           description: "",
-          section: "News",},{id: "projects-project-1",
-          title: 'project 1',
-          description: "with background image",
+          section: "News",},{id: "projects-premodern-japanese-art-style-face-generator",
+          title: 'Premodern Japanese Art Style Face Generator',
+          description: "Using StyleGAN2-Ada",
           section: "Projects",handler: () => {
-              window.location.href = "/projects/1_project/";
+              window.location.href = "/projects/jp-art-face-generator/";
             },},{id: "teachings-data-science-fundamentals",
           title: 'Data Science Fundamentals',
           description: "This course covers the foundational aspects of data science, including data collection, cleaning, analysis, and visualization. Students will learn practical skills for working with real-world datasets.",
