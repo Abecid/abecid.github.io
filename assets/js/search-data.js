@@ -76,6 +76,11 @@ ninja.data = [{
           description: "Using StyleGAN2-Ada",
           section: "Projects",handler: () => {
               window.location.href = "/projects/jp-art-face-generator/";
+            },},{id: "projects-training-sentence-embedding-models",
+          title: 'Training Sentence Embedding Models',
+          description: "(Contrastive Learning)",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/embedding-models/";
             },},{id: "teachings-data-science-fundamentals",
           title: 'Data Science Fundamentals',
           description: "This course covers the foundational aspects of data science, including data collection, cleaning, analysis, and visualization. Students will learn practical skills for working with real-world datasets.",
