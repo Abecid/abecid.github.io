@@ -1,8 +1,8 @@
 metadata:
-  last_updated: '2026-02-25'
+  last_updated: '2026-03-20'
 papers:
   uVYIIp0AAAAJ:IjCSPb-OGe4C:
-    citations: 10
+    citations: 11
     title: Towards Efficient Visual-Language Alignment of the Q-Former for Visual Reasoning Tasks
     year: '2024'
   uVYIIp0AAAAJ:Tyk-4Ss8FVUC:
@@ -18,11 +18,11 @@ papers:
     title: 'GOATex: Geometry & Occlusion Aware Texturing'
     year: '2025'
   uVYIIp0AAAAJ:Y0pCki6q_DkC:
-    citations: 1
+    citations: 2
     title: 'SIMSplat: Predictive Driving Scene Editing with Language-aligned 4D Gaussian Splatting'
     year: '2025'
   uVYIIp0AAAAJ:u-x6o8ySG0sC:
-    citations: 61
+    citations: 70
     title: 'Vlaad: Vision and language assistant for autonomous driving'
     year: '2024'
   uVYIIp0AAAAJ:u5HHmVD_uO8C:
