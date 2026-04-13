@@ -1,5 +1,5 @@
 metadata:
-  last_updated: '2026-03-20'
+  last_updated: '2026-04-13'
 papers:
   uVYIIp0AAAAJ:IjCSPb-OGe4C:
     citations: 11
@@ -22,7 +22,7 @@ papers:
     title: 'SIMSplat: Predictive Driving Scene Editing with Language-aligned 4D Gaussian Splatting'
     year: '2025'
   uVYIIp0AAAAJ:u-x6o8ySG0sC:
-    citations: 70
+    citations: 74
     title: 'Vlaad: Vision and language assistant for autonomous driving'
     year: '2024'
   uVYIIp0AAAAJ:u5HHmVD_uO8C:
