@@ -1,5 +1,5 @@
 metadata:
-  last_updated: '2026-07-06'
+  last_updated: '2026-07-17'
 papers:
   uVYIIp0AAAAJ:IjCSPb-OGe4C:
     citations: 13
@@ -26,7 +26,7 @@ papers:
     title: 'DexSIM: Real-time Dexterous Simulation with Unified Causal Video Diffusion'
     year: '2026'
   uVYIIp0AAAAJ:u-x6o8ySG0sC:
-    citations: 86
+    citations: 87
     title: 'Vlaad: Vision and language assistant for autonomous driving'
     year: '2024'
   uVYIIp0AAAAJ:u5HHmVD_uO8C:
