@@ -1,5 +1,5 @@
 metadata:
-  last_updated: '2026-07-17'
+  last_updated: '2026-07-22'
 papers:
   uVYIIp0AAAAJ:IjCSPb-OGe4C:
     citations: 13
@@ -10,7 +10,7 @@ papers:
     title: 'SAFARI: Sample-specific Assessment Framework for AI in Real-world Interactions'
     year: '2025'
   uVYIIp0AAAAJ:UeHWp8X0CEIC:
-    citations: 16
+    citations: 17
     title: 'MERLIN: Multimodal Embedding Refinement via LLM-based Iterative Navigation for Text-Video Retrieval-Rerank Pipeline'
     year: '2024'
   uVYIIp0AAAAJ:W7OEmFMy1HYC:
@@ -26,11 +26,11 @@ papers:
     title: 'DexSIM: Real-time Dexterous Simulation with Unified Causal Video Diffusion'
     year: '2026'
   uVYIIp0AAAAJ:u-x6o8ySG0sC:
-    citations: 87
+    citations: 88
     title: 'Vlaad: Vision and language assistant for autonomous driving'
     year: '2024'
   uVYIIp0AAAAJ:u5HHmVD_uO8C:
-    citations: 3
+    citations: 4
     title: Parameter-Efficient Fine-tuning of InstructBLIP for Visual Reasoning Tasks
     year: '2023'
   uVYIIp0AAAAJ:zYLM7Y9cAGgC:
