@@ -30,7 +30,29 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/projects/";
           },
-        },{id: "post-flow-maps-and-distillation",
+        },{id: "post-founding-attentionx",
+        
+          title: "Founding AttentionX",
+        
+        description: "Background",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/attentionx/";
+          
+        },
+      },{id: "post-the-modern-ai-gpu-systems-stack-a-comprehensive-guide",
+        
+          title: "The Modern AI GPU Systems Stack: A Comprehensive Guide",
+        
+        description: "A guide to performance modeling, GPU execution, kernel engineering, distributed training, inference serving, low precision, and reliability for modern foundation models.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/gpu-systems-for-modern-ai/";
+          
+        },
+      },{id: "post-flow-maps-and-distillation",
         
           title: "Flow Maps and Distillation",
         
