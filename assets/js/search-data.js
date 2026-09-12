@@ -41,11 +41,11 @@ ninja.data = [{
             window.location.href = "/blog/2026/attentionx/";
           
         },
-      },{id: "post-flow-maps-and-distillation",
+      },{id: "post-flow-maps-learning-the-jump",
         
-          title: "Flow Maps and Distillation",
+          title: "Flow Maps: Learning the Jump",
         
-        description: "Recent developments of flow map distillation techniques",
+        description: "From local velocity to finite-time transport: the geometry, derivatives, and distribution losses behind fast generative models.",
         section: "Posts",
         handler: () => {
           
