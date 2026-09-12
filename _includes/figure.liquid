@@ -8,6 +8,16 @@
   {% endif %}
 >
   <picture>
+    {% if include.mobile_path %}
+      <source
+        media="(max-width: 600px)"
+        srcset="{{ include.mobile_path | relative_url }}"
+        {% if include.mobile_width and include.mobile_height %}
+          width="{{ include.mobile_width }}"
+          height="{{ include.mobile_height }}"
+        {% endif %}
+      >
+    {% endif %}
     <!-- Auto scaling with imagemagick -->
     <!--
       See https://www.debugbear.com/blog/responsive-images#w-descriptors-and-the-sizes-attribute and
