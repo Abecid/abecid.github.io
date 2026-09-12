@@ -31,7 +31,7 @@ tags:
   - inference-serving
   - world-models
 categories: research-survey
-published: false
+published: true
 ---
 
 A kernel gets 3× faster. The training step improves by 3%. Both numbers can be correct.
