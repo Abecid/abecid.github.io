@@ -1,0 +1,42 @@
+<?xml version="1.0" ?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 520" width="400" height="520" role="img" aria-labelledby="title desc">
+  <title id="title">One endpoint versus posterior samples</title>
+  <desc id="desc">
+    A deterministic flow map returns one endpoint from a fixed state. A Meta Flow Map uses fresh auxiliary noise to sample multiple clean completions
+    conditioned on that same state.
+  </desc>
+  <defs>
+    <marker id="65dfc0" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M1,1 L9,5 L1,9" fill="none" stroke="#65dfc0" stroke-width="2" />
+    </marker>
+    <marker id="ffbd7a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M1,1 L9,5 L1,9" fill="none" stroke="#ffbd7a" stroke-width="2" />
+    </marker>
+    <marker id="89b4ff" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M1,1 L9,5 L1,9" fill="none" stroke="#89b4ff" stroke-width="2" />
+    </marker>
+    <marker id="aab9cf" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M1,1 L9,5 L1,9" fill="none" stroke="#aab9cf" stroke-width="2" />
+    </marker>
+  </defs>
+  <rect width="400" height="520" rx="16" fill="#131d2e" />
+  <g font-family="Arial, Helvetica, sans-serif" stroke-linecap="round" stroke-linejoin="round">
+    <text x="35" y="39" fill="#e8edf6" font-size="20" text-anchor="start" font-weight="700">Deterministic map</text>
+    <circle cx="70" cy="126" r="9" fill="#89b4ff" stroke="#89b4ff" stroke-width="2" />
+    <text x="70" y="169" fill="#89b4ff" font-size="20" text-anchor="middle" font-weight="400">xₜ</text>
+    <path d="M85,126 L332,126" stroke="#65dfc0" stroke-width="3" fill="none" marker-end="url(#65dfc0)" />
+    <circle cx="342" cy="126" r="9" fill="#65dfc0" stroke="#65dfc0" stroke-width="2" />
+    <text x="203" y="210" fill="#aab9cf" font-size="20" text-anchor="middle" font-weight="400">One endpoint</text>
+    <text x="35" y="284" fill="#e8edf6" font-size="20" text-anchor="start" font-weight="700">Meta Flow Map</text>
+    <circle cx="70" cy="371" r="9" fill="#89b4ff" stroke="#89b4ff" stroke-width="2" />
+    <text x="70" y="414" fill="#89b4ff" font-size="20" text-anchor="middle" font-weight="400">xₜ</text>
+    <path d="M85,371 Q199,371 324,331" stroke="#65dfc0" stroke-width="2" fill="none" marker-end="url(#65dfc0)" />
+    <circle cx="338" cy="331" r="8" fill="#65dfc0" stroke="#65dfc0" stroke-width="2" />
+    <path d="M85,371 Q199,371 324,387" stroke="#65dfc0" stroke-width="2" fill="none" marker-end="url(#65dfc0)" />
+    <circle cx="338" cy="387" r="8" fill="#65dfc0" stroke="#65dfc0" stroke-width="2" />
+    <path d="M85,371 Q199,371 324,443" stroke="#65dfc0" stroke-width="2" fill="none" marker-end="url(#65dfc0)" />
+    <circle cx="338" cy="443" r="8" fill="#65dfc0" stroke="#65dfc0" stroke-width="2" />
+    <text x="203" y="336" fill="#ffbd7a" font-size="18" text-anchor="middle" font-weight="400">fresh noise η</text>
+    <text x="203" y="492" fill="#aab9cf" font-size="20" text-anchor="middle" font-weight="400">Posterior samples</text>
+  </g>
+</svg>

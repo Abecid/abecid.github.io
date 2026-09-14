@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="530" viewBox="0 0 900 530" role="img" aria-labelledby="title desc">
+  <title id="title">Inside a GPU</title>
+  <desc id="desc">
+    Logical GPU package schematic: HBM stacks sit outside the GPU die. The die contains streaming multiprocessors and shared L2 cache. Each SM
+    contains registers, compute units, and L1 cache/shared memory.
+  </desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="context-stroke" />
+    </marker>
+  </defs>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <rect x="0" y="0" width="900" height="530" rx="14" fill="#131d2e" stroke="none" stroke-width="1.5" />
+    <text x="32" y="44" fill="#edf3fc" font-size="28" text-anchor="start" font-weight="600">Inside a GPU</text>
+    <text x="32" y="75" fill="#b5c4d9" font-size="21" text-anchor="start" font-weight="400">Logical layout · not to scale</text>
+    <rect x="26" y="96" width="848" height="406" rx="14" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <text x="41" y="124" fill="#b5c4d9" font-size="21" text-anchor="start" font-weight="400">GPU package</text>
+    <rect x="181" y="145" width="538" height="322" rx="12" fill="#131d2e" stroke="#89b4ff" stroke-width="2" />
+    <text x="197" y="174" fill="#89b4ff" font-size="23" text-anchor="start" font-weight="600">GPU die</text>
+    <line x1="150" y1="233" x2="181" y2="233" stroke="#ffbd7a" stroke-width="3" />
+    <rect x="51" y="186" width="99" height="78" rx="4" fill="#131d2e" stroke="#ffbd7a" stroke-width="1.5" />
+    <rect x="51" y="190" width="99" height="78" rx="4" fill="#131d2e" stroke="#ffbd7a" stroke-width="1.5" />
+    <rect x="51" y="194" width="99" height="78" rx="4" fill="#131d2e" stroke="#ffbd7a" stroke-width="1.5" />
+    <text x="100.5" y="240" fill="#ffbd7a" font-size="24" text-anchor="middle" font-weight="600">HBM</text>
+    <line x1="150" y1="391" x2="181" y2="391" stroke="#ffbd7a" stroke-width="3" />
+    <rect x="51" y="344" width="99" height="78" rx="4" fill="#131d2e" stroke="#ffbd7a" stroke-width="1.5" />
+    <rect x="51" y="348" width="99" height="78" rx="4" fill="#131d2e" stroke="#ffbd7a" stroke-width="1.5" />
+    <rect x="51" y="352" width="99" height="78" rx="4" fill="#131d2e" stroke="#ffbd7a" stroke-width="1.5" />
+    <text x="100.5" y="398" fill="#ffbd7a" font-size="24" text-anchor="middle" font-weight="600">HBM</text>
+    <line x1="750" y1="233" x2="719" y2="233" stroke="#ffbd7a" stroke-width="3" />
+    <rect x="750" y="186" width="99" height="78" rx="4" fill="#131d2e" stroke="#ffbd7a" stroke-width="1.5" />
+    <rect x="750" y="190" width="99" height="78" rx="4" fill="#131d2e" stroke="#ffbd7a" stroke-width="1.5" />
+    <rect x="750" y="194" width="99" height="78" rx="4" fill="#131d2e" stroke="#ffbd7a" stroke-width="1.5" />
+    <text x="799.5" y="240" fill="#ffbd7a" font-size="24" text-anchor="middle" font-weight="600">HBM</text>
+    <line x1="750" y1="391" x2="719" y2="391" stroke="#ffbd7a" stroke-width="3" />
+    <rect x="750" y="344" width="99" height="78" rx="4" fill="#131d2e" stroke="#ffbd7a" stroke-width="1.5" />
+    <rect x="750" y="348" width="99" height="78" rx="4" fill="#131d2e" stroke="#ffbd7a" stroke-width="1.5" />
+    <rect x="750" y="352" width="99" height="78" rx="4" fill="#131d2e" stroke="#ffbd7a" stroke-width="1.5" />
+    <text x="799.5" y="398" fill="#ffbd7a" font-size="24" text-anchor="middle" font-weight="600">HBM</text>
+    <rect x="201" y="195" width="157" height="168" rx="8" fill="#1c2a40" stroke="#65dfc0" stroke-width="1.5" />
+    <text x="279.5" y="224" fill="#65dfc0" font-size="24" text-anchor="middle" font-weight="600">SM 0</text>
+    <rect x="210" y="240" width="139" height="29" rx="4" fill="#131d2e" stroke="none" stroke-width="1.5" />
+    <text x="279.5" y="261" fill="#edf3fc" font-size="20" text-anchor="middle" font-weight="400">Registers</text>
+    <rect x="210" y="277" width="139" height="29" rx="4" fill="#131d2e" stroke="none" stroke-width="1.5" />
+    <text x="279.5" y="298" fill="#edf3fc" font-size="20" text-anchor="middle" font-weight="400">Compute</text>
+    <rect x="210" y="314" width="139" height="29" rx="4" fill="#131d2e" stroke="none" stroke-width="1.5" />
+    <text x="279.5" y="335" fill="#edf3fc" font-size="20" text-anchor="middle" font-weight="400">L1 / shared</text>
+    <line x1="279.5" y1="363" x2="279.5" y2="395" stroke="#65dfc0" stroke-width="2.5" />
+    <rect x="372" y="195" width="157" height="168" rx="8" fill="#1c2a40" stroke="#65dfc0" stroke-width="1.5" />
+    <text x="450.5" y="224" fill="#65dfc0" font-size="24" text-anchor="middle" font-weight="600">SM 1</text>
+    <rect x="381" y="240" width="139" height="29" rx="4" fill="#131d2e" stroke="none" stroke-width="1.5" />
+    <text x="450.5" y="261" fill="#edf3fc" font-size="20" text-anchor="middle" font-weight="400">Registers</text>
+    <rect x="381" y="277" width="139" height="29" rx="4" fill="#131d2e" stroke="none" stroke-width="1.5" />
+    <text x="450.5" y="298" fill="#edf3fc" font-size="20" text-anchor="middle" font-weight="400">Compute</text>
+    <rect x="381" y="314" width="139" height="29" rx="4" fill="#131d2e" stroke="none" stroke-width="1.5" />
+    <text x="450.5" y="335" fill="#edf3fc" font-size="20" text-anchor="middle" font-weight="400">L1 / shared</text>
+    <line x1="450.5" y1="363" x2="450.5" y2="395" stroke="#65dfc0" stroke-width="2.5" />
+    <rect x="543" y="195" width="157" height="168" rx="8" fill="#1c2a40" stroke="#65dfc0" stroke-width="1.5" />
+    <text x="621.5" y="224" fill="#65dfc0" font-size="24" text-anchor="middle" font-weight="600">SM 2</text>
+    <rect x="552" y="240" width="139" height="29" rx="4" fill="#131d2e" stroke="none" stroke-width="1.5" />
+    <text x="621.5" y="261" fill="#edf3fc" font-size="20" text-anchor="middle" font-weight="400">Registers</text>
+    <rect x="552" y="277" width="139" height="29" rx="4" fill="#131d2e" stroke="none" stroke-width="1.5" />
+    <text x="621.5" y="298" fill="#edf3fc" font-size="20" text-anchor="middle" font-weight="400">Compute</text>
+    <rect x="552" y="314" width="139" height="29" rx="4" fill="#131d2e" stroke="none" stroke-width="1.5" />
+    <text x="621.5" y="335" fill="#edf3fc" font-size="20" text-anchor="middle" font-weight="400">L1 / shared</text>
+    <line x1="621.5" y1="363" x2="621.5" y2="395" stroke="#65dfc0" stroke-width="2.5" />
+    <rect x="201" y="395" width="499" height="49" rx="5" fill="#89b4ff" stroke="none" stroke-width="1.5" />
+    <text x="450.5" y="426.5" fill="#131d2e" font-size="24" text-anchor="middle" font-weight="600">L2 · shared across SMs</text>
+  </g>
+</svg>
