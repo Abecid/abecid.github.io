@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="438" viewBox="0 0 900 438" role="img" aria-labelledby="title desc">
   <title id="title">Contiguous lanes use fewer memory sectors</title>
   <desc id="desc">
-    For 32 aligned FP32 loads, contiguous lanes use four 32-byte sectors: 128 bytes. Stride-eight loads use 32 sectors: 1024 bytes. Each load requests
+    For 32 aligned FP32 loads, contiguous lanes use four 32-byte sectors: 128 bytes. Loads with stride eight use 32 sectors: 1024 bytes. Each load requests
     the same 128 useful bytes.
   </desc>
   <defs>

@@ -75,7 +75,7 @@ for mobile in [False, True]:
             else:
                 b += line(cx + 128, cy + 16, cx + 185, cy + 16, MUT, 2, arrow=True)
     b += text(w / 2, h - 20, 'Generation: 1 → 0', fs, TEAL, 'middle')
-    svg('diffusion' + ('-mobile' if mobile else '') + '.svg', w, h, b, 'Noise to data', 'Toy linear-interpolation marginals at t=1, one half, and zero. Two data clusters emerge as noise decreases. Colors track data-cluster membership.')
+    svg('diffusion' + ('-mobile' if mobile else '') + '.svg', w, h, b, 'Noise to data', 'Toy linear interpolation marginals at t=1, one half, and zero. Two data clusters emerge as noise decreases. Colors track data cluster membership.')
 for mobile in [False, True]:
     w, h = (400, 420) if mobile else (960, 440)
     b = ''

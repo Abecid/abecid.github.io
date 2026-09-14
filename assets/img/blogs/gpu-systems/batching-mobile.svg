@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="390" height="447" viewBox="0 0 390 447" role="img" aria-labelledby="title desc">
   <title id="title">Refill a batch slot when a request finishes</title>
   <desc id="desc">
-    Illustrative two-slot schedule with A taking four iterations, B two, and C two. Static batching starts C after A finishes and ends at iteration
+    Illustrative schedule with two slots with A taking four iterations, B two, and C two. Static batching starts C after A finishes and ends at iteration
     six. Continuous batching replaces B with C at iteration two and ends at iteration four.
   </desc>
   <defs>

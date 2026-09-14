@@ -32,9 +32,9 @@ published: true
 related_posts: false
 ---
 
-Making an AI workload faster requires understanding what keeps its GPU busy—or waiting. A matrix multiplication, a normalization layer, and an autoregressive decoding step use the same hardware but move different amounts of data and expose different kinds of parallelism. The useful optimization depends on that difference.
+Making an AI workload faster requires understanding what keeps its GPU busy or waiting. A matrix multiplication, a normalization layer, and an autoregressive decoding step use the same hardware but move different amounts of data and expose different kinds of parallelism. The useful optimization depends on that difference.
 
-This post builds a way to reason about those costs: start inside one GPU, follow data through a kernel, then extend the same reasoning to multiple GPUs and inference requests. The objective is to connect each technique to **the cost it removes, the trade-off it introduces, and its effect on the whole workload**.
+This post builds a way to reason about those costs: start inside one GPU, follow data through a kernel, then extend the same reasoning to multiple GPUs and inference requests. The objective is to connect each technique to **the cost it removes, the tradeoff it introduces, and its effect on the whole workload**.
 
 ## Contents
 
@@ -53,25 +53,25 @@ A **kernel** is a function executed by many GPU threads. A launch groups those t
 
 {% include figure.liquid path="assets/img/blogs/gpu-systems/gpu-layout.svg" mobile_path="assets/img/blogs/gpu-systems/gpu-layout-mobile.svg" alt="GPU package with HBM beside the die. Inside the die, L2 connects multiple SMs. Each SM contains registers, compute units, and L1/shared memory." width=900 height=530 mobile_width=390 mobile_height=626 zoomable=true avoid_scaling=true %}
 
-The diagram shows where their data lives. **High-bandwidth memory (HBM)** is the large device memory beside the GPU die. **L2** is an on-chip cache shared across SMs; **L1** serves accesses within an SM. **Shared memory** is explicitly managed storage that lets threads in a block reuse data and cooperate. **Registers** hold each thread’s working values. Tensor cores, inside the compute units, accelerate matrix operations. The capacity shrinks as storage moves closer to computation, so kernels must choose what to keep there. [CUDA execution model](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html).
+The diagram shows where their data lives. **High bandwidth memory (HBM)** is the large device memory beside the GPU die. **L2** is a cache on the GPU die shared across SMs; **L1** serves accesses within an SM. **Shared memory** is explicitly managed storage that lets threads in a block reuse data and cooperate. **Registers** hold each thread’s working values. Tensor cores, inside the compute units, accelerate matrix operations. The capacity shrinks as storage moves closer to computation, so kernels must choose what to keep there. [CUDA execution model](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-cuda-kernels.html).
 
 ## 2. Move fewer bytes
 
 ### Coalescing: combine a warp’s memory accesses
 
-Consider the vector-add kernel again. A warp needs 32 values from each input, but memory is transferred in sectors rather than one independent transfer per requested float. If neighboring threads read neighboring 32-bit floating-point (FP32) values, their 128 useful bytes fit into **four aligned 32-byte sectors**. This is **coalescing**: the thread-to-element mapping makes the transferred bytes useful.
+Consider the vector addition kernel again. A warp needs 32 values from each input, but memory is transferred in sectors rather than one independent transfer per requested float. If neighboring threads read neighboring 32-bit floating point (FP32) values, their 128 useful bytes fit into **four aligned 32-byte sectors**. This is **coalescing**: the mapping from threads to elements makes the transferred bytes useful.
 
 {% include figure.liquid path="assets/img/blogs/gpu-systems/coalescing.svg" mobile_path="assets/img/blogs/gpu-systems/coalescing-mobile.svg" alt="One warp reads 32 FP32 values. Adjacent addresses touch four 32-byte sectors; addresses eight floats apart touch 32 sectors." caption="Aligned FP32 loads: same 128 useful bytes, 4 versus 32 sectors." width=900 height=438 mobile_width=390 mobile_height=538 zoomable=true avoid_scaling=true %}
 
-Change the mapping so each thread reads every eighth float, and those same 32 values occupy **32 sectors**. The kernel still performs 32 additions, but the memory system handles far more data. This is why tensor strides and layouts matter even when the arithmetic is unchanged. For a row-major matrix, mapping neighboring threads along a row usually gives contiguous accesses; mapping them down a column often creates a large stride. The sector counts here assume aligned loads and 32 active lanes. [CUDA memory access](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/#coalesced-access-to-global-memory).
+Change the mapping so each thread reads every eighth float, and those same 32 values occupy **32 sectors**. The kernel still performs 32 additions, but the memory system handles far more data. This is why tensor strides and layouts matter even when the arithmetic is unchanged. For a matrix stored in row major order, mapping neighboring threads along a row usually gives contiguous accesses; mapping them down a column often creates a large stride. The sector counts here assume aligned loads and 32 active lanes. [CUDA memory access](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/#coalesced-access-to-global-memory).
 
 ### Tiling: reuse the bytes you loaded
 
 Coalescing makes each transfer efficient. **Tiling** reduces how often the same inputs need transferring. In $C=AB$, one row of $A$ contributes to many columns of $C$, and one column of $B$ contributes to many rows. A tiled kernel loads small patches of $A$ and $B$ into shared memory or registers, computes a patch of $C$, then advances along the reduction dimension. The partial output stays in registers while successive input tiles accumulate into it.
 
-{% include figure.liquid path="assets/img/blogs/gpu-systems/tiling.svg" mobile_path="assets/img/blogs/gpu-systems/tiling-mobile.svg" alt="A four-by-four matrix tile and B tile produce sixteen output values. Each A value is reused across four output columns, and each B value across four output rows." caption="One 4 × 4 tile multiplication: 32 FP32 input values support 128 FLOPs. Output traffic excluded." width=900 height=618 mobile_width=390 mobile_height=638 zoomable=true avoid_scaling=true %}
+{% include figure.liquid path="assets/img/blogs/gpu-systems/tiling.svg" mobile_path="assets/img/blogs/gpu-systems/tiling-mobile.svg" alt="A 4 × 4 A tile and a 4 × 4 B tile produce sixteen output values. Each A value is reused across four output columns, and each B value across four output rows." caption="One 4 × 4 tile multiplication: 32 FP32 input values support 128 FLOPs. Output traffic excluded." width=900 height=618 mobile_width=390 mobile_height=638 zoomable=true avoid_scaling=true %}
 
-For square tiles of width $b$, one tile multiplication performs approximately $2b^3$ floating-point operations (FLOPs) from $2b^2$ input elements. With FP32 inputs, that is $b/4$ FLOPs per input byte, excluding output traffic. Larger tiles therefore offer more reuse—but require more on-chip storage. [Triton’s matrix multiplication tutorial](https://triton-lang.org/main/getting-started/tutorials/03-matrix-multiplication.html) implements this pattern with separate output tiles and a loop over the reduction dimension.
+For square tiles of width $b$, one tile multiplication performs approximately $2b^3$ floating point operations (FLOPs) from $2b^2$ input elements. With FP32 inputs, that is $b/4$ FLOPs per input byte, excluding output traffic. Larger tiles therefore offer more reuse but require more storage on chip. [Triton’s matrix multiplication tutorial](https://triton-lang.org/main/getting-started/tutorials/03-matrix-multiplication.html) implements this pattern with separate output tiles and a loop over the reduction dimension.
 
 ### Rooflines: decide whether bytes or arithmetic limit performance
 
@@ -94,13 +94,13 @@ Tiling reuses inputs within an operation. **Fusion** carries that idea across op
 
 {% include figure.liquid path="assets/img/blogs/gpu-systems/fusion.svg" mobile_path="assets/img/blogs/gpu-systems/fusion-mobile.svg" alt="Three separate operations read and write global memory six times. A fused operation keeps intermediates on chip, leaving one input read and one output write." caption="Scalar a, b; FP32. Ideal traffic: 24N → 8N bytes; caches can reduce HBM traffic." width=900 height=476 mobile_width=390 mobile_height=465 zoomable=true avoid_scaling=true %}
 
-A fused kernel keeps those values in registers and writes only the final result. For $N$ elements, the ideal FP32 array traffic falls from **24N to 8N bytes**, and three launches become one. Cache hits can reduce the actual HBM savings, while excessive register use can erase them through **spills**—storing excess working values in device memory. Compare against the framework compiler and vendor libraries first; they may already perform this fusion. [Fused softmax](https://triton-lang.org/main/getting-started/tutorials/02-fused-softmax.html) applies the same idea to a reduction: load a row, compute its statistics and normalization on chip, and write once.
+A fused kernel keeps those values in registers and writes only the final result. For $N$ elements, the ideal FP32 array traffic falls from **24N to 8N bytes**, and three launches become one. Cache hits can reduce the actual HBM savings, while excessive register use can erase them through **spills**, which store excess working values in device memory. Compare against the framework compiler and vendor libraries first; they may already perform this fusion. [Fused softmax](https://triton-lang.org/main/getting-started/tutorials/02-fused-softmax.html) applies the same idea to a reduction: load a row, compute its statistics and normalization on chip, and write once.
 
 ### Occupancy: leave enough independent work to hide waiting
 
 A warp can stall while waiting for memory or a previous instruction. The SM can issue work from another ready warp during that wait. **Occupancy** measures resident warps relative to the hardware maximum; it tells us how much of that potential parallelism is available. Blocks consume registers and shared memory, so a larger tile or a more heavily fused kernel can reduce the number of blocks that fit on an SM.
 
-This creates a trade-off between **reuse and concurrency**. A larger tile may run faster despite lower occupancy because it avoids repeated HBM reads. It may also run slower because too few independent warps remain, or because registers spill into memory. Choose tile sizes by measuring the resulting kernel, then use register, shared-memory, and stall counters to explain the result. Occupancy alone does not tell you which choice is faster. [CUDA resource usage](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/#occupancy).
+This creates a tradeoff between **reuse and concurrency**. A larger tile may run faster despite lower occupancy because it avoids repeated HBM reads. It may also run slower because too few independent warps remain, or because registers spill into memory. Choose tile sizes by measuring the resulting kernel, then use register, shared memory, and stall counters to explain the result. Occupancy alone does not tell you which choice is faster. [CUDA resource usage](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/#occupancy).
 
 ## 4. Use lower precision
 
@@ -117,17 +117,17 @@ $$
 q=Q(x/s),\qquad \hat x=sq.
 $$
 
-Here $Q$ rounds into the chosen format, and $s$ sets the scale. With this convention, too small a scale can overflow large values; too large a scale can push small ones toward zero. Per-block scales adapt better to local ranges but add metadata and computation. The relevant result is the whole workload’s speed and memory use at acceptable quality: conversions, sensitive operations retained in higher precision, and changed convergence all affect that trade-off. [Transformer Engine’s FP8 guide](https://docs.nvidia.com/deeplearning/transformer-engine/user-guide/examples/fp8_primer.html).
+Here $Q$ rounds into the chosen format, and $s$ sets the scale. With this convention, too small a scale can overflow large values; too large a scale can push small ones toward zero. Scales for each block adapt better to local ranges but add metadata and computation. The relevant result is the whole workload’s speed and memory use at acceptable quality: conversions, sensitive operations retained in higher precision, and changed convergence all affect that tradeoff. [Transformer Engine’s FP8 guide](https://docs.nvidia.com/deeplearning/transformer-engine/user-guide/examples/fp8_primer.html).
 
 ## 5. Measure the application
 
 ### Estimate the available speedup
 
-An efficient kernel matters only as much as the application depends on it. The **critical path** is the dependency chain that determines completion time. If two operations overlap, shortening the one that already finishes early may leave latency unchanged. This is why a profiler’s summed kernel durations are not a wall-clock budget: concurrent operations can cover the same time interval.
+An efficient kernel matters only as much as the application depends on it. The **critical path** is the dependency chain that determines completion time. If two operations overlap, shortening the one that already finishes early may leave latency unchanged. This is why a profiler’s summed kernel durations are not a budget of elapsed time: concurrent operations can cover the same time interval.
 
 {% include figure.liquid path="assets/img/blogs/gpu-systems/amdahl.svg" mobile_path="assets/img/blogs/gpu-systems/amdahl-mobile.svg" alt="A 100 ms run contains 95 ms of other work and a 5 ms target kernel. A threefold kernel speedup reduces total time to 96.67 ms." caption="Calculated example: 3× kernel speedup → 1.034× application speedup." width=900 height=344 mobile_width=390 mobile_height=399 zoomable=true avoid_scaling=true %}
 
-For a non-overlapped fraction $f$ of runtime accelerated by $s$, Amdahl’s law gives the total speedup below. In the diagram, making a 5 ms kernel three times faster saves only 3.33 ms from a 100 ms run. Even eliminating it entirely leaves 95 ms. Estimate this budget before implementing a replacement; it distinguishes a worthwhile application improvement from an impressive isolated benchmark.
+If a fraction $f$ of runtime does not overlap other work and is accelerated by $s$, Amdahl’s law gives the total speedup below. In the diagram, making a 5 ms kernel three times faster saves only 3.33 ms from a 100 ms run. Even eliminating it entirely leaves 95 ms. Estimate this budget before implementing a replacement; it distinguishes a worthwhile application improvement from an impressive isolated benchmark.
 
 $$
 S=\frac{1}{(1-f)+f/s}.
@@ -149,7 +149,7 @@ After changing a kernel, remeasure the full workload. Extra copies, dispatch ove
 
 ### Partition the resource that does not fit
 
-One GPU has finite model-state memory, activation memory, and compute. A parallelism scheme chooses which of those demands to split. **Data parallelism** gives each GPU different examples while keeping a model replica on each; gradients must then be combined. **Fully sharded data parallelism** also partitions parameters, gradients, and optimizer state, exchanging the pieces needed for the current layer. The memory saving therefore introduces communication into the execution schedule.
+One GPU has finite model state memory, activation memory, and compute. A parallelism scheme chooses which of those demands to split. **Data parallelism** gives each GPU different examples while keeping a model replica on each; gradients must then be combined. **Fully sharded data parallelism** also partitions parameters, gradients, and optimizer state, exchanging the pieces needed for the current layer. The memory saving therefore introduces communication into the execution schedule.
 
 | Parallelism        | What is split?            | Typical exchange                            |
 | :----------------- | :------------------------ | :------------------------------------------ |
@@ -160,15 +160,15 @@ One GPU has finite model-state memory, activation memory, and compute. A paralle
 | Pipeline           | Groups of layers          | Activations and their gradients             |
 | Expert             | MoE experts               | Tokens dispatched to selected experts       |
 
-The right split follows the pressure: large parameter state suggests sharding; long video sequences can make activation or context partitioning important. Communication frequency then determines placement. Tensor-parallel layers exchange data repeatedly, so their groups benefit from fast local links. Pipeline stages exchange at layer-group boundaries. Adding GPUs helps only if the reduced local work outweighs these exchanges and any imbalance. [PyTorch distributed overview](https://docs.pytorch.org/tutorials/beginner/dist_overview.html).
+The right split follows the pressure: large parameter state suggests sharding; long video sequences can make activation or context partitioning important. Communication frequency then determines placement. Tensor parallel layers exchange data repeatedly, so their groups benefit from fast local links. Pipeline stages exchange at layer group boundaries. Adding GPUs helps only if the reduced local work outweighs these exchanges and any imbalance. [PyTorch distributed overview](https://docs.pytorch.org/tutorials/beginner/dist_overview.html).
 
 ### Overlap communication with ready computation
 
-[NCCL collectives](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html) describe how tensors move between GPU processes, called ranks. **AllReduce** combines corresponding values and returns the result to every rank; **AllGather** assembles shards; **ReduceScatter** combines values and leaves each rank one result shard. During backpropagation, earlier-computed gradients can be reduced while later gradients are still being computed. Grouping gradients into buckets controls when these exchanges become ready.
+[NCCL collectives](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html) describe how tensors move between GPU processes, called ranks. **AllReduce** combines corresponding values and returns the result to every rank; **AllGather** assembles shards; **ReduceScatter** combines values and leaves each rank one result shard. During backpropagation, gradients computed earlier can be reduced while later gradients are still being computed. Grouping gradients into buckets controls when these exchanges become ready.
 
 {% include figure.liquid path="assets/img/blogs/gpu-systems/overlap.svg" mobile_path="assets/img/blogs/gpu-systems/overlap-mobile.svg" alt="Eight milliseconds of compute plus six milliseconds of communication take fourteen milliseconds serially. Starting communication at four milliseconds reduces completion to ten milliseconds." caption="Illustrative schedule: 4 ms hidden, 2 ms communication exposed." width=900 height=414 mobile_width=390 mobile_height=447 zoomable=true avoid_scaling=true %}
 
-Here, 8 ms of compute plus 6 ms of communication takes 14 ms if serialized. Starting communication at 4 ms hides 4 ms and finishes at 10 ms; the remaining 2 ms is **exposed communication**. Launching earlier requires ready inputs, and overlapping operations can compete for GPU resources. Measure the exposed tail rather than treating every millisecond of NCCL activity as lost time. For scaling comparisons, hold either the global workload fixed (**strong scaling**) or the per-GPU workload fixed (**weak scaling**), and report which one you used.
+Here, 8 ms of compute plus 6 ms of communication takes 14 ms if serialized. Starting communication at 4 ms hides 4 ms and finishes at 10 ms; the remaining 2 ms is **exposed communication**. Launching earlier requires ready inputs, and overlapping operations can compete for GPU resources. Measure the exposed tail rather than treating every millisecond of NCCL activity as lost time. For scaling comparisons, hold either the global workload fixed (**strong scaling**) or the workload per GPU fixed (**weak scaling**), and report which one you used.
 
 ## 7. Keep inference work moving
 
@@ -176,7 +176,7 @@ Here, 8 ms of compute plus 6 ms of communication takes 14 ms if serialized. Star
 
 Training often repeats a regular batch shape. Serving handles requests that arrive and finish at different times. A static batch can leave capacity unused when short requests finish but the batch waits for a long one. **Continuous batching** updates the active group at iteration boundaries: finished requests leave, and compatible waiting requests enter their slots.
 
-{% include figure.liquid path="assets/img/blogs/gpu-systems/batching.svg" mobile_path="assets/img/blogs/gpu-systems/batching-mobile.svg" alt="A requires four iterations; B and C need two each. Continuous batching replaces B with C while A runs, finishing at iteration four instead of six." caption="Two slots; equal-cost iterations; compatible requests." width=900 height=414 mobile_width=390 mobile_height=447 zoomable=true avoid_scaling=true %}
+{% include figure.liquid path="assets/img/blogs/gpu-systems/batching.svg" mobile_path="assets/img/blogs/gpu-systems/batching-mobile.svg" alt="A requires four iterations; B and C need two each. Continuous batching replaces B with C while A runs, finishing at iteration four instead of six." caption="Two slots; iterations of equal cost; compatible requests." width=900 height=414 mobile_width=390 mobile_height=447 zoomable=true avoid_scaling=true %}
 
 In this example, A needs four iterations while B and C need two each. Refilling B’s slot with C finishes all three in four iterations instead of six. Actual iterations vary with batch size and request type, so the diagram is a schedule, not a measured speedup. Larger batches can also increase an individual request’s latency. Evaluate throughput together with queue time and latency targets; **goodput** counts requests that finish within those targets.
 
@@ -196,4 +196,4 @@ $$
 
 {% include figure.liquid path="assets/img/blogs/gpu-systems/denoising-budget.svg" mobile_path="assets/img/blogs/gpu-systems/denoising-budget-mobile.svg" alt="With forty milliseconds per denoiser call and two hundred milliseconds of fixed work, twenty calls cost one thousand milliseconds, four cost three hundred sixty, and one costs two hundred forty." caption="Calculated, no overlap: 40 ms/call + 200 ms conditioning, VAE, and output work." width=900 height=356 mobile_width=390 mobile_height=411 zoomable=true avoid_scaling=true %}
 
-With 40 ms per call and 200 ms of fixed work, reducing $K$ from 20 to 4 changes latency from 1,000 to 360 ms: **five times fewer denoiser calls, but only 2.78× end-to-end speedup**. At one call, fixed work accounts for 83% of latency. The next useful target may therefore be VAE decoding or output encoding. This is the same reasoning used for one kernel, now applied to the entire pipeline: measure the remaining cost after each improvement, and include a quality comparison when changing the sampler.
+With 40 ms per call and 200 ms of fixed work, reducing $K$ from 20 to 4 changes latency from 1,000 to 360 ms: **five times fewer denoiser calls, but only 2.78× overall speedup**. At one call, fixed work accounts for 83% of latency. The next useful target may therefore be VAE decoding or output encoding. This is the same reasoning used for one kernel, now applied to the entire pipeline: measure the remaining cost after each improvement, and include a quality comparison when changing the sampler.

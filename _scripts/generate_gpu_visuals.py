@@ -128,7 +128,7 @@ def gpu_layout(mobile=False):
 def amdahl(mobile=False):
     s = SVG("amdahl", 399 if mobile else 344, mobile, "A small kernel has a small ceiling",
             "Illustrative 100 ms workload: 95 ms other work and 5 ms target kernel. "
-            "A three-times faster kernel gives 96.67 ms total; removing it entirely gives 95 ms.")
+            "A kernel running three times faster gives 96.67 ms total; removing it entirely gives 95 ms.")
     s.heading("Only 5 ms can shrink")
     x, width = (22, 265) if mobile else (204, 572)
     top, gap, bh = (114, 95, 30) if mobile else (111, 77, 36)
@@ -187,7 +187,7 @@ def roofline(mobile=False):
 def coalescing(mobile=False):
     s = SVG("coalescing", 538 if mobile else 438, mobile, "Contiguous lanes use fewer memory sectors",
             "For 32 aligned FP32 loads, contiguous lanes use four 32-byte sectors: 128 bytes. "
-            "Stride-eight loads use 32 sectors: 1024 bytes. Each load requests the same 128 useful bytes.")
+            "Loads with stride eight use 32 sectors: 1024 bytes. Each load requests the same 128 useful bytes.")
     s.heading("Same 128 B requested", "32 lanes × 4 B · aligned loads")
     x, width = (22, 346) if mobile else (32, 836)
     for index, (title, color, stride) in enumerate([
@@ -297,7 +297,7 @@ def overlap(mobile=False):
 
 def batching(mobile=False):
     s = SVG("batching", 447 if mobile else 414, mobile, "Refill a batch slot when a request finishes",
-            "Illustrative two-slot schedule with A taking four iterations, B two, and C two. "
+            "Illustrative schedule with two slots with A taking four iterations, B two, and C two. "
             "Static batching starts C after A finishes and ends at iteration six. Continuous "
             "batching replaces B with C at iteration two and ends at iteration four.")
     s.heading("Refill an empty slot", "A: 4 iterations · B: 2 · C: 2")
@@ -358,11 +358,11 @@ def denoising_budget(mobile=False):
 
 def tiling(mobile=False):
     s = SVG("tiling", 638 if mobile else 618, mobile, "Matrix tiles reuse each input four times",
-            "A four-by-four A tile and a four-by-four B tile contribute to a four-by-four C tile. "
+            "A 4 × 4 A tile and a 4 × 4 B tile contribute to a 4 × 4 C tile. "
             "One highlighted A element contributes to four columns of its C row; one highlighted "
             "B element contributes to four rows of its C column. Both inputs contribute at the "
             "intersection. Loading the two FP32 input tiles once transfers 128 bytes and enables "
-            "64 multiply-adds, counted as 128 FLOPs. Output C traffic is excluded.")
+            "64 multiplication and addition pairs, counted as 128 FLOPs. Output C traffic is excluded.")
     s.heading("Load once; reuse on chip", "4 × 4 tiles · FP32")
     size = 128 if mobile else 160
     cell = size / 4

@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="390" height="638" viewBox="0 0 390 638" role="img" aria-labelledby="title desc">
   <title id="title">Matrix tiles reuse each input four times</title>
   <desc id="desc">
-    A four-by-four A tile and a four-by-four B tile contribute to a four-by-four C tile. One highlighted A element contributes to four columns of its
+    A 4 × 4 A tile and a 4 × 4 B tile contribute to a 4 × 4 C tile. One highlighted A element contributes to four columns of its
     C row; one highlighted B element contributes to four rows of its C column. Both inputs contribute at the intersection. Loading the two FP32 input
-    tiles once transfers 128 bytes and enables 64 multiply-adds, counted as 128 FLOPs. Output C traffic is excluded.
+    tiles once transfers 128 bytes and enables 64 multiplication and addition pairs, counted as 128 FLOPs. Output C traffic is excluded.
   </desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">

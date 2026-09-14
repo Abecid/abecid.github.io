@@ -2,7 +2,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 310" width="960" height="310" role="img" aria-labelledby="title desc">
   <title id="title">Noise to data</title>
   <desc id="desc">
-    Toy linear-interpolation marginals at t=1, one half, and zero. Two data clusters emerge as noise decreases. Colors track data-cluster membership.
+    Toy linear interpolation marginals at t=1, one half, and zero. Two data clusters emerge as noise decreases. Colors track data cluster membership.
   </desc>
   <defs>
     <marker id="65dfc0" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse">

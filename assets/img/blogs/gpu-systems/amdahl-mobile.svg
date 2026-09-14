@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="390" height="399" viewBox="0 0 390 399" role="img" aria-labelledby="title desc">
   <title id="title">A small kernel has a small ceiling</title>
   <desc id="desc">
-    Illustrative 100 ms workload: 95 ms other work and 5 ms target kernel. A three-times faster kernel gives 96.67 ms total; removing it entirely
+    Illustrative 100 ms workload: 95 ms other work and 5 ms target kernel. A kernel running three times faster gives 96.67 ms total; removing it entirely
     gives 95 ms.
   </desc>
   <defs>
