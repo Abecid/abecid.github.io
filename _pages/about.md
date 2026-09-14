@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-# subtitle: 
+# subtitle:
 
 profile:
   align: right
@@ -27,7 +27,7 @@ latest_posts:
 
 [living is easy with eyes closed](https://www.youtube.com/watch?v=HtUH9z_Oey8&t=34s)
 
-I am interested in embodied generative simulations. 
+I am interested in embodied generative simulations.
 
 The intersection of 3D representations and distribution matching generative models boils my beans.
 

@@ -11,62 +11,66 @@ published: false
 # Flow Matching to Flow Maps to Distillation: A Deep Dive
 
 # Table of Contents
+
 1. [Foundations](#1-foundations)
-    1. [Diffusion](#11-diffusion)
-    2. [Flow Matching](#12-flow-matching)
-    3. [Rectified Flow](#13-rectified-flow)
-    4. [Flow Map](#14-flow-map)
-    5. [Consistency Models](#15-consistency-models)
+   1. [Diffusion](#11-diffusion)
+   2. [Flow Matching](#12-flow-matching)
+   3. [Rectified Flow](#13-rectified-flow)
+   4. [Flow Map](#14-flow-map)
+   5. [Consistency Models](#15-consistency-models)
 
 2. [MeanFlow Family](#2-meanflow-family)
-    1. [MeanFlow](#21-meanflow)
-    2. [Improved MeanFlow (iMF)](#22-improved-meanflow-imf)
-    3. [AlphaFlow](#23-alphaflow)
-    4. [Accelerating and Improving MeanFlow](#24-accelerating-and-improving-meanflow)
-    5. [Decoupled MeanFlow](#25-decoupled-meanflow)
+   1. [MeanFlow](#21-meanflow)
+   2. [Improved MeanFlow (iMF)](#22-improved-meanflow-imf)
+   3. [AlphaFlow](#23-alphaflow)
+   4. [Accelerating and Improving MeanFlow](#24-accelerating-and-improving-meanflow)
+   5. [Decoupled MeanFlow](#25-decoupled-meanflow)
 
 3. [FlowMap](#3-flowmap)
-    1. [Free FlowMap](#31-free-flowmap)
-    2. [Meta Flow Maps](#32-meta-flow-maps)
-    3. [Terminal Velocity Matching (TVM)](#33-terminal-velocity-matching-tvm)
+   1. [Free FlowMap](#31-free-flowmap)
+   2. [Meta Flow Maps](#32-meta-flow-maps)
+   3. [Terminal Velocity Matching (TVM)](#33-terminal-velocity-matching-tvm)
 
 4. [Score Distillation](#4-score-distillation)
-    1. [Variational Score Distillation (VSD)](#41-variational-score-distillation-vsd)
-    2. [Distribution Matching Distillation (DMD)](#42-dmd-distribution-matching-distillation)
-    3. [Score Identity Distillation (SiD)](#43-score-identity-distillation-sid)
+   1. [Variational Score Distillation (VSD)](#41-variational-score-distillation-vsd)
+   2. [Distribution Matching Distillation (DMD)](#42-dmd-distribution-matching-distillation)
+   3. [Score Identity Distillation (SiD)](#43-score-identity-distillation-sid)
 
 5. [Adversarial Distillation](#5-adversarial-distillation)
-    1. [Adversarial Diffusion Distillation (ADD)](#51-adversarial-diffusion-distillation-add)
-    2. [LADD](#52-ladd-latent-adversarial-diffusion-distillation)
-    3. [DiffRatio](#53-diffratio)
-    4. [APT (and AAPT)](#54-apt-and-the-modern-aapt-extension)
-    5. [Comparisons](#55-comparisons)
+   1. [Adversarial Diffusion Distillation (ADD)](#51-adversarial-diffusion-distillation-add)
+   2. [LADD](#52-ladd-latent-adversarial-diffusion-distillation)
+   3. [DiffRatio](#53-diffratio)
+   4. [APT (and AAPT)](#54-apt-and-the-modern-aapt-extension)
+   5. [Comparisons](#55-comparisons)
 
 6. [Video Generation](#6-video-generation)
-    1. [CausVid](#61-causvid)
-    2. [Self-Forcing](#62-self-forcing)
-    3. [Transition Matching Distillation (TMD)](#63-transition-matching-distillation)
+   1. [CausVid](#61-causvid)
+   2. [Self-Forcing](#62-self-forcing)
+   3. [Transition Matching Distillation (TMD)](#63-transition-matching-distillation)
 
 7. [New Domains](#7-new-domains)
-    1. [JiT](#71-jit-just-image-transformers)
-    2. [Drifting](#72-drifting)
-    3. [Pixel MeanFlow (pMF)](#73-pixel-meanflow-pmf)
-    4. [REPA](#74-repa-representation-alignment-for-generation)
-    5. [Latent Forcing](#75-latent-forcing)
-    6. [Unified Latents (UL)](#76-unified-latents-ul)
-    7. [Unifying Pattern](#77-unifying-pattern-across-these-new-domain-methods)
+   1. [JiT](#71-jit-just-image-transformers)
+   2. [Drifting](#72-drifting)
+   3. [Pixel MeanFlow (pMF)](#73-pixel-meanflow-pmf)
+   4. [REPA](#74-repa-representation-alignment-for-generation)
+   5. [Latent Forcing](#75-latent-forcing)
+   6. [Unified Latents (UL)](#76-unified-latents-ul)
+   7. [Unifying Pattern](#77-unifying-pattern-across-these-new-domain-methods)
 
 8. [Manifold](#8-manifold)
-    1. [Riemannian Manifold](#81-riemannian-manifold)
-    2. [Optimal Transport](#82-optimal-transport)
+   1. [Riemannian Manifold](#81-riemannian-manifold)
+   2. [Optimal Transport](#82-optimal-transport)
 
 # Overview
-Recent generative modeling utilize and develop upon flow maps and jvp based distillation techniques to reduce the number of function evaluations during inference. We focus on the Meanflow family, score distillation methods, and its applications in video generation. 
+
+Recent generative modeling utilize and develop upon flow maps and jvp based distillation techniques to reduce the number of function evaluations during inference. We focus on the Meanflow family, score distillation methods, and its applications in video generation.
 
 ---
 
 # 1. Foundations
+
 ## 1.1 Diffusion
+
 Diffusion models define a **forward noising process** that gradually corrupts data into noise, and a **reverse process** that learns to reconstruct data from noise. The main reason diffusion models became dominant is that they are stable and high-quality, but the tradeoff is **slow iterative sampling**.
 
 ### 1.1.1 Forward process (discrete DDPM view)
@@ -173,9 +177,10 @@ while preserving the teacher’s learned transport geometry.
 This is exactly why Chapter 1 naturally progresses from **Diffusion $\to$ Flow Matching $\to$ Flow Maps / Consistency / Distillation**.
 
 ## 1.2 Flow Matching
+
 ![Flow Matching](/assets/img/blogs/1_distillation/flowmatching.png)
 
-*Figure 1. Flow Matching. from Sabour, Fidler, and Kreis (2025),* Align Your Flow: Scaling Continuous-Time Flow Map Distillation *(arXiv:2506.14603).*  
+_Figure 1. Flow Matching. from Sabour, Fidler, and Kreis (2025),_ Align Your Flow: Scaling Continuous-Time Flow Map Distillation _(arXiv:2506.14603)._
 
 Flow Matching (FM) reframes generative modeling as directly learning a **time-dependent velocity field** that transports a simple source distribution (usually Gaussian noise) to the data distribution.
 
@@ -322,9 +327,10 @@ RF is the clean conceptual bridge to flow-map methods because it shifts the focu
 That is exactly the flow-map perspective.
 
 ## 1.4 Flow Map
+
 ![Flow Map](/assets/img/blogs/1_distillation/flowmap.png)
 
-*Figure 2. Flow Map. from Sabour, Fidler, and Kreis (2025),* Align Your Flow: Scaling Continuous-Time Flow Map Distillation *(arXiv:2506.14603).*  
+_Figure 2. Flow Map. from Sabour, Fidler, and Kreis (2025),_ Align Your Flow: Scaling Continuous-Time Flow Map Distillation _(arXiv:2506.14603)._
 
 Flow-map methods move beyond local vector fields and directly learn a **time-to-time transport operator**.
 
@@ -388,8 +394,8 @@ This property is incredibly important because it gives a built-in consistency co
 
 So flow maps are not a totally different universe; they are the natural next abstraction after FM/RF if your goal is **fast generation**.
 
-
 ## 1.5 Consistency Models
+
 Consistency Models (CMs) attack the same bottleneck from another angle: instead of learning a vector field or even an explicit flow map, they learn a **cross-time consistent predictor** that maps noisy states to a shared target representation (often an estimate of clean data).
 
 This makes them one of the foundational one-step / few-step distillation paradigms.
@@ -397,9 +403,11 @@ This makes them one of the foundational one-step / few-step distillation paradig
 ### 1.5.1 Core consistency idea
 
 Suppose $x_t$ and $x_s$ lie on the same teacher trajectory (or same underlying denoising path). A consistency model $f_\theta$ is trained so that:
+
 $$
 f_\theta(x_t,t) \approx f_\theta(x_s,s),
 $$
+
 after the appropriate scaling/parameterization.
 
 In words: different noise levels along the same trajectory should produce the same final prediction.
@@ -438,11 +446,14 @@ Both replace purely local supervision with **cross-time structure**, which is ex
 ---
 
 # 2. MeanFlow Family
+
 ## 2.1 MeanFlow
+
 #### 2.1.1 Average velocity instead of instantaneous velocity
+
 ![Mean Flow](/assets/img/blogs/1_distillation/meanflow.png)
 
-*Figure 3. Mean Flow, with different target timestep $t$. from Geng et al. (2025),* Mean Flows for One-step Generative Modeling *(arXiv:2505.13447).*  
+_Figure 3. Mean Flow, with different target timestep $t$. from Geng et al. (2025),_ Mean Flows for One-step Generative Modeling _(arXiv:2505.13447)._
 
 MeanFlow defines an **average velocity**
 
@@ -528,6 +539,7 @@ $$
 ## 2.2 Improved MeanFlow (iMF)
 
 iMF addresses two practical issues in MeanFlow:
+
 1. the self-referential target,
 2. fixed-CFG training (bad for inference-time flexibility).
 
@@ -564,6 +576,7 @@ This is cleaner because the regression target is now the standard FM target $(\e
 Original MeanFlow supports CFG in 1-NFE, but with a **fixed guidance scale** chosen at training time.
 
 iMF fixes this by making the guidance scale part of the conditioning:
+
 - guidance scale $\omega$ becomes an input condition,
 - the same model can be sampled with different CFG scales at inference.
 
@@ -572,11 +585,13 @@ That is a big deal because the optimal CFG scale shifts with model size, trainin
 ### 2.2.3 In-context conditioning
 
 iMF also upgrades conditioning architecture:
+
 - conditions include $(r,t)$, class label $c$, and guidance-related variables $\Omega$,
 - each condition is represented with multiple learnable tokens,
 - all condition tokens are concatenated with image latent tokens and processed by the Transformer.
 
 This allows:
+
 - support richer heterogeneous conditioning more naturally,
 - remove **adaLN-zero**,
 - cut params significantly (they report about **1/3 reduction** in a base model setting).
@@ -588,6 +603,7 @@ AlphaFlow is the paper that gives the most useful conceptual interpretation of M
 #### 2.3.1 Core insight: MeanFlow decomposes into two losses
 
 AlphaFlow shows the MeanFlow objective can be algebraically decomposed into:
+
 1. **Trajectory Flow Matching (TFM)**
 2. **Trajectory Consistency (TC)**
 
@@ -603,6 +619,7 @@ $$
 $$
 
 Interpretation:
+
 - **TFM** says “fit the trajectory-local velocity target.”
 - **TC** says “be self-consistent along the trajectory.”
 - MeanFlow is effectively a **consistency-like model with extra trajectory FM supervision**.
@@ -610,9 +627,11 @@ Interpretation:
 #### 2.3.2 Why MeanFlow often needs lots of border-case FM samples
 
 AlphaFlow also explains a weird empirical fact from MeanFlow:
+
 - MeanFlow works best when many samples use the border case $r=t$ (which looks like vanilla FM).
 
 Their analysis shows this is not just a hack:
+
 - the gradients of TFM and trajectory consistency are often **negatively correlated**,
 - so the extra FM-style supervision helps stabilize and speed up training.
 
@@ -643,6 +662,7 @@ $$
 is an intermediate time.
 
 This unifies several training objectives:
+
 - $\alpha=1$ gives **trajectory flow matching** (with suitable $\tilde v_{s,t}$),
 - $\alpha=\tfrac{1}{2}$ recovers a **Shortcut-style** objective,
 - $\alpha \to 0$ recovers the **MeanFlow gradient**.
@@ -652,6 +672,7 @@ That is the key conceptual win: AlphaFlow puts FM, Shortcut, and MeanFlow on one
 #### 2.3.4 Curriculum
 
 Because TFM and TC conflict early in training, AlphaFlow uses a curriculum:
+
 - start more FM-like (larger $\alpha$),
 - gradually anneal toward MeanFlow-like behavior (smaller $\alpha$).
 
@@ -660,14 +681,16 @@ This disentangles optimization and improves convergence.
 #### 2.3.5 Takeaways
 
 AlphaFlow is best understood as:
+
 - a **theory paper for MeanFlow optimization** (decomposition + gradient conflict),
 - plus a **practical training recipe** (curriculum over $\alpha$) that improves one-step/few-step quality.
 
 ## 2.4 Accelerating and Improving MeanFlow
 
-Understanding and Improving Mean Flow’s (UAIMF) main point is simple and very practical: MeanFlow training is bottlenecked by **slow velocity formation** and **bad temporal-gap scheduling**, so they speed up both. They propose two complementary components:  
-1. accelerate the velocity-learning part with standard diffusion training tricks (they use **MinSNR** or **DTD**), and  
-2. add a **progressive weighting** over the MeanFlow loss so the model learns small-gap average velocities first, then gradually expands to larger gaps. 
+Understanding and Improving Mean Flow’s (UAIMF) main point is simple and very practical: MeanFlow training is bottlenecked by **slow velocity formation** and **bad temporal-gap scheduling**, so they speed up both. They propose two complementary components:
+
+1. accelerate the velocity-learning part with standard diffusion training tricks (they use **MinSNR** or **DTD**), and
+2. add a **progressive weighting** over the MeanFlow loss so the model learns small-gap average velocities first, then gradually expands to larger gaps.
 
 ### 2.4.1 Why MeanFlow trains slowly
 
@@ -676,7 +699,7 @@ UAIMF analyzes MeanFlow training through two coupled subproblems:
 - learning instantaneous velocity (the easier FM-like part),
 - learning average velocity over larger timestep gaps (the harder MeanFlow part).
 
-Their empirical claim is that **rapid velocity formation helps MeanFlow converge much faster**, and that the temporal gap matters a lot: large-gap average-velocity learning is harder and should be delayed. This is why they combine velocity acceleration + progressive gap weighting. 
+Their empirical claim is that **rapid velocity formation helps MeanFlow converge much faster**, and that the temporal gap matters a lot: large-gap average-velocity learning is harder and should be delayed. This is why they combine velocity acceleration + progressive gap weighting.
 
 ### 2.4.2 Component 1: Accelerate the velocity part (MinSNR / DTD)
 
@@ -685,7 +708,7 @@ UAIMF tests one method from each category:
 - **MinSNR** as a loss-weighting acceleration method
 - **DTD** as a timestep-sampling acceleration method
 
-and plugs them into MeanFlow training. They report both help, but emphasize that **DTD is more robust across model scales** because it changes the sampling distribution instead of interfering with MeanFlow’s own adaptive loss normalization. 
+and plugs them into MeanFlow training. They report both help, but emphasize that **DTD is more robust across model scales** because it changes the sampling distribution instead of interfering with MeanFlow’s own adaptive loss normalization.
 
 ### 2.4.3 Component 2: Progressive weighting on the MeanFlow loss
 
@@ -713,7 +736,7 @@ $$
 s = 1 - \left(\frac{i}{T}\right)^k
 $$
 
-with $$k=1$$ (linear) working best in their ablations. 
+with $$k=1$$ (linear) working best in their ablations.
 
 ### 2.4.4 Why the two components work together
 
@@ -728,11 +751,11 @@ They explicitly interpret this as:
 - acceleration methods quickly establish the **instantaneous velocity foundation**
 - progressive weighting improves **average velocity learning** over time
 
-which is exactly the right mental model for MeanFlow optimization. 
+which is exactly the right mental model for MeanFlow optimization.
 
 ## 2.5 Decoupled MeanFlow
 
-Decoupled MeanFlow is the strongest architectural update in this line. The core idea is: **the encoder should care about the current timestep, and the decoder should care about the target timestep**. They decouple timestep conditioning and turn a pretrained flow model into a flow-map model with almost no architectural surgery. 
+Decoupled MeanFlow is the strongest architectural update in this line. The core idea is: **the encoder should care about the current timestep, and the decoder should care about the target timestep**. They decouple timestep conditioning and turn a pretrained flow model into a flow-map model with almost no architectural surgery.
 
 ### 2.5.1 Core architectural idea: decouple encoder vs decoder conditioning
 
@@ -757,7 +780,7 @@ This is the defining DMF equation.
 
 ### 2.5.2 Why this matters: pretrained flow models already contain flow-map structure
 
-DMF shows that a pretrained flow model can be **converted into a flow map without fine-tuning**, just by choosing an encoder/decoder split and decoding the representation with $$r$$. They report the converted DMF can even outperform the original flow model in some settings, which supports the claim that good flow-model representations are already enough for flow-map prediction. 
+DMF shows that a pretrained flow model can be **converted into a flow map without fine-tuning**, just by choosing an encoder/decoder split and decoding the representation with $$r$$. They report the converted DMF can even outperform the original flow model in some settings, which supports the claim that good flow-model representations are already enough for flow-map prediction.
 
 This is a major conceptual shift: instead of training flow maps from scratch, you can **reuse pretrained flow-model representations** and repurpose the decoder.
 
@@ -769,7 +792,7 @@ DMF explicitly argues that **representation quality matters** for flow maps. The
 - freezing encoder + tuning decoder already gives a large speed/quality gain
 - but true 1-step performance needs joint optimization (encoder cannot stay frozen forever)
 
-This gives a practical recipe: pretrain a strong flow model first, then convert/fine-tune as DMF. 
+This gives a practical recipe: pretrain a strong flow model first, then convert/fine-tune as DMF.
 
 ### 2.5.4 Training recipe: FM warm-up + MF fine-tuning
 
@@ -785,15 +808,15 @@ They justify this on compute grounds (MF/JVP is expensive) and show it scales be
 
 #### (a) Adaptive weighted Cauchy loss
 
-They note MF loss has high variance, then replace the raw MSE-style MF loss with a **Cauchy (Lorentzian) robust loss** and an adaptive weighting term over timestep pairs. Their DMF objective is written as an adaptive weighted Cauchy form over the MeanFlow residual. 
+They note MF loss has high variance, then replace the raw MSE-style MF loss with a **Cauchy (Lorentzian) robust loss** and an adaptive weighting term over timestep pairs. Their DMF objective is written as an adaptive weighted Cauchy form over the MeanFlow residual.
 
 #### (b) Time proposal tailored to flow maps
 
-They adapt timestep-pair sampling for flow maps (since you need ordered pairs with $$t>r$$). They sample two logit-normal values and sort them, and then bias the proposal toward larger gaps / smaller $$r$$ for better 1-step behavior, because converted DMF models are already strong near the diagonal $$r \approx t$$. 
+They adapt timestep-pair sampling for flow maps (since you need ordered pairs with $$t>r$$). They sample two logit-normal values and sort them, and then bias the proposal toward larger gaps / smaller $$r$$ for better 1-step behavior, because converted DMF models are already strong near the diagonal $$r \approx t$$.
 
 #### (c) Model Guidance (MG)
 
-They use **Model Guidance (MG)** to avoid the full compute cost of CFG during training, and note MG is especially effective for training high-quality few-step flow maps. This is part of why their 1-step/4-step results are strong. 
+They use **Model Guidance (MG)** to avoid the full compute cost of CFG during training, and note MG is especially effective for training high-quality few-step flow maps. This is part of why their 1-step/4-step results are strong.
 
 ### 2.5.6 Takeaways
 
@@ -803,7 +826,7 @@ DMF is not just another MeanFlow variant. It reframes the problem:
 - **UAIMF / AlphaFlow** improve optimization dynamics
 - **DMF** improves the **architecture + training pipeline**, and shows pretrained flow models are the best starting point
 
-They report SOTA-level few-step results and show 1-step / 4-step generation approaching much more expensive flow-model sampling with large inference-speed gains. 
+They report SOTA-level few-step results and show 1-step / 4-step generation approaching much more expensive flow-model sampling with large inference-speed gains.
 
 ---
 
@@ -820,6 +843,7 @@ Traditional flow-map distillation often samples intermediate states $x_t$ from a
 But the student is supposed to reproduce the teacher’s **sampling process**, i.e. the trajectory distribution induced by the teacher from the prior.
 
 Supervision states coming from a mismatched distribution results in a **teacher-data mismatch**:
+
 - the student is trained on states that are not on the teacher’s true rollout distribution,
 - more augmentation can worsen it,
 - student quality degrades.
@@ -850,6 +874,7 @@ u(f_\theta(z,\delta),1-\delta) - \delta \,\partial_\delta F_\theta(z,\delta)
 $$
 
 The key interpretation:
+
 - $f_\theta(z,\delta)$ defines the student’s current trajectory,
 - $\partial_\delta f_\theta$ is the **student’s generating velocity**,
 - the loss is equivalent to aligning the student generating velocity with the teacher field:
@@ -894,11 +919,13 @@ v_N(I_r(f_\theta(z,1),n),r) - u(I_r(f_\theta(z,1),n),r)
 $$
 
 where:
+
 - $u$ is the teacher marginal velocity,
 - $v_N$ is the student-induced **noising** marginal velocity,
 - $I_r(\cdot,\cdot)$ is the interpolation to intermediate time $r$.
 
 Intuition:
+
 - the prediction loss aligns the **student’s forward/generating flow**
 - the correction loss aligns the **student-induced noising marginals** with the teacher’s marginals
 
@@ -917,15 +944,18 @@ Deterministic flow-map learning works if the transport map is the right object. 
 $$
 \kappa_{t,s}(z_t, z_s)
 $$
+
 is the right object.
 
 The paper frames this using:
+
 - **marginal consistency**
 - **conditional consistency**
 - a family of posterior conditionals $p_{1|t}$
 - and a diagonal supervision view
 
 The important conceptual upgrade is:
+
 - instead of only learning deterministic trajectories,
 - learn a transition operator consistent with the stochastic process structure.
 
@@ -957,11 +987,13 @@ $$
 (with the appropriate latent dependence through $z_1$/paths)
 
 The exact notation is heavier, but the key idea is the same as flow-map composition:
+
 - **two-time transitions must compose correctly through intermediate times**, but now in distributional form.
 
 #### 3.2.4 Their training objective (MFM loss)
 
 They build:
+
 1. a **diagonal supervision loss** (fit the posterior on diagonal time pairs),
 2. a **consistency loss** (enforce off-diagonal composition consistency),
 3. and combine them into an MFM objective:
@@ -973,12 +1005,14 @@ $$
 $$
 
 This is the stochastic counterpart of the deterministic progression:
+
 - diagonal target = “FM-like” anchor
 - off-diagonal consistency = “flow-map-like” propagation
 
 #### 3.2.5 Takeaways
 
 This paper gives a more general lens:
+
 - MeanFlow / deterministic flow maps are one branch
 - stochastic transition learning is the broader object when uncertainty matters
 - the “diagonal + consistency” decomposition is the unifying pattern
@@ -994,15 +1028,19 @@ This is exactly the kind of conceptual bridge diffusion researchers should care 
 TVM parameterizes a **two-time displacement map** (flow map increment) directly, instead of only learning the instantaneous velocity field.
 
 Let the ground-truth displacement from time $t$ to $s$ be
+
 $$
 f(x_t,t,s) := \psi(x_t,t,s) - x_t.
 $$
 
 TVM uses a model
+
 $$
 f_\theta(x_t,t,s) = (s-t)F_\theta(x_t,t,s),
 $$
+
 and defines the model’s instantaneous velocity as the boundary derivative
+
 $$
 u_\theta(x_t,t)
 :=
@@ -1012,6 +1050,7 @@ F_\theta(x_t,t,t).
 $$
 
 This is the key unification:
+
 - the **same network** learns both
   1. a large-step displacement map $f_\theta$, and
   2. an infinitesimal velocity field $u_\theta$.
@@ -1019,11 +1058,13 @@ This is the key unification:
 #### 3.3.2 Why “terminal” velocity?
 
 The ground-truth displacement satisfies
+
 $$
 f(x_t,t,s)=\int_t^s u(x_r,r)\,dr.
 $$
 
 Differentiate w.r.t. the **terminal time** $s$:
+
 $$
 \frac{d}{ds}f(x_t,t,s)=u(\psi(x_t,t,s),s).
 $$
@@ -1033,16 +1074,19 @@ This is the terminal velocity condition.
 The nice part is: if the terminal-velocity condition is satisfied along the trajectory, then the displacement map error is controlled (TVM shows an upper bound of displacement error by integrated terminal-velocity error). So instead of directly supervising the full ODE integral, TVM supervises the **derivative at the terminal endpoint**.
 
 This is the conceptual contrast with MeanFlow:
+
 - **MeanFlow** differentiates w.r.t. the **start time** $t$,
 - **TVM** differentiates w.r.t. the **end time** $s$.
 
 #### 3.3.3 Proxy trick (how they make it trainable)
 
 The terminal condition depends on unknown ground-truth objects:
+
 - $\psi(x_t,t,s)$ (true flow map)
 - $u(\cdot,s)$ (true velocity field)
 
 TVM replaces them with model proxies:
+
 $$
 u(\psi(x_t,t,s),s)
 \;\approx\;
@@ -1050,9 +1094,11 @@ u_\theta\big(x_t + f_\theta(x_t,t,s),\, s\big).
 $$
 
 So the model predicts a displacement to a new point
+
 $$
 x_s^{(\theta)} = x_t + f_\theta(x_t,t,s),
 $$
+
 then evaluates its own velocity field at that terminal point.
 
 This makes the loss **self-consistent** and trainable in one stage.
@@ -1065,6 +1111,7 @@ TVM jointly optimizes:
 2. **Flow Matching boundary term** (special case / anchor)
 
 Per-time objective:
+
 $$
 \mathcal{L}_{\mathrm{TVM}}^{t,s}(\theta)
 =
@@ -1085,10 +1132,12 @@ u_\theta\big(x_t + f_\theta(x_t,t,s), s\big)
 $$
 
 Where:
+
 - $x_s$ is sampled from the interpolation path (as in Flow Matching),
 - $v_s$ is the standard FM target velocity (e.g. for linear interpolation, $v_s = x_1 - x_0$).
 
 Then the practical training objective is just expectation over sampled time pairs:
+
 $$
 \mathcal{L}_{\mathrm{TVM}}(\theta)
 =
@@ -1098,14 +1147,17 @@ $$
 #### 3.3.5 EMA + stop-gradient version (important in practice)
 
 Like consistency/distillation-style methods, TVM stabilizes training using:
+
 - **EMA target network**
 - **stop-gradient** on proxy paths
 
 The practical version uses:
+
 - stop-grad copy for displacement branch,
 - stop-grad EMA copy for terminal velocity target.
 
 Conceptually:
+
 $$
 u_\theta\big(x_t + f_\theta(x_t,t,s),s\big)
 \;\to\;
@@ -1120,10 +1172,12 @@ This avoids collapse / target chasing and makes the proxy supervision much more 
 TVM proves a **distribution-level guarantee**:
 
 Under a Lipschitz assumption on $u_\theta(\cdot,s)$, a weighted time integral of the TVM objective upper-bounds the squared Wasserstein-2 distance between:
+
 - the model pushforward distribution (via the learned map), and
 - the true data distribution.
 
 In spirit:
+
 $$
 W_2^2(\text{model pushforward}, p_0)
 \;\lesssim\;
@@ -1138,10 +1192,13 @@ This is a big deal because many one/few-step distillation methods work well empi
 TVM extends naturally to conditional generation with CFG.
 
 They define a CFG-conditioned displacement map
+
 $$
 f_\theta(x_t,t,s,c,w),
 $$
+
 where:
+
 - $c$ = class condition
 - $w$ = guidance scale
 
@@ -1156,6 +1213,7 @@ The practical CFG objective adds two important ideas:
    - the loss can explode for large $w$ without correction.
 
 So the conditional TVM loss is roughly:
+
 $$
 \frac{1}{w^2}
 \left\|
@@ -1174,10 +1232,13 @@ This is one of the most practical contributions in the paper because it supports
 Once trained, sampling is dead simple and supports both 1-step and few-step generation **without retraining**.
 
 For a sequence of times
+
 $$
 1=t_0 > t_1 > \cdots > t_n=0,
 $$
+
 iterate:
+
 $$
 x_{t_{k+1}}
 =
@@ -1191,6 +1252,7 @@ x_{t_k}
 $$
 
 So:
+
 - **1-NFE**: one direct jump $t=1 \to 0$
 - **few-NFE**: chain multiple learned jumps
 - no ODE solver needed (the network itself is the integrator)
@@ -1200,10 +1262,13 @@ This is exactly why flow-map-style methods are so appealing for distillation and
 #### 3.3.9 JVP term and implementation detail (important for “algorithm” understanding)
 
 Because
+
 $$
 f_\theta(x_t,t,s)=(s-t)F_\theta(x_t,t,s),
 $$
+
 the terminal derivative expands as
+
 $$
 \frac{d}{ds}f_\theta(x_t,t,s)
 =
@@ -1215,6 +1280,7 @@ $$
 That second term is a **Jacobian-vector product (JVP)** through the network.
 
 TVM’s practical novelty is not just using JVP, but supporting:
+
 - **JVP through FlashAttention**
 - **backprop through the JVP result**
 
@@ -1235,9 +1301,9 @@ TVM adds several engineering choices that are unusually important:
 
 3. **Scaled parameterization for CFG**
    - Make the model output scale with $w$ by construction:
-   $$
-   f_\theta(x_t,t,s,c,w)=(s-t)\,w\,F_\theta(x_t,t,s,c,w).
-   $$
+     $$
+     f_\theta(x_t,t,s,c,w)=(s-t)\,w\,F_\theta(x_t,t,s,c,w).
+     $$
    - This improves optimization under large guidance.
 
 4. **Time sampling matters**
@@ -1248,11 +1314,13 @@ TVM adds several engineering choices that are unusually important:
 #### 3.3.11 TVM vs MeanFlow (the clean comparison)
 
 **MeanFlow**
+
 - matches a derivative condition w.r.t. **start time** $t$
 - propagates $u(x_t,t)$ through the JVP path
 - more sensitive to random CFG because the velocity magnitude directly enters the JVP branch
 
 **TVM**
+
 - matches a derivative condition w.r.t. **terminal time** $s$
 - JVP is w.r.t. $s$ (cleaner and more stable under random CFG)
 - has a clearer Wasserstein-style distribution guarantee
@@ -1261,7 +1329,9 @@ TVM adds several engineering choices that are unusually important:
 This is why TVM is a strong “algorithmic” evolution of flow-map distillation rather than just another loss tweak.
 
 ---
+
 # 4. Score Distillation
+
 ## 4.1 Variational Score Distillation (VSD)
 
 ### 4.1.1 Score Distillation Sampling (SDS)
@@ -1323,7 +1393,7 @@ instead of optimizing one fixed $\theta$.
 
 Then VSD evolves particles by a **Wasserstein gradient flow / particle ODE**. The ODE uses a score difference between:
 
-1. the score of noisy real images (from the pretrained diffusion model), and  
+1. the score of noisy real images (from the pretrained diffusion model), and
 2. the score of noisy rendered images (estimated by a learnable network).
 
 The VSD particle dynamics are:
@@ -1373,10 +1443,12 @@ $$
 $$
 
 This is the crucial diffusion-distillation component in VSD:
+
 - VSD **distills a score model for the rendered-image distribution** (not just the teacher),
 - then uses the **difference of two scores** for particle updates.
 
 In practice, VSD parameterizes $\epsilon_\phi$ as either:
+
 - a small U-Net, or
 - a **LoRA** adaptation of the pretrained diffusion model (usually better fidelity).
 
@@ -1408,6 +1480,7 @@ x_t = \alpha_t g(\theta,c)+\sigma_t\epsilon.
 $$
 
 This is the clean algorithmic form:
+
 - **SDS** uses $\epsilon_{\mathrm{pretrain}} - \epsilon$
 - **VSD** uses $\epsilon_{\mathrm{pretrain}} - \epsilon_\phi$
 
@@ -1449,8 +1522,8 @@ DMD computes a gradient by comparing two denoisers on the same noisy fake sample
 
 For a fake image $x = G_\theta(z)$:
 
-1. add random diffusion noise to get $x_t$  
-2. denoise with both networks  
+1. add random diffusion noise to get $x_t$
+2. denoise with both networks
 3. use the difference as the realism direction
 
 The implementation-level gradient proxy is essentially:
@@ -1468,12 +1541,14 @@ $$
 and they realize this as a stop-grad MSE objective on $x$ (so autograd yields the desired gradient direction).
 
 This is the key DMD trick:
+
 - avoid backprop through a long teacher trajectory,
 - still get a **distribution-level** correction signal.
 
 #### 4.2.3 Practical read on DMD
 
 DMD is strong because it is **not just teacher regression**:
+
 - the KL / distribution-matching gradient gives a realism signal beyond memorizing teacher trajectories,
 - the regression term keeps training stable.
 
@@ -1496,6 +1571,7 @@ S_\phi(x_t) - \nabla_{x_t}\log p_\theta(x_t),
 $$
 
 where:
+
 - $S_\phi(x_t)$ is the pretrained teacher score,
 - $p_\theta(x_t)$ is the diffused generator distribution.
 
@@ -1511,6 +1587,7 @@ L_\theta
 $$
 
 This is the cleanest formulation in this chapter conceptually:
+
 - make the **fake-data score** match the **teacher score**.
 
 ---
@@ -1572,6 +1649,7 @@ L_\theta^{(1)}
 $$
 
 SiD explicitly shows this can fail badly because:
+
 - the approximation error in $f_\psi$ enters the objective in a destabilizing way,
 - the loss depends on both score-estimation error and the true score difference.
 
@@ -1603,6 +1681,7 @@ $$
 instead of directly squaring the noisy score-difference estimate.
 
 That is the algorithmic insight behind SiD:
+
 - use score identities to derive a loss that still targets MESM,
 - but behaves better under imperfect generator-score estimation.
 
@@ -1622,6 +1701,7 @@ In practice this is more memory/computation heavy, but it is a major reason SiD 
 ---
 
 # 5. Adversarial Distillation
+
 ## 5.1 Adversarial Diffusion Distillation (ADD)
 
 ADD is the clean “diffusion-distill + GAN refine” recipe for turning a pre-trained diffusion teacher into a fast student (often 1-step or few-step), while explicitly preserving the teacher’s denoising behavior.
@@ -1629,6 +1709,7 @@ ADD is the clean “diffusion-distill + GAN refine” recipe for turning a pre-t
 ### 5.1.1 Core idea: combine adversarial learning with diffusion distillation
 
 The student is trained with two losses:
+
 1. **Adversarial loss** for photorealistic high-frequency detail
 2. **Diffusion distillation loss** to stay aligned with the teacher’s denoising trajectory
 
@@ -1670,6 +1751,7 @@ $$
 $$
 
 where:
+
 - $\hat{x}_{\psi,t}$ is the **teacher-predicted denoised image**
 - $\hat{x}_{\theta,t}$ is the **student-predicted denoised image**
 - the discriminator sees timestep and conditioning too, so the adversarial game is timestep-aware
@@ -1696,10 +1778,12 @@ Without it, pure adversarial training tends to hallucinate detail but break sema
 ### 5.1.4 Why ADD matters
 
 ADD became a strong template because it fixes the classic one-step problem:
+
 - pure distillation gives blurry or over-smoothed outputs
 - pure GAN gives sharp but unstable / off-manifold outputs
 
 ADD gets both:
+
 - **teacher alignment** from diffusion distillation
 - **sharpness and realism** from adversarial training
 
@@ -1724,6 +1808,7 @@ The big shift is: **do the adversarial game in latent/video space and train for 
 ### 5.2.1 Motivation: one-step video gets killed by exposure error
 
 Teacher-forced diffusion distillation works okay for short clips, but for long autoregressive rollout:
+
 - errors accumulate
 - small distortions compound
 - teacher-forced supervision mismatches inference-time behavior
@@ -1736,6 +1821,7 @@ Instead of requiring exact paired long-video targets (which are scarce and awkwa
 LADD trains the generator so each generated segment looks real to a discriminator.
 
 That is the crucial algorithmic advantage:
+
 - **supervised distillation** needs paired targets and usually short clips
 - **adversarial training** only needs “real vs generated” segments
 
@@ -1768,11 +1854,13 @@ the discriminator gives a scalable supervision signal for long-horizon rollout.
 ### 5.2.4 Why latent adversarial training is stronger than pixel GAN in this setting
 
 Doing the adversarial game in latent/video representation space helps because:
+
 - lower dimensionality → cheaper and more stable
 - closer to the model’s native generation space
 - easier to enforce temporal consistency than purely pixel GAN losses
 
 In practice, this makes LADD-style methods much more compatible with:
+
 - one-step or few-step video generators
 - autoregressive rollout
 - KV-cache causal transformers
@@ -1781,8 +1869,9 @@ In practice, this makes LADD-style methods much more compatible with:
 
 LADD is not just “ADD but for video.”
 It is the transition from:
+
 - **paired denoising distillation**
-to
+  to
 - **distribution-level adversarial alignment for long-horizon latent rollout**
 
 That shift is what makes minute-long streaming generation feasible.
@@ -1807,6 +1896,7 @@ This is the exact same failure mode as exposure bias in autoregressive models.
 DiffRatio frames this mismatch as a **density ratio correction** problem.
 
 They derive a correction factor that reweights the distillation objective by a ratio between:
+
 - the student-induced trajectory distribution
 - the teacher/reference trajectory distribution
 
@@ -1831,6 +1921,7 @@ The student should not just minimize teacher-forced error; it should minimize er
 The ratio is not known directly, so DiffRatio estimates it with a classifier (discriminator-like network).
 
 Train a binary classifier to distinguish samples from:
+
 - teacher/reference distribution
 - student rollout distribution
 
@@ -1845,12 +1936,16 @@ It is used as a **distribution correction estimator**.
 DiffRatio training has two coupled updates:
 
 #### (A) Ratio estimator / classifier update
+
 Train a classifier to separate:
+
 - reference (teacher) samples
 - student-generated samples
 
 #### (B) Student update
+
 Train the student with:
+
 - the original distillation loss
 - reweighted by the estimated density ratio
 
@@ -1861,11 +1956,13 @@ This directly targets the rollout mismatch that breaks one-step/few-step distill
 DiffRatio is a more principled answer to the “teacher-student mismatch” than just adding more heuristics.
 
 It says:
+
 - the issue is not only sharpness/blur
 - the issue is **wrong training distribution**
 - adversarial estimation can be used to **fix the measure** the student is trained under
 
 That’s a very strong conceptual bridge between:
+
 - diffusion distillation
 - adversarial learning
 - off-policy / covariate-shift correction ideas
@@ -1891,16 +1988,19 @@ This staged design is the key engineering insight.
 You do not jump directly from diffusion weights to GAN training.
 
 #### Stage 1: Diffusion adaptation
+
 - Convert the pretrained video diffusion transformer into a causal/autoregressive architecture
 - Finetune with diffusion objective under teacher forcing
 - Preserve the diffusion prior while adapting architecture and inputs
 
 #### Stage 2: Consistency distillation
+
 - Use consistency distillation as initialization before adversarial training
 - Speeds convergence and stabilizes the later adversarial phase
 - In AAPT, this is explicitly described as following APT
 
 #### Stage 3: Adversarial post-training
+
 - Add a discriminator (initialized from diffusion weights in AAPT-style setups)
 - Train generator + discriminator adversarially
 - This improves frame quality and enables 1-step generation quality recovery
@@ -1908,11 +2008,13 @@ You do not jump directly from diffusion weights to GAN training.
 ### 5.4.2 Why adversarial post-training is necessary after distillation
 
 Consistency / diffusion distillation gets you speed, but often:
+
 - oversmooths details
 - weakens texture realism
 - accumulates errors in long rollout
 
 Adversarial post-training fixes exactly that:
+
 - sharper details
 - better perceptual realism
 - stronger long-horizon behavior (especially with student-forcing)
@@ -1925,12 +2027,15 @@ they are the bridge from “distilled but soft” to “distilled and actually u
 AAPT extends APT in a way that is super relevant for streaming / interactive video:
 
 #### Causal generator + KV cache
+
 - autoregressive frame generation
 - one latent frame per forward pass (1NFE)
 - reuse KV cache for speed
 
 #### Student-forcing adversarial training
+
 During adversarial training:
+
 - only the first frame is ground truth
 - afterward, the model feeds back its **own generated frames**
 - training behavior matches inference behavior
@@ -1941,6 +2046,7 @@ It directly attacks exposure error instead of hiding it with teacher forcing.
 ### 5.4.4 Discriminator design and loss in the APT/AAPT line
 
 AAPT uses:
+
 - a causal discriminator backbone (same family as the generator)
 - per-frame logits (not only clip-level), enabling parallel multi-duration discrimination
 - relativistic adversarial objective (R3GAN-style)
@@ -1952,6 +2058,7 @@ it is designed for stability and long-video training, not old-school image GAN h
 ### 5.4.5 Long-video training trick (important)
 
 AAPT-style training solves the long-video data problem by:
+
 - generating long videos
 - splitting them into short overlapping segments for discriminator evaluation
 - training the discriminator on real vs generated segments
@@ -1967,8 +2074,8 @@ the discriminator supplies supervision at the **distribution level**, which scal
 
 The adversarial line of diffusion distillation is not one thing; it has evolved through three distinct roles:
 
-1. **ADD:** adversarial loss as a perceptual sharpness booster on top of diffusion distillation  
-2. **APT / AAPT / LADD:** adversarial post-training as the main way to make 1-step generators actually work for video and long-horizon rollout  
+1. **ADD:** adversarial loss as a perceptual sharpness booster on top of diffusion distillation
+2. **APT / AAPT / LADD:** adversarial post-training as the main way to make 1-step generators actually work for video and long-horizon rollout
 3. **DiffRatio:** adversarial classifier as a density-ratio estimator for correcting teacher-student distribution mismatch
 
 That progression is the real story:
@@ -1977,8 +2084,11 @@ adversarial methods moved from “make it sharper” to “fix the training dist
 ---
 
 # 6. Video Generation
+
 ## 6.1 CausVid
+
 #### 6.1.1 Core idea (causal AR diffusion + distillation)
+
 CausVid converts a pretrained **bidirectional video diffusion/flow model** into a **causal autoregressive** generator and then distills it into a **few-step** AR model.
 
 The key practical recipe is:
@@ -1989,24 +2099,30 @@ The key practical recipe is:
 This is the right framing because causal masking alone is not enough; you first need to preserve the teacher’s dynamics under causal attention, then compress inference.
 
 #### 6.1.2 Stage 0: ODE trajectory initialization (important)
+
 CausVid first constructs ODE solution pairs from the pretrained teacher and uses them to initialize the causal student. This is basically a **trajectory-preserving warm start** before adversarial/distribution matching distillation.
 
 Why this matters:
+
 - Directly jumping to DMD with a randomly causalized student is unstable.
 - ODE-pair initialization makes the student already “look like” the teacher’s denoising trajectory under causal constraints.
 
 #### 6.1.3 Asymmetric Distillation with DMD (main algorithmic part)
+
 CausVid uses **asymmetric distillation**:
+
 - **Teacher**: high-quality, many-step, bidirectional model
 - **Student**: causal, few-step AR model
 
 Then it applies a **DMD-style distribution matching objective** to train the student generator.
 
 A useful mental model:
+
 - The teacher provides a high-quality target distribution (and score-like signal / critic guidance).
 - The student is optimized to match that target with drastically fewer denoising steps.
 
 #### 6.1.4 CausVid training algorithm (high-level)
+
 **Algorithm sketch (CausVid-style):**
 
 1. **Initialize student** with causal attention masking.
@@ -2019,7 +2135,9 @@ A useful mental model:
    - Update student (and discriminator / critic if using adversarial DMD variant)
 
 #### 6.1.5 Why CausVid matters in the progression
+
 CausVid is the clean bridge from:
+
 - “fast image distillation” ideas (DMD / consistency / one-step)
 - to **causal autoregressive video diffusion**
 
@@ -2028,7 +2146,9 @@ But it still has a train-test mismatch issue if training rollouts are not aligne
 ---
 
 ## 6.2 Self-Forcing
+
 #### 6.2.1 Main idea: fix the train-test gap (the real problem)
+
 Self-Forcing’s central claim is dead-on:
 
 - **Teacher Forcing (TF)** and **Diffusion Forcing (DF)** train on context distributions that do **not** match the model’s actual inference-time autoregressive rollout.
@@ -2037,47 +2157,59 @@ Self-Forcing’s central claim is dead-on:
 Self-Forcing fixes this by doing **autoregressive self-rollout during training** and applying a **holistic distribution matching loss** on the final generated video.
 
 #### 6.2.2 Holistic post-training objective (core formulation)
+
 Instead of local frame-wise supervision, Self-Forcing trains on full autoregressive rollouts.
 
 Conceptually, the model defines an autoregressive distribution over video chunks/frames:
+
 $$
 p_\theta(X) = \prod_i p_\theta(x_i \mid x_{<i})
 $$
 
 Then during training:
+
 1. Roll out the model autoregressively using its **own generated context**
 2. Get a full generated video $\hat{X}$
 3. Apply a **distribution matching loss** on $\hat{X}$ vs target/teacher distribution
 
 This is the key upgrade:
+
 - training process now mirrors inference
 - exposure bias is handled directly, not indirectly
 
 #### 6.2.3 Distribution matching losses used in Self-Forcing
+
 Self-Forcing is not tied to one distillation loss. It supports multiple post-training objectives:
 
 ### (a) DMD-style loss
+
 A DMD objective can be applied to the **final self-rolled-out video**:
+
 - generator gets a score/critic-driven gradient to move toward target distribution
 - plus an auxiliary regression term for stability (same spirit as DMD2/DMD2-v style recipes)
 
 This gives a **data-free** route when using teacher-generated supervision/signals.
 
 ### (b) SiD-style loss
+
 Self-Forcing can also use **Score identity Distillation (SiD)** style updates:
+
 - estimate/approximate the score mismatch
 - optimize the student rollout distribution accordingly
 
 Again, the important part is not the exact score estimator; it’s that the loss is computed on **true AR self-rollouts**.
 
 ### (c) GAN loss (R3GAN-style in their implementation)
+
 They also instantiate Self-Forcing with a GAN objective (R3GAN variant):
+
 - discriminator sees real videos vs self-forced generated videos
 - generator learns to produce realistic rollouts
 
 This is actually very natural for Self-Forcing because GANs already train on samples from the generator’s own distribution.
 
 #### 6.2.4 Efficient training trick: stochastic gradient truncation
+
 Self-Forcing sounds expensive because training is sequential, but they make it tractable with **gradient truncation**:
 
 - Roll out multiple AR steps
@@ -2090,6 +2222,7 @@ the model still trains on its own generated context distribution.
 This is the algorithmic reason Self-Forcing is practical.
 
 #### 6.2.5 Self-Forcing training algorithm (practical)
+
 **Algorithm sketch (Self-Forcing):**
 
 1. Start from a pretrained causal AR diffusion model (often CausVid-style initialization)
@@ -2102,7 +2235,9 @@ This is the algorithmic reason Self-Forcing is practical.
 4. (Optional) use rolling KV cache for efficient inference/extrapolation
 
 #### 6.2.6 Why Self-Forcing is important
+
 This is the first really strong “RL-like” move in video diffusion post-training:
+
 - **Pretrain in parallel**
 - **Post-train sequentially on your own rollout distribution**
 
@@ -2117,6 +2252,7 @@ Transition Matching Distillation (TMD) bridges engineering and theory based adap
 #### 6.3.1 Core problem setup
 
 They want to distill a pretrained video diffusion teacher into a faster student. Direct one-stage distillation is hard in video because:
+
 - the space is huge,
 - temporal consistency matters,
 - transformer-based video models make JVP painful (esp. attention kernels/FSDP/context parallelism).
@@ -2138,6 +2274,7 @@ where $m$ is a feature extracted from the main backbone.
 Then they use a MeanFlow-style objective to train this transition head.
 
 A very practical (and nontrivial) design choice:
+
 - they **reparameterize** the average velocity to stay aligned with the teacher head:
 
 $$
@@ -2149,10 +2286,12 @@ This is not cosmetic. It keeps the new head close to teacher semantics, which im
 #### 6.3.3 JVP issue and finite-difference approximation
 
 This paper is very realistic about systems constraints:
+
 - exact JVP is annoying with large-scale video transformer stacks (FlashAttention, FSDP, context parallelism),
 - so they use a **finite-difference approximation** of the JVP.
 
 That’s a practical compromise:
+
 - theoretically less clean than exact JVP,
 - but massively easier to integrate into production-grade training code.
 
@@ -2172,7 +2311,9 @@ So the conceptual split is:
 This is a strong template for hard domains (video, 3D, multimodal) where pure one-shot distillation is brittle.
 
 #### 6.3.5 Why TMD is strong
+
 TMD wins because it combines both worlds:
+
 - **trajectory-based structure** (TM-MF / flow-map adaptation)
 - **distribution-based distillation** (DMD2-v)
 
@@ -2183,39 +2324,53 @@ That’s why it gets a better speed-quality tradeoff than plain one-step/few-ste
 ---
 
 # 7. New Domains
+
 ## 7.1 JiT (Just image Transformers)
+
 #### 7.1.1 Core idea: x-prediction in pixel-space Transformers
-JiT’s key move is to make the Transformer directly predict the **denoised image** (an $x$-like target) instead of predicting noise/velocity in a high-dimensional noisy pixel patch space. The motivation is a **manifold hypothesis** argument: denoised images are lower-dimensional / easier targets for a ViT than noisy velocity fields. This is exactly the ingredient later reused by pMF. 
+
+JiT’s key move is to make the Transformer directly predict the **denoised image** (an $x$-like target) instead of predicting noise/velocity in a high-dimensional noisy pixel patch space. The motivation is a **manifold hypothesis** argument: denoised images are lower-dimensional / easier targets for a ViT than noisy velocity fields. This is exactly the ingredient later reused by pMF.
 
 #### 7.1.2 Algorithmic form (x-pred with v-loss)
+
 In the FM-style parameterization used in later papers when discussing JiT, the network outputs $x_\theta(z_t,t)$ and converts it to a velocity prediction:
+
 $$
 v_\theta(z_t,t)=\frac{1}{t}\big(z_t-x_\theta(z_t,t)\big)
 $$
-and training still uses the **velocity-space regression loss** (v-loss). This “prediction space vs loss space” decoupling is the important algorithmic pattern that keeps showing up in later distillation papers. 
+
+and training still uses the **velocity-space regression loss** (v-loss). This “prediction space vs loss space” decoupling is the important algorithmic pattern that keeps showing up in later distillation papers.
 
 #### 7.1.3 Why this matters for distillation
+
 The high-signal point is not “pixel-space diffusion” by itself, but that JiT establishes a recipe:
+
 - choose an **easier output space** for the network (denoised/image-like),
 - keep a **stable/known loss space** (velocity/noise/FM target),
 - use a **conversion map** between them.
 
-That recipe is basically the blueprint for pMF and several later “decouple output-space from loss-space” methods. pMF explicitly cites JiT as the x-pred ingredient used to make one-step latent-free generation work. 
+That recipe is basically the blueprint for pMF and several later “decouple output-space from loss-space” methods. pMF explicitly cites JiT as the x-pred ingredient used to make one-step latent-free generation work.
 
 #### 7.1.4 Practical note (loss/prediction mismatch)
-The JiT line also motivated later empirical work on **output-space vs loss-space mismatch**: x-pred can work best when paired with a velocity-style loss (or a reweighted variant), while naive direct x-loss can underperform. That design lesson reappears in pMF and MeanFlow-family variants. 
+
+The JiT line also motivated later empirical work on **output-space vs loss-space mismatch**: x-pred can work best when paired with a velocity-style loss (or a reweighted variant), while naive direct x-loss can underperform. That design lesson reappears in pMF and MeanFlow-family variants.
 
 ---
 
 ## 7.2 Drifting
+
 #### 7.2.1 Core idea: replace score/velocity field with a drifting field
-Drifting proposes a different one-step generative formulation: instead of learning a diffusion/flow velocity or score, it learns an **anti-symmetric kernelized field** (the “drifting field”) and then trains a generator to align with that field. The paper frames this as a new way to get one-step generation with strong quality while keeping a mathematically structured training target. 
+
+Drifting proposes a different one-step generative formulation: instead of learning a diffusion/flow velocity or score, it learns an **anti-symmetric kernelized field** (the “drifting field”) and then trains a generator to align with that field. The paper frames this as a new way to get one-step generation with strong quality while keeping a mathematically structured training target.
 
 #### 7.2.2 Algorithmic object: empirical drifting field
-The method builds an empirical field from batch-level statistics (mean-field style / kernelized interactions). In the paper’s notation, the drifting field $V_{\mathrm{drf}}$ is formed from weighted source/target terms, with weights computed from a softmax over kernel similarities. This is the main algorithmic primitive replacing the usual score/velocity target. 
+
+The method builds an empirical field from batch-level statistics (mean-field style / kernelized interactions). In the paper’s notation, the drifting field $V_{\mathrm{drf}}$ is formed from weighted source/target terms, with weights computed from a softmax over kernel similarities. This is the main algorithmic primitive replacing the usual score/velocity target.
 
 #### 7.2.3 Training loop (distillation lens)
+
 From a diffusion-distillation perspective, the important interpretation is:
+
 - the model is trained to match a **teacher-like vector field target**,
 - but the target is **not** a diffusion teacher score/velocity,
 - it is a **kernelized drifting field** built from data/generator samples.
@@ -2225,8 +2380,11 @@ So Drifting is part of the broader one-step trend, but it moves outside standard
 ---
 
 ## 7.3 Pixel MeanFlow (pMF)
+
 #### 7.3.1 Why pMF is in this chapter
+
 pMF is a clean “new-domain” extension because it combines:
+
 - **one-step MeanFlow-style distillation logic** (JVP / MeanFlow identity),
 - **JiT-style x-prediction**,
 - and does it in **raw pixel space** (latent-free).
@@ -2234,34 +2392,47 @@ pMF is a clean “new-domain” extension because it combines:
 That makes it a direct example of diffusion/flow distillation ideas being adapted to a harder domain (high-dimensional pixel space).
 
 #### 7.3.2 Core conversion: from average velocity to image-like target
+
 pMF defines an image-like field
+
 $$
 x(z_t,r,t)\equiv z_t - t\,u(z_t,r,t),
 $$
+
 where $u(z_t,r,t)$ is the MeanFlow average velocity. This is the key trick: make the network output something denoised/image-like, but still train via MeanFlow’s velocity-space machinery.
 
 The paper explicitly motivates this with a generalized manifold argument:
+
 - $u$ looks noisy/high-dimensional,
 - $x$ looks denoised/lower-dimensional,
 - so $x$ is easier for the network to model.
 
 #### 7.3.3 The algorithm (this is the important part)
+
 pMF reparameterizes the network output as:
+
 $$
 u_\theta(z_t,r,t)=\frac{1}{t}\big(z_t-x_\theta(z_t,r,t)\big),
 $$
+
 then plugs that into the improved MeanFlow/iMF JVP compound target:
+
 $$
 V_\theta = u_\theta + (t-r)\cdot \mathrm{JVP}_{\mathrm{sg}},
 $$
+
 and trains with a standard velocity regression:
+
 $$
 \mathcal{L}_{\mathrm{pMF}}=\mathbb{E}\|V_\theta-v\|_2^2.
 $$
+
 So pMF is **x-prediction + MeanFlow JVP distillation + v-loss**. That’s the whole algorithmic identity.
 
 #### 7.3.4 Pseudocode structure (practical)
+
 The training pseudocode is very explicit:
+
 1. sample $(t,r)$ and noise,
 2. form $z_t=(1-t)x+t\epsilon$,
 3. compute $u$ from the x-pred network output,
@@ -2270,67 +2441,85 @@ The training pseudocode is very explicit:
 6. build $V=u+(t-r)\,\text{stopgrad}(du/dt)$,
 7. regress to $(\epsilon-x)$.
 
-This is basically iMF with the network living in image space instead of velocity space. 
+This is basically iMF with the network living in image space instead of velocity space.
 
 #### 7.3.5 Distillation takeaway
+
 pMF is one of the cleanest examples of the modern pattern:
+
 - **teacher target space** stays physically meaningful (velocity/FM),
 - **student output space** becomes easier (image-like/manifold-aligned),
 - a **conversion + JVP identity** bridges the two.
 
-That pattern is exactly what makes these one-step methods actually trainable at high resolution. 
+That pattern is exactly what makes these one-step methods actually trainable at high resolution.
 
 ---
 
 ## 7.4 REPA (Representation Alignment for Generation)
+
 #### 7.4.1 Core idea: distill semantics into DiT hidden states
-REPA is not a one-step sampler by itself. It is a **training-time acceleration / regularization** method for diffusion transformers: align early hidden states of the noisy-input diffusion model with representations from a strong pretrained encoder (e.g., DINO/SigLIP/MAE), so the diffusion model learns semantic structure faster. The paper reports substantially faster convergence and better FID. 
+
+REPA is not a one-step sampler by itself. It is a **training-time acceleration / regularization** method for diffusion transformers: align early hidden states of the noisy-input diffusion model with representations from a strong pretrained encoder (e.g., DINO/SigLIP/MAE), so the diffusion model learns semantic structure faster. The paper reports substantially faster convergence and better FID.
 
 #### 7.4.2 Algorithmic pattern (representation distillation)
+
 The method is basically:
+
 - run the diffusion transformer on noisy input,
 - take hidden states from an early block,
 - project them to a feature space,
 - align them to frozen pretrained visual representations of the clean image.
 
-This is a **teacher-student distillation signal in feature space**, not in score/velocity space. It complements the usual denoising loss rather than replacing it. 
+This is a **teacher-student distillation signal in feature space**, not in score/velocity space. It complements the usual denoising loss rather than replacing it.
 
 #### 7.4.3 Why it matters in a distillation chapter
+
 REPA expands “distillation” beyond sampling-step distillation:
+
 - classic diffusion distillation compresses **inference trajectories**,
 - REPA distills **representation priors** into the denoiser backbone.
 
-That’s a different axis of acceleration: faster training / better sample efficiency, not just fewer NFEs. It also composes well with other diffusion recipes, which is why it shows up as a practical building block. 
+That’s a different axis of acceleration: faster training / better sample efficiency, not just fewer NFEs. It also composes well with other diffusion recipes, which is why it shows up as a practical building block.
 
 ---
 
 ## 7.5 Latent Forcing
+
 #### 7.5.1 Core idea: distill a latent planner into a pixel refiner
+
 Latent Forcing is a two-stage autoregressive video generation setup that explicitly splits generation into:
+
 1. a **base latent diffusion** model (semantic / long-horizon structure),
 2. a **pixel-space refiner diffusion** model (visual details),
 
-with a distillation-like forcing mechanism that conditions the refiner on latent predictions. This is basically “semantic planning in latent space, rendering in pixel space.” 
+with a distillation-like forcing mechanism that conditions the refiner on latent predictions. This is basically “semantic planning in latent space, rendering in pixel space.”
 
 #### 7.5.2 Key algorithm trick: two-time conditioning
+
 The refiner needs to know **both**:
+
 - how noisy the current pixel sample is,
 - and how much to trust the latent prediction.
 
 So they add a **second time/noise embedding** (for latent-conditioning time) into the U-Net conditioning stack. This is the core algorithmic adaptation and is the reason the method works across different latent/pixel noise levels.
 
 #### 7.5.3 Training objective
+
 Training optimizes a weighted sum of:
+
 - the base latent diffusion loss,
 - the pixel refiner denoising loss.
 
-The paper writes this as a joint objective (Eq. 1), with a scalar weight balancing the base and refiner parts. This is the cleanest way to read it: **joint distillation/training across two domains (latent + pixel)**. 
+The paper writes this as a joint objective (Eq. 1), with a scalar weight balancing the base and refiner parts. This is the cleanest way to read it: **joint distillation/training across two domains (latent + pixel)**.
 
 #### 7.5.4 Timestep schedule is the secret sauce
-They do not use identical timesteps for base and refiner. Instead, they derive/schedule a latent-conditioning timestep as a function of the global/pixel timestep (their Eq. 4-style schedule, with clipping / constraints in later equations). This prevents the refiner from being conditioned on latent predictions that are unrealistically clean/noisy relative to the current pixel denoising stage. 
+
+They do not use identical timesteps for base and refiner. Instead, they derive/schedule a latent-conditioning timestep as a function of the global/pixel timestep (their Eq. 4-style schedule, with clipping / constraints in later equations). This prevents the refiner from being conditioned on latent predictions that are unrealistically clean/noisy relative to the current pixel denoising stage.
 
 #### 7.5.5 Distillation takeaway
+
 Latent Forcing is a domain-transfer distillation recipe:
+
 - distill **global structure** into a compact latent process,
 - force a pixel model to consume that structure reliably,
 - synchronize the two with explicit noise-time coupling.
@@ -2340,16 +2529,21 @@ This is exactly the kind of “new domain” extension diffusion distillation ne
 ---
 
 ## 7.6 Unified Latents (UL)
-#### 7.6.1 Core idea: train the latent space *for* diffusion, not before diffusion
+
+#### 7.6.1 Core idea: train the latent space _for_ diffusion, not before diffusion
+
 UL reframes latent learning as a **jointly trained system**:
+
 - encoder produces latents,
 - a diffusion prior regularizes/model these latents,
 - a diffusion decoder reconstructs the data.
 
-The punchline is that they explicitly link encoder noise to the prior’s minimum noise level, which gives a principled handle on latent information capacity (bitrate). This is a big deal because previous latent pipelines often tuned KL strength heuristically. 
+The punchline is that they explicitly link encoder noise to the prior’s minimum noise level, which gives a principled handle on latent information capacity (bitrate). This is a big deal because previous latent pipelines often tuned KL strength heuristically.
 
 #### 7.6.2 Algorithm 1 (joint training)
+
 UL’s training algorithm is clean and practical:
+
 1. encode $x$ to a clean latent $z_{\text{clean}}$,
 2. add diffusion noise in latent space and train a **latent prior diffusion loss** $L_z$,
 3. sample a slightly noisy latent $z_0$ and noisy image $x_t$,
@@ -2359,16 +2553,20 @@ UL’s training algorithm is clean and practical:
 This is not post-hoc distillation; it is **co-training** the latent representation and the diffusion models so the latent becomes diffusion-friendly by construction.
 
 #### 7.6.3 Sampling algorithm (factorized generation)
+
 Sampling is also explicitly two-stage:
+
 1. sample latent noise $z_1$,
 2. denoise to a latent $z_0$ with the latent prior,
 3. sample image noise $x_1$,
 4. denoise with the decoder conditioned on $z_0$.
 
-This factorization is the deployment-side analog of the training split above. 
+This factorization is the deployment-side analog of the training split above.
 
 #### 7.6.4 Why UL belongs in “distillation/new domains”
+
 UL is a latent-learning framework, but it matters for diffusion distillation because it changes the upstream problem:
+
 - if the latent is easier to model, **few-step / distilled samplers become easier downstream**;
 - UL gives a principled way to control this via latent noise/bitrate rather than ad hoc KL tuning.
 
@@ -2377,6 +2575,7 @@ So UL is not trajectory distillation, but it is absolutely part of the modern di
 ---
 
 ## 7.7 Unifying pattern across these “new-domain” methods
+
 The common pattern across JiT, pMF, Latent Forcing, REPA, and UL is:
 
 1. **Choose an easier target/domain**
@@ -2584,6 +2783,7 @@ Optimal transport (OT) is the geometry-first version of distribution transport.
 It matters here because diffusion/flow distillation quality is heavily affected by the **interpolation path** and **coupling** between source and target samples.
 
 OT gives a principled way to choose both:
+
 - a coupling (who should be paired with whom),
 - and a path (how mass should move).
 
@@ -2629,7 +2829,7 @@ $$
 v_t\big((1-t)x+tT(x)\big)=T(x)-x.
 $$
 
-This is *not* the same as standard flow-matching interpolation, which uses independent pairs $(X_0,X_1)\sim \alpha_0\otimes\alpha_1$.
+This is _not_ the same as standard flow-matching interpolation, which uses independent pairs $(X_0,X_1)\sim \alpha_0\otimes\alpha_1$.
 That distinction is huge:
 
 - **Flow matching**: couples independent endpoints (convolution-like path)
@@ -2641,7 +2841,7 @@ For distillation, OT-style couplings tend to produce a cleaner transport target,
 
 ### 8.2.4 Flow Matching vs OT (the exact algorithmic difference)
 
-Standard FM solves an unconstrained least-squares regression for the velocity on a *prescribed* interpolation:
+Standard FM solves an unconstrained least-squares regression for the velocity on a _prescribed_ interpolation:
 
 $$
 \min_{(v_t)_t}
@@ -2666,6 +2866,7 @@ That means:
 This is the useful way to think about OT in a distillation pipeline:
 
 #### Option A: OT-informed pairing + FM / flow-map distillation
+
 1. Build a better coupling $\rho(x_0,x_1)$ (ideally OT-like).
 2. Use that coupling in the interpolant / training pairs.
 3. Train your velocity or flow map with standard FM + self-distillation losses.
@@ -2673,6 +2874,7 @@ This is the useful way to think about OT in a distillation pipeline:
 This is already enough to make the distillation target easier.
 
 #### Option B: OT geodesic path as the teacher path
+
 1. Use OT geodesic interpolation (or an approximation to it).
 2. Train a velocity field on that path.
 3. Distill into a flow map / one-step map (Lagrangian / Eulerian / progressive style).
