@@ -356,7 +356,79 @@ def denoising_budget(mobile=False):
     s.save()
 
 
+def tiling(mobile=False):
+    s = SVG("tiling", 638 if mobile else 618, mobile, "Matrix tiles reuse each input four times",
+            "A four-by-four A tile and a four-by-four B tile contribute to a four-by-four C tile. "
+            "One highlighted A element contributes to four columns of its C row; one highlighted "
+            "B element contributes to four rows of its C column. Both inputs contribute at the "
+            "intersection. Loading the two FP32 input tiles once transfers 128 bytes and enables "
+            "64 multiply-adds, counted as 128 FLOPs. Output C traffic is excluded.")
+    s.heading("Load once; reuse on chip", "4 × 4 tiles · FP32")
+    size = 128 if mobile else 160
+    cell = size / 4
+    ax, bx, cx = (18, 236, 236) if mobile else (220, 590, 590)
+    ay, by, cy = (355, 123, 355) if mobile else (320, 100, 320)
+    row, k, col = 1, 2, 1
+    s.text(22 if mobile else 220, 157 if mobile else 180, "C += A × B",
+           size=23 if mobile else 30, weight=600)
+    s.text(22 if mobile else 220, 184 if mobile else 211, "one K tile",
+           size=17 if mobile else 21, color=MUTED)
+
+    def tile(x, y, kind):
+        for i in range(4):
+            for j in range(4):
+                color = PANEL
+                if kind == "A" and (i, j) == (row, k):
+                    color = BLUE
+                elif kind == "B" and (i, j) == (k, col):
+                    color = ORANGE
+                elif kind == "C":
+                    if i == row:
+                        color = BLUE
+                    if j == col:
+                        color = ORANGE
+                    if (i, j) == (row, col):
+                        color = INK
+                s.rect(x + j * cell, y + i * cell, cell, cell,
+                       color, GRID, radius=1, sw=1.5)
+        if kind in ["A", "B"]:
+            i, j = (row, k) if kind == "A" else (k, col)
+            s.text(x + (j + .5) * cell, y + (i + .5) * cell + 6,
+                   kind.lower(), size=18 if mobile else 23,
+                   color=BG, anchor="middle", weight=600)
+        else:
+            s.text(x + (col + .5) * cell, y + (row + .5) * cell + 6,
+                   "ab", size=17 if mobile else 21,
+                   color=BG, anchor="middle", weight=600)
+
+    tile(ax, ay, "A")
+    tile(bx, by, "B")
+    tile(cx, cy, "C")
+    s.text(ax + size / 2, ay - 16, "A tile", color=BLUE, anchor="middle", weight=600)
+    s.text(bx + size / 2, by - 16, "B tile", color=ORANGE, anchor="middle", weight=600)
+    s.text(cx + size / 2, cy + size + 28, "C tile", anchor="middle", weight=600)
+
+    # Match the A element's row and the B element's column to their C outputs.
+    ry = cy + (row + .5) * cell
+    ccol = cx + (col + .5) * cell
+    s.line(ax + size + 8, ry, cx - 12, ry, BLUE, 2.5, arrow=True)
+    s.text((ax + size + cx) / 2, ry - 19, "reuse 4×", color=BLUE,
+           size=17 if mobile else 23, anchor="middle", weight=600)
+    s.line(ccol, by + size + 8, ccol, cy - 14, ORANGE, 2.5, arrow=True)
+    s.text(ccol + 15, (by + size + cy) / 2 + 6, "reuse 4×", color=ORANGE,
+           size=17 if mobile else 23, weight=600)
+
+    # The white intersection is one partial sum, not the final C value.
+    s.text(s.w / 2, 555 if mobile else 535, "Each C entry sums 4 products", color=MUTED,
+           size=17 if mobile else 21, anchor="middle")
+    s.text(s.w / 2, 590 if mobile else 566, "128 input bytes → 128 FLOPs",
+           size=20 if mobile else 26, anchor="middle", weight=600)
+    s.text(s.w / 2, 616 if mobile else 589, "C traffic excluded", color=MUTED,
+           size=17 if mobile else 20, anchor="middle")
+    s.save()
+
+
 if __name__ == "__main__":
-    for draw in [gpu_layout, amdahl, roofline, coalescing, fusion, overlap, batching, denoising_budget]:
+    for draw in [gpu_layout, amdahl, roofline, coalescing, fusion, overlap, batching, denoising_budget, tiling]:
         draw()
         draw(mobile=True)

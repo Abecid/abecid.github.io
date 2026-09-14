@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="638" viewBox="0 0 390 638" role="img" aria-labelledby="title desc">
+  <title id="title">Matrix tiles reuse each input four times</title>
+  <desc id="desc">
+    A four-by-four A tile and a four-by-four B tile contribute to a four-by-four C tile. One highlighted A element contributes to four columns of its
+    C row; one highlighted B element contributes to four rows of its C column. Both inputs contribute at the intersection. Loading the two FP32 input
+    tiles once transfers 128 bytes and enables 64 multiply-adds, counted as 128 FLOPs. Output C traffic is excluded.
+  </desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="context-stroke" />
+    </marker>
+  </defs>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <rect x="0" y="0" width="390" height="638" rx="14" fill="#131d2e" stroke="none" stroke-width="1.5" />
+    <text x="22" y="36" fill="#edf3fc" font-size="21" text-anchor="start" font-weight="600">Load once; reuse on chip</text>
+    <text x="22" y="63" fill="#b5c4d9" font-size="17" text-anchor="start" font-weight="400">4 × 4 tiles · FP32</text>
+    <text x="22" y="157" fill="#edf3fc" font-size="23" text-anchor="start" font-weight="600">C += A × B</text>
+    <text x="22" y="184" fill="#b5c4d9" font-size="17" text-anchor="start" font-weight="400">one K tile</text>
+    <rect x="18" y="355" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="50" y="355" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="82" y="355" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="114" y="355" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="18" y="387" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="50" y="387" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="82" y="387" width="32" height="32" rx="1" fill="#89b4ff" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="114" y="387" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="18" y="419" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="50" y="419" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="82" y="419" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="114" y="419" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="18" y="451" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="50" y="451" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="82" y="451" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="114" y="451" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <text x="98" y="409" fill="#131d2e" font-size="18" text-anchor="middle" font-weight="600">a</text>
+    <rect x="236" y="123" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="268" y="123" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="300" y="123" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="332" y="123" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="236" y="155" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="268" y="155" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="300" y="155" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="332" y="155" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="236" y="187" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="268" y="187" width="32" height="32" rx="1" fill="#ffbd7a" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="300" y="187" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="332" y="187" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="236" y="219" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="268" y="219" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="300" y="219" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="332" y="219" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <text x="284" y="209" fill="#131d2e" font-size="18" text-anchor="middle" font-weight="600">b</text>
+    <rect x="236" y="355" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="268" y="355" width="32" height="32" rx="1" fill="#ffbd7a" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="300" y="355" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="332" y="355" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="236" y="387" width="32" height="32" rx="1" fill="#89b4ff" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="268" y="387" width="32" height="32" rx="1" fill="#edf3fc" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="300" y="387" width="32" height="32" rx="1" fill="#89b4ff" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="332" y="387" width="32" height="32" rx="1" fill="#89b4ff" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="236" y="419" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="268" y="419" width="32" height="32" rx="1" fill="#ffbd7a" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="300" y="419" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="332" y="419" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="236" y="451" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="268" y="451" width="32" height="32" rx="1" fill="#ffbd7a" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="300" y="451" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <rect x="332" y="451" width="32" height="32" rx="1" fill="#1c2a40" stroke="#3e506a" stroke-width="1.5" />
+    <text x="284" y="409" fill="#131d2e" font-size="17" text-anchor="middle" font-weight="600">ab</text>
+    <text x="82" y="339" fill="#89b4ff" font-size="18" text-anchor="middle" font-weight="600">A tile</text>
+    <text x="300" y="107" fill="#ffbd7a" font-size="18" text-anchor="middle" font-weight="600">B tile</text>
+    <text x="300" y="511" fill="#edf3fc" font-size="18" text-anchor="middle" font-weight="600">C tile</text>
+    <line x1="154" y1="403" x2="224" y2="403" stroke="#89b4ff" stroke-width="2.5" marker-end="url(#arrow)" />
+    <text x="191" y="384" fill="#89b4ff" font-size="17" text-anchor="middle" font-weight="600">reuse 4×</text>
+    <line x1="284" y1="259" x2="284" y2="341" stroke="#ffbd7a" stroke-width="2.5" marker-end="url(#arrow)" />
+    <text x="299" y="309" fill="#ffbd7a" font-size="17" text-anchor="start" font-weight="600">reuse 4×</text>
+    <text x="195" y="555" fill="#b5c4d9" font-size="17" text-anchor="middle" font-weight="400">Each C entry sums 4 products</text>
+    <text x="195" y="590" fill="#edf3fc" font-size="20" text-anchor="middle" font-weight="600">128 input bytes → 128 FLOPs</text>
+    <text x="195" y="616" fill="#b5c4d9" font-size="17" text-anchor="middle" font-weight="400">C traffic excluded</text>
+  </g>
+</svg>
