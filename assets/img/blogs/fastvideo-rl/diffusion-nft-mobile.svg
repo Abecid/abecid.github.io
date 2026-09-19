@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="652" viewBox="0 0 400 652" role="img" aria-labelledby="title desc">
+<title id="title">DiffusionNFT: learn from endpoints with any solver</title>
+<desc id="desc">A solver such as Flow-UniPC generates endpoints. VideoAlign scores the videos, and clean latents are re-noised for forward reconstruction. Positive and negative velocity predictions are reflected around the detached old prediction. The reward-dependent mixture of reconstruction losses trains the model, with an optional reference anchor; rollout likelihoods are not needed.</desc>
+<defs>
+<marker id="ae8edf6" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#e8edf6" stroke-width="2"/></marker>
+<marker id="aaab9cf" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#aab9cf" stroke-width="2"/></marker>
+<marker id="a89b4ff" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#89b4ff" stroke-width="2"/></marker>
+<marker id="a65dfc0" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#65dfc0" stroke-width="2"/></marker>
+<marker id="affbd7a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#ffbd7a" stroke-width="2"/></marker>
+<marker id="ac6b2ff" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#c6b2ff" stroke-width="2"/></marker>
+</defs>
+<rect width="400" height="652" rx="16" fill="#131d2e"/>
+<g font-family="Arial, Helvetica, sans-serif" stroke-linecap="round" stroke-linejoin="round">
+<text x="22" y="35" fill="#e8edf6" font-size="23" text-anchor="start" font-weight="700">Learn from endpoints,</text>
+<text x="22" y="64" fill="#e8edf6" font-size="23" text-anchor="start" font-weight="700">with any solver</text>
+<rect x="20" y="89" width="360" height="64" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="200.0" y="128.14" fill="#89b4ff" font-size="21" text-anchor="middle" font-weight="400">Flow-UniPC → final latent x₀</text>
+<path d="M200 160 L200 184" fill="none" stroke="#89b4ff" stroke-width="2.5" marker-end="url(#a89b4ff)"/>
+<rect x="20" y="193" width="360" height="77" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="200.0" y="224.8" fill="#e8edf6" font-size="20" text-anchor="middle" font-weight="400">VideoAlign → reward</text>
+<text x="200.0" y="251.8" fill="#e8edf6" font-size="20" text-anchor="middle" font-weight="400">Re-noise x₀ → xₜ</text>
+<path d="M200 278 L200 304" fill="none" stroke="#aab9cf" stroke-width="2" marker-end="url(#aaab9cf)"/>
+<text x="200" y="334" fill="#e8edf6" font-size="20" text-anchor="middle" font-weight="400">Predict v<tspan baseline-shift="sub" font-size="70%">θ</tspan> and detached v̄</text>
+<path d="M194 385 L65 385" fill="none" stroke="#ffbd7a" stroke-width="3" marker-end="url(#affbd7a)"/>
+<path d="M206 385 L335 385" fill="none" stroke="#65dfc0" stroke-width="3" marker-end="url(#a65dfc0)"/>
+<circle cx="200" cy="385" r="7" fill="#89b4ff" stroke="#89b4ff" stroke-width="2"/>
+<circle cx="48" cy="385" r="6" fill="#ffbd7a" stroke="#ffbd7a" stroke-width="2"/>
+<circle cx="352" cy="385" r="6" fill="#65dfc0" stroke="#65dfc0" stroke-width="2"/>
+<text x="48" y="369" fill="#ffbd7a" font-size="24" text-anchor="middle" font-weight="400">v⁻</text>
+<text x="352" y="369" fill="#65dfc0" font-size="24" text-anchor="middle" font-weight="400">v⁺</text>
+<text x="200" y="416" fill="#89b4ff" font-size="24" text-anchor="middle" font-weight="400">v̄</text>
+<text x="118" y="416" fill="#ffbd7a" font-size="19" text-anchor="middle" font-weight="400">−βΔv</text>
+<text x="282" y="416" fill="#65dfc0" font-size="19" text-anchor="middle" font-weight="400">+βΔv</text>
+<text x="200" y="448" fill="#aab9cf" font-size="20" text-anchor="middle" font-weight="400">Δv = v<tspan baseline-shift="sub" font-size="70%">θ</tspan> − v̄</text>
+<text x="200" y="487" fill="#aab9cf" font-size="19" text-anchor="middle" font-weight="400">Both reconstruct the same x₀</text>
+<text x="200" y="513" fill="#aab9cf" font-size="19" text-anchor="middle" font-weight="400">using x̂₀ = xₜ − t v</text>
+<rect x="20" y="549" width="360" height="80" rx="12" fill="#1b2940"/>
+<text x="200" y="579" fill="#e8edf6" font-size="24" text-anchor="middle" font-weight="700">r ℓ(v⁺) + (1 − r) ℓ(v⁻)</text>
+<text x="200" y="610" fill="#aab9cf" font-size="18" text-anchor="middle" font-weight="400">+ optional reference anchor</text>
+</g>
+</svg>

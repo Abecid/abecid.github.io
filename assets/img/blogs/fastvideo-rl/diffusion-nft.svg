@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="537" viewBox="0 0 960 537" role="img" aria-labelledby="title desc">
+<title id="title">DiffusionNFT: learn from endpoints with any solver</title>
+<desc id="desc">A solver such as Flow-UniPC generates endpoints. VideoAlign scores the videos, and clean latents are re-noised for forward reconstruction. Positive and negative velocity predictions are reflected around the detached old prediction. The reward-dependent mixture of reconstruction losses trains the model, with an optional reference anchor; rollout likelihoods are not needed.</desc>
+<defs>
+<marker id="ae8edf6" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#e8edf6" stroke-width="2"/></marker>
+<marker id="aaab9cf" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#aab9cf" stroke-width="2"/></marker>
+<marker id="a89b4ff" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#89b4ff" stroke-width="2"/></marker>
+<marker id="a65dfc0" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#65dfc0" stroke-width="2"/></marker>
+<marker id="affbd7a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#ffbd7a" stroke-width="2"/></marker>
+<marker id="ac6b2ff" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#c6b2ff" stroke-width="2"/></marker>
+</defs>
+<rect width="960" height="537" rx="16" fill="#131d2e"/>
+<g font-family="Arial, Helvetica, sans-serif" stroke-linecap="round" stroke-linejoin="round">
+<text x="40" y="43" fill="#e8edf6" font-size="28" text-anchor="start" font-weight="700">Learn from endpoints, with any solver</text>
+<text x="40" y="78" fill="#aab9cf" font-size="21" text-anchor="start" font-weight="400">DiffusionNFT · sampling and training use different paths</text>
+<rect x="40" y="112" width="249" height="82" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="164.5" y="145.98" fill="#89b4ff" font-size="22" text-anchor="middle" font-weight="400">Flow-UniPC rollout</text>
+<text x="164.5" y="174.98" fill="#89b4ff" font-size="22" text-anchor="middle" font-weight="400">Final latent x₀</text>
+<path d="M300 153 L341 153" fill="none" stroke="#89b4ff" stroke-width="2.5" marker-end="url(#a89b4ff)"/>
+<rect x="354" y="112" width="252" height="82" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="480.0" y="145.98" fill="#e8edf6" font-size="22" text-anchor="middle" font-weight="400">VideoAlign → reward</text>
+<text x="480.0" y="174.98" fill="#e8edf6" font-size="22" text-anchor="middle" font-weight="400">Re-noise x₀ → xₜ</text>
+<path d="M618 153 L659 153" fill="none" stroke="#89b4ff" stroke-width="2.5" marker-end="url(#a89b4ff)"/>
+<rect x="672" y="112" width="248" height="82" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="796.0" y="145.98" fill="#e8edf6" font-size="22" text-anchor="middle" font-weight="400">Predict v<tspan baseline-shift="sub" font-size="70%">θ</tspan> and v̄</text>
+<text x="796.0" y="174.98" fill="#e8edf6" font-size="22" text-anchor="middle" font-weight="400">v̄ is detached</text>
+<path d="M796 206 L796 233 L480 233 L480 284" fill="none" stroke="#aab9cf" stroke-width="2" marker-end="url(#aaab9cf)"/>
+<text x="40" y="263" fill="#aab9cf" font-size="17" text-anchor="start" font-weight="700">TWO PREDICTIONS AROUND THE OLD MODEL</text>
+<path d="M474 316 L210 316" fill="none" stroke="#ffbd7a" stroke-width="3" marker-end="url(#affbd7a)"/>
+<path d="M486 316 L750 316" fill="none" stroke="#65dfc0" stroke-width="3" marker-end="url(#a65dfc0)"/>
+<circle cx="480" cy="316" r="8" fill="#89b4ff" stroke="#89b4ff" stroke-width="2"/>
+<circle cx="193" cy="316" r="8" fill="#ffbd7a" stroke="#ffbd7a" stroke-width="2"/>
+<circle cx="767" cy="316" r="8" fill="#65dfc0" stroke="#65dfc0" stroke-width="2"/>
+<text x="480" y="351" fill="#89b4ff" font-size="25" text-anchor="middle" font-weight="400">v̄</text>
+<text x="193" y="293" fill="#ffbd7a" font-size="23" text-anchor="middle" font-weight="400">Implicit negative v⁻</text>
+<text x="767" y="293" fill="#65dfc0" font-size="23" text-anchor="middle" font-weight="400">Positive v⁺</text>
+<text x="321" y="349" fill="#ffbd7a" font-size="22" text-anchor="middle" font-weight="400">−β(v<tspan baseline-shift="sub" font-size="70%">θ</tspan> − v̄)</text>
+<text x="630" y="349" fill="#65dfc0" font-size="22" text-anchor="middle" font-weight="400">+β(v<tspan baseline-shift="sub" font-size="70%">θ</tspan> − v̄)</text>
+<text x="480" y="393" fill="#aab9cf" font-size="22" text-anchor="middle" font-weight="400">Reconstruct the same x₀ from each prediction: x̂₀ = xₜ − t v</text>
+<rect x="40" y="420" width="880" height="86" rx="12" fill="#1b2940"/>
+<text x="480" y="454" fill="#e8edf6" font-size="25" text-anchor="middle" font-weight="700">L = r ℓ(v⁺) + (1 − r) ℓ(v⁻) + optional reference anchor</text>
+<text x="480" y="486" fill="#aab9cf" font-size="21" text-anchor="middle" font-weight="400">Higher reward → positive branch     ·     Lower reward → negative branch</text>
+</g>
+</svg>

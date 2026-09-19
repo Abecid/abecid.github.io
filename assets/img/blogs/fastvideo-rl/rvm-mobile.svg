@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="724" viewBox="0 0 400 724" role="img" aria-labelledby="title desc">
+<title id="title">RVM: turn reward into a velocity target</title>
+<desc id="desc">On-policy four-step H3 rollouts provide endpoints and rewards. Re-noising an endpoint defines the flow target u. With no reference anchor, positive advantage moves the velocity prediction toward u, and negative advantage moves it away. The detached target v_target equals stop-gradient of v_theta minus g, where g is the signed reward gradient plus an optional reference anchor. Regressing to this target supplies that gradient using a nonnegative loss. The illustrated target shifts are schematic.</desc>
+<defs>
+<marker id="ae8edf6" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#e8edf6" stroke-width="2"/></marker>
+<marker id="aaab9cf" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#aab9cf" stroke-width="2"/></marker>
+<marker id="a89b4ff" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#89b4ff" stroke-width="2"/></marker>
+<marker id="a65dfc0" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#65dfc0" stroke-width="2"/></marker>
+<marker id="affbd7a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#ffbd7a" stroke-width="2"/></marker>
+<marker id="ac6b2ff" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#c6b2ff" stroke-width="2"/></marker>
+</defs>
+<rect width="400" height="724" rx="16" fill="#131d2e"/>
+<g font-family="Arial, Helvetica, sans-serif" stroke-linecap="round" stroke-linejoin="round">
+<text x="22" y="35" fill="#e8edf6" font-size="23" text-anchor="start" font-weight="700">Turn reward into</text>
+<text x="22" y="64" fill="#e8edf6" font-size="23" text-anchor="start" font-weight="700">a velocity target</text>
+<rect x="20" y="89" width="360" height="71" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="200.0" y="117.8" fill="#89b4ff" font-size="20" text-anchor="middle" font-weight="400">Four-step H3 on-policy rollout</text>
+<text x="200.0" y="144.8" fill="#89b4ff" font-size="20" text-anchor="middle" font-weight="400">Endpoint x₀ + reward</text>
+<path d="M200 168 L200 192" fill="none" stroke="#89b4ff" stroke-width="2.5" marker-end="url(#a89b4ff)"/>
+<rect x="20" y="202" width="360" height="67" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="200.0" y="228.8" fill="#e8edf6" font-size="20" text-anchor="middle" font-weight="400">Re-noise x₀ → xₜ</text>
+<text x="200.0" y="255.8" fill="#e8edf6" font-size="20" text-anchor="middle" font-weight="400">Flow target u = ε − x₀</text>
+<text x="22" y="312" fill="#65dfc0" font-size="16" text-anchor="start" font-weight="700">POSITIVE ADVANTAGE</text>
+<path d="M43 356 L358 356" fill="none" stroke="#364861" stroke-width="2"/>
+<circle cx="50" cy="356" r="7" fill="#89b4ff" stroke="#89b4ff" stroke-width="2"/>
+<circle cx="350" cy="356" r="7" fill="#e8edf6" stroke="#e8edf6" stroke-width="2"/>
+<circle cx="203" cy="356" r="7" fill="#131d2e" stroke="#65dfc0" stroke-width="2"/>
+<path d="M338 356 L218 356" fill="none" stroke="#65dfc0" stroke-width="3" marker-end="url(#a65dfc0)"/>
+<text x="50" y="389" fill="#89b4ff" font-size="23" text-anchor="middle" font-weight="400">u</text>
+<text x="350" y="389" fill="#e8edf6" font-size="23" text-anchor="middle" font-weight="400">v<tspan baseline-shift="sub" font-size="70%">θ</tspan></text>
+<text x="203" y="337" fill="#65dfc0" font-size="20" text-anchor="middle" font-weight="400">v<tspan baseline-shift="sub" font-size="70%">target</tspan></text>
+<text x="22" y="429" fill="#ffbd7a" font-size="16" text-anchor="start" font-weight="700">NEGATIVE ADVANTAGE</text>
+<path d="M43 473 L358 473" fill="none" stroke="#364861" stroke-width="2"/>
+<circle cx="50" cy="473" r="7" fill="#89b4ff" stroke="#89b4ff" stroke-width="2"/>
+<circle cx="201" cy="473" r="7" fill="#e8edf6" stroke="#e8edf6" stroke-width="2"/>
+<circle cx="350" cy="473" r="7" fill="#131d2e" stroke="#ffbd7a" stroke-width="2"/>
+<path d="M213 473 L335 473" fill="none" stroke="#ffbd7a" stroke-width="3" marker-end="url(#affbd7a)"/>
+<text x="50" y="506" fill="#89b4ff" font-size="23" text-anchor="middle" font-weight="400">u</text>
+<text x="201" y="506" fill="#e8edf6" font-size="23" text-anchor="middle" font-weight="400">v<tspan baseline-shift="sub" font-size="70%">θ</tspan></text>
+<text x="332" y="454" fill="#ffbd7a" font-size="20" text-anchor="middle" font-weight="400">v<tspan baseline-shift="sub" font-size="70%">target</tspan></text>
+<rect x="20" y="539" width="360" height="133" rx="12" fill="#1b2940"/>
+<text x="200" y="570" fill="#e8edf6" font-size="22" text-anchor="middle" font-weight="700">g = A(v<tspan baseline-shift="sub" font-size="70%">θ</tspan> − u) + λ(v<tspan baseline-shift="sub" font-size="70%">θ</tspan> − v<tspan baseline-shift="sub" font-size="70%">ref</tspan>)</text>
+<text x="200" y="609" fill="#e8edf6" font-size="22" text-anchor="middle" font-weight="400">v<tspan baseline-shift="sub" font-size="70%">target</tspan> = stopgrad(v<tspan baseline-shift="sub" font-size="70%">θ</tspan> − g)</text>
+<text x="200" y="646" fill="#e8edf6" font-size="23" text-anchor="middle" font-weight="400">L = ½ ‖v<tspan baseline-shift="sub" font-size="70%">θ</tspan> − v<tspan baseline-shift="sub" font-size="70%">target</tspan>‖²</text>
+<text x="200" y="701" fill="#aab9cf" font-size="17" text-anchor="middle" font-weight="400">Arrows: λ = 0; schematic shifts.</text>
+</g>
+</svg>

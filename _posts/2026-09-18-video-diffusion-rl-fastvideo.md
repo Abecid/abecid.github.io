@@ -55,6 +55,8 @@ $$
 
 Here $\mathcal L_{\mathrm{ref}}$ is an optional KL penalty to a frozen reference. The strength is straightforward credit assignment from a black-box terminal reward, without training a value model. For video, the difficulty is the cost and variance of long rollouts.
 
+{% include figure.liquid path="assets/img/blogs/fastvideo-rl/flow-grpo.svg" mobile_path="assets/img/blogs/fastvideo-rl/flow-grpo-mobile.svg" width=960 height=510 mobile_width=400 mobile_height=641 alt="Flow-GRPO candidates share initial noise, branch within a stochastic window, and complete deterministic suffixes. Group-normalized video rewards weight clipped updates to the stochastic transition probabilities." caption="Shared noise controls scene variation; independent SDE draws supply exploration. Terminal rewards train the stochastic decisions. Whole prompt groups are placed on one GPU." zoomable=true avoid_scaling=true %}
+
 **What mattered in my implementation:**
 
 - **Flow-SDE rollouts with a stochastic window.** Explore within a limited portion of the trajectory and use deterministic ODE steps elsewhere. The stochastic step has the form $x_{t-\Delta}=\mu_\theta(x_t,t)+\sigma_t\sqrt{\Delta}\,z$, with $z\sim\mathcal N(0,I)$. Its corrected drift and Gaussian noise give a transition whose log-probability can be recomputed during training.
@@ -87,6 +89,8 @@ High-reward samples pull toward their reconstruction target; low-reward samples 
 
 Using the pretrained prediction space and a reference anchor gives a natural way to limit drift from pretrained behavior. It also lets me use **Flow-UniPC**, a higher-order solver, without deriving its sampling likelihood.
 
+{% include figure.liquid path="assets/img/blogs/fastvideo-rl/diffusion-nft.svg" mobile_path="assets/img/blogs/fastvideo-rl/diffusion-nft-mobile.svg" width=960 height=537 mobile_width=400 mobile_height=652 alt="DiffusionNFT scores generated endpoints, re-noises their latents, and forms positive and implicit-negative velocity predictions on opposite sides of the detached old prediction. Reward weights their reconstruction losses." caption="NFT separates rollout sampling from forward-process training. The two predictions reconstruct the same endpoint, with reward controlling their weights; no rollout likelihood is needed." zoomable=true avoid_scaling=true %}
+
 **My video adaptations:**
 
 - Replace the image-reward setup with **VideoAlign**: visual quality (VQ), motion quality (MQ), and text alignment (TA).
@@ -113,6 +117,8 @@ $$
 
 The DMD term re-noises the student's predicted clean latent and compares a frozen teacher with a learned fake-score model. In the implementation, its correction is proportional to $\hat x_0^{\mathrm{fake}}-\hat x_0^{\mathrm{teacher}}$; a detached-target regression sends the student against that discrepancy. The critic learns separately by flow matching on student samples.
 
+{% include figure.liquid path="assets/img/blogs/fastvideo-rl/dmdr.svg" mobile_path="assets/img/blogs/fastvideo-rl/dmdr-mobile.svg" width=960 height=605 mobile_width=400 mobile_height=726 alt="The DMDR video student receives two loss branches: VideoAlign rewards feed NFT-style learning, while a frozen teacher and learned fake-score critic provide a distribution-matching correction on re-noised student latents." caption="My DMDR adaptation combines black-box reward learning with teacher-based distribution matching. Both update the student; the fake-score critic learns separately on student samples." zoomable=true avoid_scaling=true %}
+
 The main training controls were a **DMD-only cold start**, more frequent critic updates than student updates, and time-dependent noise sampling and teacher guidance. For Wan, I used decaying teacher CFG in place of the reference implementation's architecture-specific guidance hook. [Video adaptation](https://github.com/Abecid/FastVideo/blob/fb3984d703cfce8b0c8fd861c74bdb4c9abf348b/fastvideo/train/methods/rl/dmdr.py).
 
 **This was harder to train and worked less well in my runs.** My suspicion is that simply adding reward and distribution-matching terms leaves their directions and scales poorly coordinated. That is a hypothesis, not an ablation result. It motivated a more direct question: can reward improve the exact transitions used by a few-step generator?
@@ -137,6 +143,8 @@ w_i=\frac{\exp(R_i/\tau)}{\sum_j\exp(R_j/\tau)},\qquad
 $$
 
 Centering makes equal-reward groups produce zero update. The appeal is local credit assignment on an already distilled model. This experiment aligns its finite transitions; it does not itself demonstrate joint distillation from a many-step teacher.
+
+{% include figure.liquid path="assets/img/blogs/fastvideo-rl/finite-transition.svg" mobile_path="assets/img/blogs/fastvideo-rl/finite-transition-mobile.svg" width=960 height=579 mobile_width=400 mobile_height=692 alt="Finite-transition posterior alignment branches from one shared intermediate state. Different GPUs sample local actions and complete fixed suffixes. Terminal rewards define softmax weights for a centered log-likelihood update to the same local policy." caption="Compare local decisions from the same state, then project the reward tilt into that transition's policy. Branches are schematic; the original run used four candidates and branched only on the first three transitions." zoomable=true avoid_scaling=true %}
 
 **The implementation lessons were especially useful:**
 
@@ -165,6 +173,8 @@ v_{\mathrm{target}}=\operatorname{sg}(v_\theta-g),\qquad
 $$
 
 Here $\operatorname{sg}$ stops gradients through the target. This gives the intended signed gradient with a nonnegative surrogate loss and removes NFT's explicit positive/negative construction. The reference anchor is **optional**: the corrected default uses no anchor, with audio-only and full-anchor ablations available.
+
+{% include figure.liquid path="assets/img/blogs/fastvideo-rl/rvm.svg" mobile_path="assets/img/blogs/fastvideo-rl/rvm-mobile.svg" width=960 height=575 mobile_width=400 mobile_height=724 alt="RVM re-noises on-policy H3 endpoints to obtain a flow target. Positive advantage shifts the detached velocity target toward the flow target; negative advantage shifts it away. Regression to the detached target implements the signed gradient with a nonnegative loss." caption="With no reference anchor, the reward sign determines whether to reinforce or suppress the sampled direction. A detached target turns that signed guidance into ordinary regression; arrows show schematic shifts in velocity space." zoomable=true avoid_scaling=true %}
 
 **The H3 engineering work:**
 

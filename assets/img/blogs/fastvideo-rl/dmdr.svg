@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="605" viewBox="0 0 960 605" role="img" aria-labelledby="title desc">
+<title id="title">DMDR: two gradients meet in one student</title>
+<desc id="desc">A few-step student supplies video samples to two branches. VideoAlign feeds an NFT-style reward loss. A re-noised student sample is evaluated by a frozen teacher and a separately trained fake-score critic. Their clean reconstructions give the DMD correction. The student receives the weighted sum of the reward and distribution-matching losses, plus an optional reference anchor.</desc>
+<defs>
+<marker id="ae8edf6" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#e8edf6" stroke-width="2"/></marker>
+<marker id="aaab9cf" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#aab9cf" stroke-width="2"/></marker>
+<marker id="a89b4ff" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#89b4ff" stroke-width="2"/></marker>
+<marker id="a65dfc0" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#65dfc0" stroke-width="2"/></marker>
+<marker id="affbd7a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#ffbd7a" stroke-width="2"/></marker>
+<marker id="ac6b2ff" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#c6b2ff" stroke-width="2"/></marker>
+</defs>
+<rect width="960" height="605" rx="16" fill="#131d2e"/>
+<g font-family="Arial, Helvetica, sans-serif" stroke-linecap="round" stroke-linejoin="round">
+<text x="40" y="43" fill="#e8edf6" font-size="28" text-anchor="start" font-weight="700">Two gradients meet in one student</text>
+<text x="40" y="78" fill="#aab9cf" font-size="21" text-anchor="start" font-weight="400">DMDR video adaptation · reward optimization + distribution matching</text>
+<rect x="40" y="227" width="180" height="91" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="130.0" y="265.48" fill="#89b4ff" font-size="22" text-anchor="middle" font-weight="400">Few-step</text>
+<text x="130.0" y="294.48" fill="#89b4ff" font-size="22" text-anchor="middle" font-weight="400">student sample</text>
+<path d="M220 251 L254 251 L254 157 L294 157" fill="none" stroke="#89b4ff" stroke-width="2.5" marker-end="url(#a89b4ff)"/>
+<path d="M220 291 L254 291 L254 346 L294 346" fill="none" stroke="#89b4ff" stroke-width="2.5" marker-end="url(#a89b4ff)"/>
+<rect x="306" y="116" width="258" height="82" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="435.0" y="149.98" fill="#65dfc0" font-size="22" text-anchor="middle" font-weight="400">VideoAlign reward</text>
+<text x="435.0" y="178.98" fill="#65dfc0" font-size="22" text-anchor="middle" font-weight="400">Black-box scoring</text>
+<path d="M577 157 L672 157" fill="none" stroke="#65dfc0" stroke-width="2.5" marker-end="url(#a65dfc0)"/>
+<rect x="685" y="116" width="235" height="82" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="802.5" y="149.82" fill="#65dfc0" font-size="23" text-anchor="middle" font-weight="400">NFT-style loss</text>
+<text x="802.5" y="179.82" fill="#65dfc0" font-size="23" text-anchor="middle" font-weight="400">L<tspan baseline-shift="sub" font-size="70%">reward</tspan></text>
+<rect x="306" y="305" width="170" height="82" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="391.0" y="339.14" fill="#e8edf6" font-size="21" text-anchor="middle" font-weight="400">Re-noise</text>
+<text x="391.0" y="367.14" fill="#e8edf6" font-size="21" text-anchor="middle" font-weight="400">student latent</text>
+<path d="M476 330 L493 330 L493 274 L522 274" fill="none" stroke="#aab9cf" stroke-width="2" marker-end="url(#aaab9cf)"/>
+<path d="M476 363 L493 363 L493 397 L522 397" fill="none" stroke="#aab9cf" stroke-width="2" marker-end="url(#aaab9cf)"/>
+<rect x="535" y="237" width="170" height="73" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="620.0" y="266.48" fill="#89b4ff" font-size="22" text-anchor="middle" font-weight="400">Frozen</text>
+<text x="620.0" y="295.48" fill="#89b4ff" font-size="22" text-anchor="middle" font-weight="400">teacher</text>
+<rect x="535" y="360" width="170" height="73" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="620.0" y="389.48" fill="#ffbd7a" font-size="22" text-anchor="middle" font-weight="400">Fake-score</text>
+<text x="620.0" y="418.48" fill="#ffbd7a" font-size="22" text-anchor="middle" font-weight="400">critic</text>
+<path d="M717 274 L744 274 L744 322 L767 322" fill="none" stroke="#89b4ff" stroke-width="2" marker-end="url(#a89b4ff)"/>
+<path d="M717 397 L744 397 L744 370 L767 370" fill="none" stroke="#ffbd7a" stroke-width="2" marker-end="url(#affbd7a)"/>
+<rect x="780" y="305" width="140" height="82" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="850.0" y="339.14" fill="#c6b2ff" font-size="21" text-anchor="middle" font-weight="400">DMD</text>
+<text x="850.0" y="367.14" fill="#c6b2ff" font-size="21" text-anchor="middle" font-weight="400">correction</text>
+<text x="609" y="463" fill="#aab9cf" font-size="20" text-anchor="middle" font-weight="400">Critic learns separately on student samples.</text>
+<path d="M937 156 L937 487 L814 487 L814 509" fill="none" stroke="#65dfc0" stroke-width="2" marker-end="url(#a65dfc0)"/>
+<path d="M850 399 L850 430 L925 430 L925 478 L694 478 L694 509" fill="none" stroke="#c6b2ff" stroke-width="2" marker-end="url(#ac6b2ff)"/>
+<rect x="40" y="519" width="880" height="62" rx="12" fill="#1b2940"/>
+<text x="480" y="557" fill="#e8edf6" font-size="23" text-anchor="middle" font-weight="700">Student update: λ<tspan baseline-shift="sub" font-size="70%">R</tspan> L<tspan baseline-shift="sub" font-size="70%">reward</tspan> + λ<tspan baseline-shift="sub" font-size="70%">D</tspan> L<tspan baseline-shift="sub" font-size="70%">DMD</tspan> + optional reference anchor</text>
+<path d="M40 550 L25 550 L25 273 L32 273" fill="none" stroke="#aab9cf" stroke-width="2" marker-end="url(#aaab9cf)" stroke-dasharray="6 7"/>
+</g>
+</svg>

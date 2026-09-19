@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="579" viewBox="0 0 960 579" role="img" aria-labelledby="title desc">
+<title id="title">Finite-transition alignment: compare branches from the same state</title>
+<desc id="desc">On the deployed four-step grid, a common prefix reaches a shared intermediate state. Different GPUs sample alternative Gaussian actions at one transition, then complete deterministic suffixes. Terminal rewards determine softmax posterior weights. Centered weighted log-likelihood projects this reward-tilted distribution into the same local policy. The final transition is completion-only in the original experiment.</desc>
+<defs>
+<marker id="ae8edf6" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#e8edf6" stroke-width="2"/></marker>
+<marker id="aaab9cf" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#aab9cf" stroke-width="2"/></marker>
+<marker id="a89b4ff" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#89b4ff" stroke-width="2"/></marker>
+<marker id="a65dfc0" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#65dfc0" stroke-width="2"/></marker>
+<marker id="affbd7a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#ffbd7a" stroke-width="2"/></marker>
+<marker id="ac6b2ff" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#c6b2ff" stroke-width="2"/></marker>
+</defs>
+<rect width="960" height="579" rx="16" fill="#131d2e"/>
+<g font-family="Arial, Helvetica, sans-serif" stroke-linecap="round" stroke-linejoin="round">
+<text x="40" y="43" fill="#e8edf6" font-size="28" text-anchor="start" font-weight="700">Compare branches from the same state</text>
+<text x="40" y="78" fill="#aab9cf" font-size="21" text-anchor="start" font-weight="400">Finite-transition posterior projection · train the transition used at deployment</text>
+<rect x="40" y="99" width="880" height="58" rx="12" fill="#1b2940"/>
+<text x="480" y="135" fill="#89b4ff" font-size="24" text-anchor="middle" font-weight="400">Deployed grid: 1000 → 937.5 → 833.33 → 625 → 0</text>
+<text x="40" y="202" fill="#aab9cf" font-size="17" text-anchor="start" font-weight="700">SHARED PREFIX</text>
+<text x="284" y="202" fill="#89b4ff" font-size="17" text-anchor="start" font-weight="700">LOCAL ACTION</text>
+<text x="548" y="202" fill="#aab9cf" font-size="17" text-anchor="start" font-weight="700">FIXED SUFFIX</text>
+<path d="M66 310 L239 310" fill="none" stroke="#89b4ff" stroke-width="3" marker-end="url(#a89b4ff)"/>
+<circle cx="66" cy="310" r="6" fill="#89b4ff" stroke="#89b4ff" stroke-width="2"/>
+<circle cx="253" cy="310" r="8" fill="#e8edf6" stroke="#e8edf6" stroke-width="2"/>
+<text x="187" y="385" fill="#e8edf6" font-size="23" text-anchor="middle" font-weight="400">Shared state s</text>
+<path d="M262 310 C309 310 335 250 390 250" fill="none" stroke="#65dfc0" stroke-width="3" marker-end="url(#a65dfc0)"/>
+<circle cx="403" cy="250" r="6" fill="#65dfc0" stroke="#65dfc0" stroke-width="2"/>
+<text x="420" y="257" fill="#65dfc0" font-size="20" text-anchor="start" font-weight="400">GPU 0</text>
+<path d="M496 250 C556 240 636 259 717 250" fill="none" stroke="#65dfc0" stroke-width="2.5" marker-end="url(#a65dfc0)"/>
+<rect x="745" y="228" width="175" height="44" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="832.5" y="257.14" fill="#65dfc0" font-size="21" text-anchor="middle" font-weight="400">Higher R</text>
+<path d="M262 310 C309 310 335 310 390 310" fill="none" stroke="#89b4ff" stroke-width="3" marker-end="url(#a89b4ff)"/>
+<circle cx="403" cy="310" r="6" fill="#89b4ff" stroke="#89b4ff" stroke-width="2"/>
+<text x="420" y="317" fill="#89b4ff" font-size="20" text-anchor="start" font-weight="400">GPU 1</text>
+<path d="M496 310 C556 300 636 319 717 310" fill="none" stroke="#89b4ff" stroke-width="2.5" marker-end="url(#a89b4ff)"/>
+<rect x="745" y="288" width="175" height="44" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="832.5" y="317.14" fill="#89b4ff" font-size="21" text-anchor="middle" font-weight="400">Middle R</text>
+<path d="M262 310 C309 310 335 370 390 370" fill="none" stroke="#ffbd7a" stroke-width="3" marker-end="url(#affbd7a)"/>
+<circle cx="403" cy="370" r="6" fill="#ffbd7a" stroke="#ffbd7a" stroke-width="2"/>
+<text x="420" y="377" fill="#ffbd7a" font-size="20" text-anchor="start" font-weight="400">GPU 2</text>
+<path d="M496 370 C556 360 636 379 717 370" fill="none" stroke="#ffbd7a" stroke-width="2.5" marker-end="url(#affbd7a)"/>
+<rect x="745" y="348" width="175" height="44" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="832.5" y="377.14" fill="#ffbd7a" font-size="21" text-anchor="middle" font-weight="400">Lower R</text>
+<text x="480" y="424" fill="#aab9cf" font-size="21" text-anchor="middle" font-weight="400">Same starting state, different local decisions; one candidate per GPU.</text>
+<path d="M832 401 L832 447" fill="none" stroke="#aab9cf" stroke-width="2" marker-end="url(#aaab9cf)"/>
+<rect x="40" y="457" width="880" height="94" rx="12" fill="#1b2940"/>
+<text x="480" y="491" fill="#e8edf6" font-size="27" text-anchor="middle" font-weight="700">q*(a | s) ∝ p<tspan baseline-shift="sub" font-size="70%">old</tspan>(a | s) exp(R / τ)</text>
+<text x="480" y="528" fill="#aab9cf" font-size="24" text-anchor="middle" font-weight="400">w = softmax(R / τ)    →    L = −Σ (wᵢ − 1/K) log p<tspan baseline-shift="sub" font-size="70%">θ</tspan>(aᵢ | s)</text>
+<path d="M95 457 L95 351 L251 351 L251 325" fill="none" stroke="#aab9cf" stroke-width="2" marker-end="url(#aaab9cf)" stroke-dasharray="6 7"/>
+</g>
+</svg>

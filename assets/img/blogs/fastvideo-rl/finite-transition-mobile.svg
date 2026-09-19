@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="692" viewBox="0 0 400 692" role="img" aria-labelledby="title desc">
+<title id="title">Finite-transition alignment: compare branches from the same state</title>
+<desc id="desc">On the deployed four-step grid, a common prefix reaches a shared intermediate state. Different GPUs sample alternative Gaussian actions at one transition, then complete deterministic suffixes. Terminal rewards determine softmax posterior weights. Centered weighted log-likelihood projects this reward-tilted distribution into the same local policy. The final transition is completion-only in the original experiment.</desc>
+<defs>
+<marker id="ae8edf6" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#e8edf6" stroke-width="2"/></marker>
+<marker id="aaab9cf" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#aab9cf" stroke-width="2"/></marker>
+<marker id="a89b4ff" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#89b4ff" stroke-width="2"/></marker>
+<marker id="a65dfc0" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#65dfc0" stroke-width="2"/></marker>
+<marker id="affbd7a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#ffbd7a" stroke-width="2"/></marker>
+<marker id="ac6b2ff" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#c6b2ff" stroke-width="2"/></marker>
+</defs>
+<rect width="400" height="692" rx="16" fill="#131d2e"/>
+<g font-family="Arial, Helvetica, sans-serif" stroke-linecap="round" stroke-linejoin="round">
+<text x="22" y="35" fill="#e8edf6" font-size="23" text-anchor="start" font-weight="700">Compare branches from</text>
+<text x="22" y="64" fill="#e8edf6" font-size="23" text-anchor="start" font-weight="700">the same state</text>
+<rect x="20" y="89" width="360" height="67" rx="12" fill="#1b2940"/>
+<text x="200" y="116" fill="#89b4ff" font-size="18" text-anchor="middle" font-weight="400">Exact deployed four-step grid</text>
+<text x="200" y="144" fill="#e8edf6" font-size="18" text-anchor="middle" font-weight="400">1000 → 937.5 → 833.33 → 625 → 0</text>
+<text x="200" y="188" fill="#e8edf6" font-size="20" text-anchor="middle" font-weight="400">Common prefix → shared state s</text>
+<circle cx="200" cy="216" r="7" fill="#e8edf6" stroke="#e8edf6" stroke-width="2"/>
+<rect x="20" y="245" width="360" height="111" rx="12" fill="#1b2940"/>
+<text x="200" y="340" fill="#89b4ff" font-size="18" text-anchor="middle" font-weight="400">Local Gaussian actions</text>
+<path d="M200 224 L200 236 L69 236 L69 275" fill="none" stroke="#65dfc0" stroke-width="2.5" marker-end="url(#a65dfc0)"/>
+<circle cx="69" cy="285" r="5" fill="#65dfc0" stroke="#65dfc0" stroke-width="2"/>
+<text x="69" y="314" fill="#65dfc0" font-size="19" text-anchor="middle" font-weight="400">GPU 0</text>
+<path d="M69 363 L69 443" fill="none" stroke="#65dfc0" stroke-width="2.5" marker-end="url(#a65dfc0)"/>
+<path d="M200 224 L200 236 L200 236 L200 275" fill="none" stroke="#89b4ff" stroke-width="2.5" marker-end="url(#a89b4ff)"/>
+<circle cx="200" cy="285" r="5" fill="#89b4ff" stroke="#89b4ff" stroke-width="2"/>
+<text x="200" y="314" fill="#89b4ff" font-size="19" text-anchor="middle" font-weight="400">GPU 1</text>
+<path d="M200 363 L200 443" fill="none" stroke="#89b4ff" stroke-width="2.5" marker-end="url(#a89b4ff)"/>
+<path d="M200 224 L200 236 L331 236 L331 275" fill="none" stroke="#ffbd7a" stroke-width="2.5" marker-end="url(#affbd7a)"/>
+<circle cx="331" cy="285" r="5" fill="#ffbd7a" stroke="#ffbd7a" stroke-width="2"/>
+<text x="331" y="314" fill="#ffbd7a" font-size="19" text-anchor="middle" font-weight="400">GPU 2</text>
+<path d="M331 363 L331 443" fill="none" stroke="#ffbd7a" stroke-width="2.5" marker-end="url(#affbd7a)"/>
+<rect x="127" y="389" width="146" height="28" rx="0" fill="#131d2e"/>
+<text x="200" y="410" fill="#aab9cf" font-size="19" text-anchor="middle" font-weight="400">Fixed suffix</text>
+<rect x="20" y="454" width="108" height="44" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="74.0" y="482.12" fill="#65dfc0" font-size="18" text-anchor="middle" font-weight="400">Higher R</text>
+<rect x="146" y="454" width="108" height="44" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="200.0" y="482.12" fill="#89b4ff" font-size="18" text-anchor="middle" font-weight="400">Middle R</text>
+<rect x="272" y="454" width="108" height="44" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="326.0" y="482.12" fill="#ffbd7a" font-size="18" text-anchor="middle" font-weight="400">Lower R</text>
+<text x="200" y="534" fill="#e8edf6" font-size="23" text-anchor="middle" font-weight="700">w = softmax(R / τ)</text>
+<path d="M200 545 L200 568" fill="none" stroke="#aab9cf" stroke-width="2" marker-end="url(#aaab9cf)"/>
+<rect x="20" y="579" width="360" height="88" rx="12" fill="#1b2940"/>
+<text x="200" y="610" fill="#e8edf6" font-size="20" text-anchor="middle" font-weight="400">L = −Σ (wᵢ − 1/K) log p<tspan baseline-shift="sub" font-size="70%">θ</tspan>(aᵢ | s)</text>
+<text x="200" y="639" fill="#aab9cf" font-size="17" text-anchor="middle" font-weight="400">Project the reward tilt into</text>
+<text x="200" y="660" fill="#aab9cf" font-size="17" text-anchor="middle" font-weight="400">the same local transition policy.</text>
+</g>
+</svg>

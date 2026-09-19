@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="641" viewBox="0 0 400 641" role="img" aria-labelledby="title desc">
+<title id="title">Flow-GRPO: reward the stochastic decisions</title>
+<desc id="desc">Candidates share a prompt and initial latent. A deterministic prefix enters a stochastic window with independent noise draws, then an ODE suffix completes each video. Group-normalized terminal rewards weight clipped transition-likelihood updates. Whole prompt groups are placed on one GPU.</desc>
+<defs>
+<marker id="ae8edf6" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#e8edf6" stroke-width="2"/></marker>
+<marker id="aaab9cf" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#aab9cf" stroke-width="2"/></marker>
+<marker id="a89b4ff" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#89b4ff" stroke-width="2"/></marker>
+<marker id="a65dfc0" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#65dfc0" stroke-width="2"/></marker>
+<marker id="affbd7a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#ffbd7a" stroke-width="2"/></marker>
+<marker id="ac6b2ff" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#c6b2ff" stroke-width="2"/></marker>
+</defs>
+<rect width="400" height="641" rx="16" fill="#131d2e"/>
+<g font-family="Arial, Helvetica, sans-serif" stroke-linecap="round" stroke-linejoin="round">
+<text x="22" y="35" fill="#e8edf6" font-size="23" text-anchor="start" font-weight="700">Reward the stochastic</text>
+<text x="22" y="64" fill="#e8edf6" font-size="23" text-anchor="start" font-weight="700">decisions</text>
+<rect x="59" y="89" width="282" height="61" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="200.0" y="125.96000000000001" fill="#89b4ff" font-size="19" text-anchor="middle" font-weight="400">Same prompt + initial noise</text>
+<path d="M200 151 L200 199" fill="none" stroke="#89b4ff" stroke-width="3" marker-end="url(#a89b4ff)"/>
+<text x="222" y="181" fill="#aab9cf" font-size="18" text-anchor="start" font-weight="400">ODE prefix</text>
+<rect x="20" y="207" width="360" height="153" rx="12" fill="#1b2940"/>
+<text x="200" y="235" fill="#89b4ff" font-size="20" text-anchor="middle" font-weight="700">Stochastic window</text>
+<circle cx="200" cy="257" r="5" fill="#89b4ff" stroke="#89b4ff" stroke-width="2"/>
+<path d="M200 257 L175 272 L139 266 L115 294 L89 291 L67 320" fill="none" stroke="#65dfc0" stroke-width="3"/>
+<circle cx="67" cy="320" r="5" fill="#65dfc0" stroke="#65dfc0" stroke-width="2"/>
+<path d="M67 330 L67 422" fill="none" stroke="#65dfc0" stroke-width="2.5" marker-end="url(#a65dfc0)"/>
+<path d="M200 257 L214 271 L190 285 L207 303 L200 320" fill="none" stroke="#89b4ff" stroke-width="3"/>
+<circle cx="200" cy="320" r="5" fill="#89b4ff" stroke="#89b4ff" stroke-width="2"/>
+<path d="M200 330 L200 422" fill="none" stroke="#89b4ff" stroke-width="2.5" marker-end="url(#a89b4ff)"/>
+<path d="M200 257 L234 274 L259 269 L284 298 L312 293 L333 320" fill="none" stroke="#ffbd7a" stroke-width="3"/>
+<circle cx="333" cy="320" r="5" fill="#ffbd7a" stroke="#ffbd7a" stroke-width="2"/>
+<path d="M333 330 L333 422" fill="none" stroke="#ffbd7a" stroke-width="2.5" marker-end="url(#affbd7a)"/>
+<rect x="116" y="377" width="168" height="28" rx="0" fill="#131d2e"/>
+<text x="200" y="398" fill="#aab9cf" font-size="19" text-anchor="middle" font-weight="400">ODE suffix</text>
+<rect x="20" y="432" width="108" height="44" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="74.0" y="460.12" fill="#65dfc0" font-size="18" text-anchor="middle" font-weight="400">Higher R</text>
+<rect x="146" y="432" width="108" height="44" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="200.0" y="460.12" fill="#89b4ff" font-size="18" text-anchor="middle" font-weight="400">Middle R</text>
+<rect x="272" y="432" width="108" height="44" rx="12" fill="#1b2940" stroke="#364861" stroke-width="1.5"/>
+<text x="326.0" y="460.12" fill="#ffbd7a" font-size="18" text-anchor="middle" font-weight="400">Lower R</text>
+<text x="200" y="507" fill="#e8edf6" font-size="20" text-anchor="middle" font-weight="400">Group-normalize rewards → A</text>
+<path d="M200 516 L200 539" fill="none" stroke="#aab9cf" stroke-width="2" marker-end="url(#aaab9cf)"/>
+<rect x="20" y="548" width="360" height="71" rx="12" fill="#1b2940"/>
+<text x="200" y="577" fill="#e8edf6" font-size="19" text-anchor="middle" font-weight="400">Clipped likelihood ratio × A</text>
+<text x="200" y="603" fill="#e8edf6" font-size="19" text-anchor="middle" font-weight="400">updates stochastic transitions</text>
+</g>
+</svg>
