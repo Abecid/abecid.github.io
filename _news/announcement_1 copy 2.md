@@ -5,4 +5,4 @@ inline: true
 related_posts: false
 ---
 
-I'm joining NVIDIA's [Real-time World Model](https://research.nvidia.com/labs/rtr/) Team!
+I'm joining NVIDIA's Interactive World Model Team!
