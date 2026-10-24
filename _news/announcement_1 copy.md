@@ -5,4 +5,4 @@ inline: true
 related_posts: false
 ---
 
-DexSIM was accepted to [ICLR 2026 Workshop World Models](https://sites.google.com/view/iclr-2026-workshop-world-model/home)
+[DexSIM](https://arxiv.org/abs/2605.24630) was accepted to [World Models @ ICLR 2026](https://sites.google.com/view/iclr-2026-workshop-world-model/home)
