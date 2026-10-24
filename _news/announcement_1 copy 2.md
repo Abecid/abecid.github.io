@@ -5,4 +5,4 @@ inline: true
 related_posts: false
 ---
 
-I'm joining NVIDIA's Interactive World Model Team!
+Joining NVIDIA's Interactive World Model Team!
