@@ -16,14 +16,16 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Keep OS upgrades explicit so runner migrations cannot break Ruby setup.
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.3.5"
+          # Use the latest compatible patch with prebuilt binaries available.
+          ruby-version: "3.3"
           bundler-cache: true
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -55,7 +57,7 @@ jobs:
   deploy:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       pages: write
